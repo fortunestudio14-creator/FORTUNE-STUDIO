@@ -26,17 +26,19 @@ async function notify(s) {
   const owner = [...rows, ["name", "Name"], ["phone", "Phone"], ["address", "Event address"], ["delivery", "Delivery and pickup"]];
   const head = (t) => `<div style='font-family:Arial,sans-serif;max-width:520px'><h2 style='margin:0 0 12px'>${t}</h2>`;
   const foot = "<p style='color:#666;font-size:13px'>Fortune Studio LLC · 570-309-5776 · fortunestudio14@gmail.com</p></div>";
+  const brand = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;border:1px solid #e8e1d6;border-radius:14px;overflow:hidden;background:#fff"><div style="background:#171717;color:#f4e7cf;padding:24px;text-align:center"><div style="font-size:24px;letter-spacing:4px;font-weight:700">FORTUNE STUDIO</div><div style="font-size:10px;letter-spacing:3px;margin-top:6px;color:#d8c7a8">LLC · PHOTOGRAPHY & EVENTS</div></div><div style="padding:24px">`;
+  const end = `<p style="color:#777;font-size:12px;border-top:1px solid #eee;padding-top:16px;margin-top:24px">Fortune Studio LLC · 570-309-5776 · fortunestudio14@gmail.com</p></div></div>`;
   const sent = [];
   if (email) sent.push(mail(email, "Payment confirmed — your date is reserved · " + m.date_label,
-    head(`Thank you, ${esc(m.name)}! Your payment was received and your date is reserved.`) +
+    brand + `<h2 style="color:#171717">Thank you, ${esc(m.name)}!</h2><p>Your payment was received and your reservation details are below.</p>` +
     "<p style='background:#eaf7ee;color:#176b35;padding:12px;border-radius:8px;font-weight:bold'>PAYMENT CONFIRMED</p>" +
-    table(m, rows) + "<p>We will contact you if any additional details are needed. The remaining balance, if any, is due before the event.</p>" + foot, OWNER));
-  sent.push(mail(OWNER, `🔴 NEW PAID BOOKING · ${m.date_label} · ${m.name}`,
-    head("🔴 NEW PAID BOOKING") +
-    "<p style='background:#b91c1c;color:#fff;padding:14px;border-radius:8px;font-weight:bold'>PAYMENT RECEIVED — ACTION REQUIRED: REVIEW THIS BOOKING</p>" +
-    table(m, owner) + `<p><b>Customer email:</b> ${esc(email)}</p>` + foot, email));
-  const r = await Promise.all(sent);
-  if (!r.some(Boolean)) throw new Error("no email could be sent"); // Stripe will retry the webhook
+    table(m, rows) + "<p>We will contact you if any additional details are needed. The remaining balance, if any, is due before the event.</p>" + end, OWNER));
+  sent.push(mail(OWNER, `NEW PAID BOOKING · ${m.date_label} · ${m.name}`,
+    brand + "<h2 style='color:#a61b1b'>NEW PAID BOOKING</h2>" +
+    "<p style='background:#b91c1c;color:#fff;padding:14px;border-radius:8px;font-weight:bold'>PAYMENT RECEIVED — PLEASE REVIEW THIS BOOKING</p>" +
+    table(m, owner) + `<p><b>Customer email:</b> ${esc(email)}</p>` + end, email));
+  const results = await Promise.all(sent);
+  if (results.some((ok) => !ok)) throw new Error("one or more booking emails failed; Stripe will retry the webhook");
 }
 
 module.exports = async (req, res) => {
