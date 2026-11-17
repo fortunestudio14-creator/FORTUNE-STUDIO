@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/34986220/SETUP.md)
 # Setup (10 minutes)
 
 Put `index.html`, `package.json` and the `api/` folder in the root of your Vercel project, then deploy.
@@ -5,10 +6,11 @@ Put `index.html`, `package.json` and the `api/` folder in the root of your Verce
 1. **Stripe** (stripe.com, free account). Dashboard > Developers > API keys. Copy the Secret key.
 2. **Webhook**: Developers > Webhooks > Add endpoint
    URL `https://fortunestudiollc.vercel.app/api/webhook`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Copy the Signing secret.
-3. **Payment methods**: Settings > Payment methods. Apple Pay and Google Pay are automatic. Turn on PayPal if Stripe offers it for your account.
+3. **Payment methods**: Settings > Payment methods. Apple Pay and Google Pay are automatic. PayPal is not used.
 4. **Emails** (resend.com, free): create an API key. Without a verified domain, Resend only delivers to your own email, so verify fortunestudio14 domain or use your own domain for `MAIL_FROM`. Stripe also emails the customer a receipt on its own.
 5. **Vercel > Settings > Environment Variables**, then redeploy:
    - `STRIPE_SECRET_KEY`
+   - `STRIPE_PUBLISHABLE_KEY` (pk_live_... or pk_test_..., Developers > API keys)
    - `STRIPE_WEBHOOK_SECRET`
    - `RESEND_API_KEY`
    - `MAIL_FROM` (example `Fortune Studio <hello@yourdomain.com>`)
