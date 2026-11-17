@@ -24,11 +24,14 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <details><summary>Photos, logo and videos</summary><div id="media"></div></details>
 <details><summary>Colors</summary><div id="colors"></div></details>
 <details><summary>Show or hide sections</summary><div id="sections"></div></details>
-<details><summary>Add new section</summary>
-<label>Title</label><input id="ns_t"><label>Text</label><textarea id="ns_x" rows="3"></textarea>
-<label>Photo or video (optional)</label><input id="ns_f" type="file" accept="image/*,video/*">
-<label>Button text and link (optional)</label><input id="ns_bt" placeholder="Button text"><input id="ns_bl" placeholder="https://...">
-<button id="ns_add">Add section</button><div id="ns_list"></div></details>
+<details><summary>Add new item (photo, video, text, button)</summary>
+<label>What to add</label><select id="ns_ty"><option value="photo">Photo</option><option value="video">Video</option><option value="text">Text</option><option value="button">Button</option></select>
+<label>Where on the site</label><select id="ns_pos"></select>
+<label>Title (optional)</label><input id="ns_t"><label>Text (optional)</label><textarea id="ns_x" rows="3"></textarea>
+<div id="ns_fw"><label>Photo or video file</label><input id="ns_f" type="file" accept="image/*,video/*"></div>
+<div id="ns_bw"><label>Button text and link</label><input id="ns_bt" placeholder="Button text"><input id="ns_bl" placeholder="https://..."></div>
+<button id="ns_add">Add to site</button><div class="hint">After adding, you can change its size, position and look below.</div><div id="ns_list"></div></details>
+<details><summary>Background and effects</summary><div id="fxp"></div></details>
 <details><summary>Add photo to gallery</summary><input id="ng_f" type="file" accept="image/*"><button id="ng_add">Upload and add</button><div id="ng_list"></div></details>
 <details><summary>Prices (real, also at checkout)</summary><div id="prices"></div></details>
 <details><summary>All texts (search and edit)</summary>
@@ -45,7 +48,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null,bypass=false;
 const say=(id,s)=>$(id).textContent=s;
 function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
-function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
+function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
 async function init(){
   if(!window.supabase)throw Error('Supabase library did not load. Refresh the page.');
   const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();
@@ -75,7 +78,7 @@ function ready(injected){
   if(injected)say('status','Editing works. IMPORTANT: upload the new index.html to GitHub, or the public site will not show your changes.');
 }
 function refresh(){win.FS_CMS.content=C;win.FS_CMS.applyAll()}
-function drawAll(){drawPrices();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
+function drawAll(){drawFx();drawPrices();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
   const tx=t.closest('[data-cms]'),ln=t.closest('[data-cmsa]'),md=t.closest('[data-cmsm]'),bl=t.closest('[data-cmsx]');
@@ -88,7 +91,7 @@ function pick(t){
   if(ln){const k=ln.dataset.cmsa;box.append(el('label',{textContent:'Link address'}));
     const i=el('input',{value:ln.getAttribute('href')||'',placeholder:'https://...'});i.oninput=()=>{if(i.value.trim())C.l[k]=i.value.trim();else delete C.l[k];refresh()};box.append(i);
     box.append(el('div',{className:'hint',textContent:'Use https://..., tel:+1570..., mailto:you@mail.com or #section'}))}
-  if(md){box.append(replaceRow(md,'Replace this '+(md.tagName==='VIDEO'?'video':'photo')))}
+  if(md){box.append(replaceRow(md,'Replace this '+(md.tagName==='VIDEO'?'video':'photo')),sizeBox(md))}
   if(bl){const k=bl.dataset.cmsx,hid=!!C.h[k];
     box.append(el('button',{className:hid?'s':'d',textContent:hid?'Show this block again':'Hide this whole block',onclick:()=>{if(C.h[k])delete C.h[k];else C.h[k]=true;refresh();pick(t)}}))}
 }
@@ -127,6 +130,37 @@ $('q').oninput=drawTexts;
 $('lg').onchange=()=>{const bt=doc.querySelector('[data-l="'+$('lg').value+'"]');if(bt){bypass=true;bt.click();bypass=false}setTimeout(()=>{refresh();drawTexts()},150)};
 $('openbook').onclick=()=>{try{win.openBook(1)}catch(e){say('status','Could not open the booking form.')}};
 $('closebook').onclick=()=>{try{doc.getElementById('book').close()}catch(e){}};
+
+function sizeBox(m){const k=m.dataset.cmsm,w=el('div',{style:'margin-top:10px;border-top:1px solid #343840;padding-top:8px'});C.ms=C.ms||{};
+  const cur=()=>C.ms[k]=C.ms[k]||{},set=(p,v)=>{if(v===''||v===undefined)delete cur()[p];else cur()[p]=v;if(!Object.keys(C.ms[k]).length)delete C.ms[k];refresh()},v=C.ms[k]||{};
+  const rg=el('input',{type:'range',min:10,max:100,value:v.w||100}),rl=el('span',{className:'hint',textContent:(v.w||100)+'%'});rg.oninput=()=>{rl.textContent=rg.value+'%';set('w',rg.value==='100'?'':rg.value)};
+  w.append(el('b',{textContent:'Size and look'}),fld('Width',el('div',{className:'row'},rg,rl)),
+   fld('Height in px (empty = automatic)',Object.assign(el('input',{type:'number',min:0,value:v.h||''}),{oninput(){set('h',this.value)}})),
+   fld('Fit',Object.assign(el('select',{},opt('','Original',v.fit||''),opt('cover','Fill (crop)',v.fit),opt('contain','Show all',v.fit)),{onchange(){set('fit',this.value)}})),
+   fld('Round corners (px)',Object.assign(el('input',{type:'number',min:0,max:80,value:v.r===undefined?'':v.r}),{oninput(){set('r',this.value)}})),
+   fld('Align',Object.assign(el('select',{},opt('','Original',v.a||''),opt('center','Center',v.a),opt('right','Right',v.a)),{onchange(){set('a',this.value)}})),
+   el('button',{className:'s',textContent:'Reset size and look',onclick:()=>{delete C.ms[k];refresh();pick(m)}}),
+   el('div',{className:'hint',textContent:'Photos in the gallery and the top video are fixed boxes: only Fit and Round corners apply to them.'}));return w}
+function drawFx(){const b=$('fxp');b.textContent='';C.fx=C.fx||{};const f=C.fx;f.bg=f.bg||{};const bg=f.bg;
+  const chk=(k,l,def=true)=>b.append(el('label',{className:'row'},Object.assign(el('input',{type:'checkbox',checked:f[k]!==false&&def,style:'width:auto'}),{onchange(){if(this.checked)delete f[k];else f[k]=false;refresh()}}),el('span',{textContent:l})));
+  b.append(el('b',{textContent:'Existing effects'}));
+  chk('corners','Camera corner marks');chk('glow','Glow when you hover a card');chk('reveal','Slide-in when scrolling');chk('hero','Animated title at the top');chk('marquee','Moving words banner');
+  const gr=el('input',{type:'range',min:0,max:12,step:.5,value:f.grain===undefined?2.5:f.grain}),gl=el('span',{className:'hint',textContent:gr.value+'%'});gr.oninput=()=>{gl.textContent=gr.value+'%';f.grain=gr.value;refresh()};
+  b.append(fld('Film grain',el('div',{className:'row'},gr,gl)));
+  b.append(el('b',{textContent:'New background',style:'display:block;margin-top:10px'}));
+  const ty=el('select',{},opt('none','None',bg.type||'none'),opt('image','Photo',bg.type),opt('gradient','Gradient',bg.type),opt('glow','Soft moving lights',bg.type),opt('bokeh','Floating light dots',bg.type));
+  ty.onchange=()=>{bg.type=ty.value;refresh();drawFx()};b.append(fld('Type',ty));
+  const t=bg.type;
+  if(t&&t!=='none'){
+    const op=el('input',{type:'range',min:0,max:100,value:bg.op===undefined?40:bg.op}),ol=el('span',{className:'hint',textContent:op.value+'%'});op.oninput=()=>{ol.textContent=op.value+'%';bg.op=op.value;refresh()};
+    b.append(fld('Strength',el('div',{className:'row'},op,ol)));
+    if(t!=='image'){const c1=el('input',{type:'color',value:bg.c1||'#e8b99f'});c1.oninput=()=>{bg.c1=c1.value;refresh()};b.append(fld(t==='gradient'?'Color 1':'Light color',c1))}
+    if(t==='gradient'){const c2=el('input',{type:'color',value:bg.c2||'#0a0a0a'});c2.oninput=()=>{bg.c2=c2.value;refresh()};b.append(fld('Color 2',c2));
+      const an=el('input',{type:'number',min:0,max:360,value:bg.angle||160});an.oninput=()=>{bg.angle=an.value;refresh()};b.append(fld('Angle (degrees)',an))}
+    if(t==='image'){const f2=el('input',{type:'file',accept:'image/*'}),bl=el('input',{type:'range',min:0,max:40,value:bg.blur||0});bl.oninput=()=>{bg.blur=bl.value;refresh()};
+      b.append(fld('Background photo',f2),el('button',{textContent:'Upload background photo',onclick:async()=>{try{if(!f2.files[0])throw Error('Choose a photo first.');say('status','Uploading...');bg.img=await upload(f2.files[0]);refresh();say('status','Background set. Click Save and publish.')}catch(e){say('status','Upload error: '+e.message)}}}),fld('Blur',bl))}
+  }
+  b.append(el('button',{className:'s',textContent:'Reset background and effects',onclick:()=>{C.fx={};refresh();drawFx()}}),el('div',{className:'hint',textContent:'The background sits behind all the content, so text stays readable. Lower the strength if it is too busy.'}))}
 function drawMedia(){const b=$('media');b.textContent='';let n=0,v=0;
   doc.querySelectorAll('[data-cmsm]').forEach(m=>{const isV=m.tagName==='VIDEO',lab=isV?'Video '+(++v):'Photo '+(++n);
     const d=el('div',{style:'border-bottom:1px solid #343840;padding:8px 0'});
@@ -141,12 +175,36 @@ function drawSections(){const b=$('sections');b.textContent='';
   doc.querySelectorAll('section[data-cmsx]').forEach(s=>{const k=s.dataset.cmsx,h=s.querySelector('h2'),c=el('input',{type:'checkbox',checked:!C.h[k],style:'width:auto'});
     c.onchange=()=>{if(c.checked)delete C.h[k];else C.h[k]=true;refresh()};
     b.append(el('div',{className:'row'},c,el('label',{textContent:(h&&h.textContent)||s.id||'Section'}),el('button',{className:'s',textContent:'Go',onclick:()=>s.scrollIntoView({behavior:'smooth'})})))})}
+const POS=[['top','After the top (hero)'],['about','After About'],['rent','After Rentals'],['gal','After Photography gallery'],['wed','After Weddings'],['vid','After Videos'],['area','After the map'],['','At the end, above the footer']];
+function fld(label,node){return el('div',{},el('label',{className:'hint',textContent:label}),node)}
+function opt(v,t,cur){return el('option',{value:v,textContent:t,selected:String(cur)===String(v)})}
 function drawAdded(){const a=$('ns_list'),g=$('ng_list');a.textContent='';g.textContent='';
-  C.add.sections.forEach((s,i)=>a.append(el('div',{className:'row'},el('label',{textContent:s.title||'(no title)'}),el('button',{className:'d',textContent:'Remove',onclick:()=>{C.add.sections.splice(i,1);refresh();drawAdded()}}))));
+  const sp=$('ns_pos');if(!sp.options.length)POS.forEach(([v,t])=>sp.append(opt(v,t,'')));
+  C.add.sections.forEach((s,i)=>{
+    const d=el('details',{style:'margin-top:8px'}),on=(k,n,ev='oninput')=>{n[ev]=()=>{s[k]=n.type==='checkbox'?n.checked:n.value;refresh()};return n};
+    d.append(el('summary',{textContent:(s.title||s.btnText||(s.media?'Media':'Item'))+' #'+(i+1)}));
+    d.append(fld('Title',on('title',el('input',{value:s.title||''}))),fld('Text',on('text',el('textarea',{rows:3,value:s.text||''}))));
+    if(s.media){
+      const w=on('w',el('input',{type:'range',min:10,max:100,value:s.w||100})),wl=el('span',{className:'hint',textContent:(s.w||100)+'%'});w.addEventListener('input',()=>wl.textContent=w.value+'%');
+      d.append(fld('Width',el('div',{className:'row'},w,wl)),fld('Height in px (empty = automatic)',on('h',el('input',{type:'number',min:0,value:s.h||''}))),
+        fld('Fit',on('fit',el('select',{},opt('cover','Fill (crop)',s.fit),opt('contain','Show all',s.fit)),'onchange')),
+        fld('Round corners (px)',on('radius',el('input',{type:'number',min:0,max:80,value:s.radius===undefined?14:s.radius}))));
+      if(/\.(mp4|webm|mov)(\?|$)/i.test(s.media))d.append(el('label',{className:'row'},on('auto',el('input',{type:'checkbox',checked:!!s.auto,style:'width:auto'}),'onchange'),el('span',{textContent:'Play automatically (muted, loop)'})))}
+    d.append(fld('Align',on('align',el('select',{},opt('center','Center',s.align||'center'),opt('left','Left',s.align),opt('right','Right',s.align)),'onchange')),
+      fld('Position',on('after',el('select',{},...POS.map(([v,t])=>opt(v,t,s.after||'')) ),'onchange')));
+    if(s.btnText!==undefined)d.append(fld('Button text',on('btnText',el('input',{value:s.btnText||''}))),fld('Button link',on('btnLink',el('input',{value:s.btnLink||''}))));
+    d.append(el('button',{className:'d',textContent:'Remove',onclick:()=>{C.add.sections.splice(i,1);refresh();drawAdded()}}));a.append(d)});
   C.add.gallery.forEach((u,i)=>g.append(el('div',{className:'row'},el('img',{className:'thumb',src:u}),el('label',{textContent:'Gallery photo '+(i+1)}),el('button',{className:'d',textContent:'Remove',onclick:()=>{C.add.gallery.splice(i,1);refresh();drawAdded()}}))))}
-$('ns_add').onclick=async()=>{try{const f=$('ns_f').files[0];say('status','Adding...');
-  C.add.sections.push({title:$('ns_t').value,text:$('ns_x').value,media:f?await upload(f):'',btnText:$('ns_bt').value,btnLink:$('ns_bl').value});
-  ['ns_t','ns_x','ns_f','ns_bt','ns_bl'].forEach(i=>$(i).value='');refresh();drawAdded();say('status','Section added at the bottom, above the footer. Click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
+function nsMode(){const t=$('ns_ty').value;$('ns_fw').style.display=(t==='photo'||t==='video')?'':'none';$('ns_bw').style.display=t==='button'?'':'none';$('ns_f').accept=t==='video'?'video/*':t==='photo'?'image/*':'image/*,video/*'}
+$('ns_ty').onchange=nsMode;nsMode();
+$('ns_add').onclick=async()=>{try{const t=$('ns_ty').value,f=$('ns_f').files[0];
+  if((t==='photo'||t==='video')&&!f)throw Error('Choose a '+t+' file first.');
+  if(t==='button'&&(!$('ns_bt').value||!$('ns_bl').value))throw Error('Write the button text and the link.');
+  if(t==='text'&&!$('ns_t').value&&!$('ns_x').value)throw Error('Write a title or a text.');
+  say('status','Adding...');const it={title:$('ns_t').value,text:$('ns_x').value,after:$('ns_pos').value,align:'center',w:100,radius:14,fit:'cover'};
+  if(f&&(t==='photo'||t==='video'))it.media=await upload(f);
+  if(t==='button'){it.btnText=$('ns_bt').value;it.btnLink=$('ns_bl').value}
+  C.add.sections.push(it);['ns_t','ns_x','ns_f','ns_bt','ns_bl'].forEach(i=>$(i).value='');refresh();drawAdded();say('status','Added. Open it in the list below to change size and position. Then click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
 $('ng_add').onclick=async()=>{try{const f=$('ng_f').files[0];if(!f)throw Error('Choose a photo first.');say('status','Uploading...');C.add.gallery.push(await upload(f));$('ng_f').value='';refresh();drawAdded();say('status','Photo added to the gallery. Click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
 async function doSave(){const {error}=await sb.from('site_settings').upsert({id:1,content:C,updated_at:new Date().toISOString()});if(error)throw error;
   const h=await sb.from('site_history').insert({content:C});if(h.error)console.warn('History not saved. Run the new SQL.',h.error);drawEdits();drawVers()}
@@ -157,6 +215,8 @@ function drawEdits(){const b=$('edits');b.textContent='';let n=0;
   Object.entries(C.l).forEach(([k,v])=>add('Link: '+v.slice(0,40),()=>delete C.l[k]));
   Object.keys(C.m).forEach(k=>add((doc.querySelector('[data-cmsm="'+k+'"]')||{}).tagName==='VIDEO'?'Video replaced':'Photo replaced',()=>delete C.m[k]));
   Object.keys(C.css).forEach(k=>add('Color changed: '+k,()=>delete C.css[k]));
+  if(Object.keys(C.fx||{}).length)add('Background and effects changed',()=>C.fx={});
+  Object.keys(C.ms||{}).forEach(k=>add('Media resized or restyled',()=>delete C.ms[k]));
   if(C.prices&&(Object.keys(C.prices).some(k=>k!=='ph')||Object.keys(C.prices.ph||{}).length))add('Prices changed',()=>delete C.prices);
   Object.keys(C.h).forEach(k=>{const e=doc.querySelector('[data-cmsx="'+k+'"]');add('Hidden: '+((e&&e.textContent.trim().slice(0,30))||k),()=>delete C.h[k])});
   if(C.add.sections.length)add(C.add.sections.length+' added section(s)',()=>C.add.sections=[]);
