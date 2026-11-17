@@ -128,7 +128,43 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 .wl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.wl span{display:flex;align-items:center;justify-content:center;gap:3px;height:34px;min-width:64px;padding:0 12px;border-radius:8px;background:#fff;border:1px solid #ddd}.wl svg{display:block}
 .pw{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}.pw label{margin:0;color:var(--tx);border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:border-color .2s,box-shadow .2s}.pw label small{color:var(--mu);font-size:.85rem}.pw input{display:none}.pw label:has(input:checked){border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}.pw label span{font-weight:500}
 @media(max-width:480px){.pw{grid-template-columns:1fr}}
-</style></head><body>
+</style>
+<style id="fortune-refresh">
+:root{
+ --bg:#171d1a;--card:#222b26;--line:#3b4941;--tx:#f5f0e5;--mu:#b7b9ad;
+ --ac:#c9ad78;--ok:#91c6a0;--bad:#563b3b;color-scheme:dark;
+}
+body{background:radial-gradient(ellipse at 50% 0%,#344238 0%,#1b241f 42%,#141916 100%);background-attachment:fixed}
+section{position:relative}
+section:after{content:"";position:absolute;z-index:-1;left:8%;right:8%;bottom:12px;height:42px;border-radius:50%;background:radial-gradient(ellipse,#c9ad7830,transparent 72%);filter:blur(14px);pointer-events:none}
+nav.sc{background:rgba(23,29,26,.94)}
+.card,.opt,#cw,dialog{background:linear-gradient(145deg,#28332c,#1d2520);border-color:#465349;box-shadow:0 16px 44px #0003}
+.btn{background:linear-gradient(135deg,#e8d7b4,#c9ad78);color:#182019;box-shadow:0 8px 24px #c9ad7825}
+.btn.o{background:transparent;color:var(--tx);border-color:#c9ad78;box-shadow:none}
+.price,.opt b,.fb{color:#d8bd8b}
+.mq{border-color:#465349}.mq div{color:#c4c7b9}
+#cb{background:linear-gradient(135deg,#e8d7b4,#c9ad78);color:#172019;box-shadow:0 8px 26px #0005}
+#cw{background:#202a24;border-color:#586653;box-shadow:0 20px 55px #0008}
+#cm .b{background:#344239;color:#f5f0e5}
+#cm .u{background:#d4bd91;color:#1b211c}
+#cf{background:#1c241f}
+input,select,textarea{background:#1d2620;border-color:#48564b}
+.g{box-shadow:0 12px 34px #0004}
+.fs-video{position:relative;min-width:0;min-height:220px;overflow:hidden;border-radius:18px;background:#101512;isolation:isolate}
+.fs-video video{display:block;width:100%;height:100%;min-height:220px;max-height:520px;object-fit:cover;border-radius:18px;cursor:pointer}
+.fs-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;border:1px solid #f5f0e5bb;background:#c9ad78ed;color:#172019;font-size:25px;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s}
+.fs-play:active{transform:translate(-50%,-50%) scale(.94)}
+.fs-video.is-playing .fs-play{opacity:0;pointer-events:none}
+.fs-video:hover .fs-play{opacity:1}
+.fs-video.is-playing:hover .fs-play{opacity:1}
+@media(max-width:700px){
+ .fs-video,.fs-video video{min-height:210px}
+ .fs-play{width:62px;height:62px;opacity:1!important}
+ .fs-video.is-playing .fs-play{opacity:0!important}
+}
+@media(prefers-reduced-motion:reduce){.fs-play{transition:none}}
+</style>
+</head><body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQVKXHB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TB3MPP25" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -155,7 +191,7 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 <div class="grid" style="margin-top:26px"><div class="card"><div class="ix">01</div><h3 data-i="w1"></h3><p style="color:var(--mu)" data-i="w1d"></p></div><div class="card"><div class="ix">02</div><h3 data-i="w2"></h3><p style="color:var(--mu)" data-i="w2d"></p></div><div class="card"><div class="ix">03</div><h3 data-i="w3"></h3><p style="color:var(--mu)" data-i="w3d"></p></div></div>
 <div class="cr" style="justify-content:flex-start;margin-top:22px"><button class="btn" data-bp="w" data-i="wb"></button><a class="btn o" href="#gal" data-i="wg"></a></div></section>
 
-<section id="vid"><h2 data-i="t2"></h2><div class="vids"><video src="videos/video1.mp4" poster="videos/video1-poster.jpg" preload="auto" disablepictureinpicture muted loop playsinline controls aria-label="Fortune Studio video"></video><div style="display:grid;gap:14px"><video src="videos/video2.mp4" poster="videos/video2-poster.jpg" preload="auto" disablepictureinpicture muted loop playsinline controls></video><div class="card"><h3 style="font-size:1.2rem" data-i="ph"></h3><div class="price">$99+</div><p style="color:var(--mu);margin:0 0 12px" data-i="phd"></p><a class="btn" href="#gal" data-i="cta3"></a></div></div></div></section>
+<section id="vid"><h2 data-i="t2"></h2><div class="vids"><div class="fs-video"><video src="videos/video1.mp4" poster="videos/video1-poster.jpg" preload="metadata" disablepictureinpicture muted loop playsinline aria-label="Fortune Studio video"></video><button class="fs-play" type="button" aria-label="Play video">▶</button></div><div style="display:grid;gap:14px"><div class="fs-video"><video src="videos/video2.mp4" poster="videos/video2-poster.jpg" preload="metadata" disablepictureinpicture muted loop playsinline aria-label="Fortune Studio video"></video><button class="fs-play" type="button" aria-label="Play video">▶</button></div><div class="card"><h3 style="font-size:1.2rem" data-i="ph"></h3><div class="price">$99+</div><p style="color:var(--mu);margin:0 0 12px" data-i="phd"></p><a class="btn" href="#gal" data-i="cta3"></a></div></div></div></section>
 
 <dialog id="book"><button id="bx" aria-label="Close">✕</button><h2 data-i="t3"></h2><p style="color:var(--mu)" data-i="s3"></p>
 <div class="steps"><span class="on" id="t1s">1 · <em data-i="st1" style="font-style:normal"></em></span><span id="t2s">2 · <em data-i="st2" style="font-style:normal"></em></span><span id="t3s">3 · <em data-i="st3" style="font-style:normal"></em></span></div>
@@ -703,5 +739,20 @@ document.getElementById("cal").addEventListener("click",e=>{
   },120);
 });
 })();
+</script>
+
+<script id="fortune-video-controls">
+document.querySelectorAll("#vid .fs-video").forEach(function(box){
+ const video=box.querySelector("video"),button=box.querySelector(".fs-play");
+ function sync(){const playing=!video.paused&&!video.ended;box.classList.toggle("is-playing",playing);button.textContent=playing?"Ⅱ":"▶";button.setAttribute("aria-label",playing?"Pause video":"Play video");}
+ async function toggle(){
+   if(video.paused){try{await video.play()}catch(e){sync()}}
+   else video.pause();
+   sync();
+ }
+ button.addEventListener("click",toggle);
+ video.addEventListener("click",toggle);
+ video.addEventListener("play",sync);video.addEventListener("pause",sync);video.addEventListener("ended",sync);
+});
 </script>
 </body></html>
