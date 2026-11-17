@@ -30,6 +30,11 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <label>Button text and link (optional)</label><input id="ns_bt" placeholder="Button text"><input id="ns_bl" placeholder="https://...">
 <button id="ns_add">Add section</button><div id="ns_list"></div></details>
 <details><summary>Add photo to gallery</summary><input id="ng_f" type="file" accept="image/*"><button id="ng_add">Upload and add</button><div id="ng_list"></div></details>
+<details><summary>Prices (real, also at checkout)</summary><div id="prices"></div></details>
+<details><summary>All texts (search and edit)</summary>
+<div class="row"><label>Language</label><select id="lg"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option></select></div>
+<div class="row"><button class="s" id="openbook">Open booking form</button><button class="s" id="closebook">Close it</button></div>
+<input id="q" placeholder="Search a word, like: delivery, tax, tables..."><div id="texts" class="hint">Type at least 2 letters.</div></details>
 <details><summary>My edits (see and undo)</summary><div id="edits"></div></details>
 <details><summary>Saved versions and reset</summary><div id="vers"></div><button id="reset" class="d">Reset whole site to default</button><div class="hint">Reset removes all your edits and saves right away. Your old versions stay in the list so you can bring them back.</div></details>
 <p class="hint">Text edits apply to the language selected on the site preview. Prices shown here are display text only; booking totals are calculated in the site code.</p>
@@ -37,7 +42,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <iframe id="view" src="/?cmsedit=1"></iframe></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null;
+const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null,bypass=false;
 const say=(id,s)=>$(id).textContent=s;
 function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
 function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
@@ -64,13 +69,13 @@ function start(){
 }
 function ready(injected){
   const s=doc.createElement('style');s.textContent='[data-cms],[data-cmsa],[data-cmsm],[data-cmsx]{cursor:pointer}[data-cms]:hover{outline:2px dashed #e8b99f;outline-offset:2px}.cms-sel{outline:3px solid #4da3ff!important;outline-offset:2px}';doc.head.appendChild(s);
-  doc.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();pick(e.target)},true);
+  doc.addEventListener('click',e=>{if(bypass)return;e.preventDefault();e.stopPropagation();pick(e.target)},true);
   doc.addEventListener('submit',e=>e.preventDefault(),true);
   refresh();drawAll();
   if(injected)say('status','Editing works. IMPORTANT: upload the new index.html to GitHub, or the public site will not show your changes.');
 }
 function refresh(){win.FS_CMS.content=C;win.FS_CMS.applyAll()}
-function drawAll(){drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
+function drawAll(){drawPrices();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
   const tx=t.closest('[data-cms]'),ln=t.closest('[data-cmsa]'),md=t.closest('[data-cmsm]'),bl=t.closest('[data-cmsx]');
@@ -78,7 +83,7 @@ function pick(t){
   const box=$('sel');box.textContent='';box.className='';const lg=win.FS_CMS.lang();
   if(!tx&&!ln&&!md&&!bl){box.textContent='This part cannot be edited here (booking form and chat are kept as they are).';box.className='hint';return}
   if(tx){const k=tx.dataset.cms;box.append(el('label',{textContent:'Text ('+lg+')'}));
-    const ta=el('textarea',{rows:4,value:tx.textContent});ta.oninput=()=>{C.t[lg]=C.t[lg]||{};C.t[lg][k]=ta.value;win.FS_CMS.applyText()};box.append(ta);
+    const ta=el('textarea',{rows:4,value:tx.textContent});ta.oninput=()=>{C.t[lg]=C.t[lg]||{};C.t[lg][k]=ta.value;refresh()};box.append(ta);
     box.append(el('button',{className:'s',textContent:'Reset text',onclick:()=>{if(C.t[lg])delete C.t[lg][k];refresh();ta.value=tx.textContent}}))}
   if(ln){const k=ln.dataset.cmsa;box.append(el('label',{textContent:'Link address'}));
     const i=el('input',{value:ln.getAttribute('href')||'',placeholder:'https://...'});i.oninput=()=>{if(i.value.trim())C.l[k]=i.value.trim();else delete C.l[k];refresh()};box.append(i);
@@ -99,6 +104,29 @@ function replaceRow(m,label){
     el('button',{className:'s',textContent:'Use original again',onclick:()=>{delete C.m[m.dataset.cmsm];refresh();drawMedia()}}));
   return w;
 }
+
+const PF=[['t','Table price, each ($)'],['c','Chair price, each ($)'],['a','Party package ($)'],['b','Celebration package ($)'],['wh','Wedding or event coverage, per hour ($)'],['wd','Wedding deposit ($)'],['tax','Sales tax (%)'],['dep','Deposit share when paying a deposit (%)'],['xh','Extra hour adds (% of price)']];
+const PT=[['ex','Extra edited photo ($) - shown on site only'],['dl','Delivery fee ($) - shown on site only'],['phr','Photography add-on, per hour ($) - shown on site only']];
+function drawPrices(){const b=$('prices');b.textContent='';const D=win.FS_CMS.DEF;C.prices=C.prices||{};
+  const num=(k,l)=>{const i=el('input',{type:'number',min:0,step:'any',value:C.prices[k]!==undefined?C.prices[k]:'',placeholder:'Now: '+D[k]});i.oninput=()=>{if(i.value==='')delete C.prices[k];else C.prices[k]=i.value;refresh()};b.append(el('label',{textContent:l}),i)};
+  PF.forEach(([k,l])=>num(k,l));b.append(el('div',{className:'hint',textContent:'Photo sessions (minutes fixed): price and number of photos'}));
+  C.prices.ph=C.prices.ph||{};
+  Object.keys(D.ph).forEach(m=>{const cur=C.prices.ph[m]||[];const p=el('input',{type:'number',min:0,step:'any',value:cur[0]??'',placeholder:'$ '+D.ph[m][0]}),n=el('input',{type:'number',min:0,step:1,value:cur[1]??'',placeholder:D.ph[m][1]+' photos'});
+    const up=()=>{if(p.value===''&&n.value==='')delete C.prices.ph[m];else C.prices.ph[m]=[p.value,n.value];refresh()};p.oninput=up;n.oninput=up;
+    b.append(el('div',{className:'row'},el('label',{textContent:m+' min'}),p,n))});
+  PT.forEach(([k,l])=>num(k,l));
+  b.append(el('div',{className:'hint',textContent:'Empty box = original price. Prices change the site, the booking total and the Stripe checkout amount after you click Save and publish.'}),el('button',{className:'s',textContent:'Reset all prices',onclick:()=>{delete C.prices;refresh();drawPrices()}}))}
+function Dobj(){try{return win.eval('D')}catch(e){return null}}
+function drawTexts(){const b=$('texts'),q=$('q').value.trim().toLowerCase(),lg=win.FS_CMS.lang(),D=Dobj();$('lg').value=lg;b.textContent='';
+  if(!D||!D[lg])return;if(q.length<2){b.textContent='Type at least 2 letters.';return}
+  const keys=Object.keys(D[lg]).filter(k=>typeof D[lg][k]==='string'&&(k.toLowerCase().includes(q)||D[lg][k].toLowerCase().includes(q))).slice(0,40);
+  if(!keys.length)b.textContent='Nothing found.';
+  keys.forEach(k=>{const ta=el('textarea',{rows:2,value:D[lg][k]});ta.oninput=()=>{C.t[lg]=C.t[lg]||{};C.t[lg]['i:'+k]=ta.value;refresh()};
+    b.append(el('div',{className:'hint',textContent:k}),ta)})}
+$('q').oninput=drawTexts;
+$('lg').onchange=()=>{const bt=doc.querySelector('[data-l="'+$('lg').value+'"]');if(bt){bypass=true;bt.click();bypass=false}setTimeout(()=>{refresh();drawTexts()},150)};
+$('openbook').onclick=()=>{try{win.openBook(1)}catch(e){say('status','Could not open the booking form.')}};
+$('closebook').onclick=()=>{try{doc.getElementById('book').close()}catch(e){}};
 function drawMedia(){const b=$('media');b.textContent='';let n=0,v=0;
   doc.querySelectorAll('[data-cmsm]').forEach(m=>{const isV=m.tagName==='VIDEO',lab=isV?'Video '+(++v):'Photo '+(++n);
     const d=el('div',{style:'border-bottom:1px solid #343840;padding:8px 0'});
@@ -129,6 +157,7 @@ function drawEdits(){const b=$('edits');b.textContent='';let n=0;
   Object.entries(C.l).forEach(([k,v])=>add('Link: '+v.slice(0,40),()=>delete C.l[k]));
   Object.keys(C.m).forEach(k=>add((doc.querySelector('[data-cmsm="'+k+'"]')||{}).tagName==='VIDEO'?'Video replaced':'Photo replaced',()=>delete C.m[k]));
   Object.keys(C.css).forEach(k=>add('Color changed: '+k,()=>delete C.css[k]));
+  if(C.prices&&(Object.keys(C.prices).some(k=>k!=='ph')||Object.keys(C.prices.ph||{}).length))add('Prices changed',()=>delete C.prices);
   Object.keys(C.h).forEach(k=>{const e=doc.querySelector('[data-cmsx="'+k+'"]');add('Hidden: '+((e&&e.textContent.trim().slice(0,30))||k),()=>delete C.h[k])});
   if(C.add.sections.length)add(C.add.sections.length+' added section(s)',()=>C.add.sections=[]);
   if(C.add.gallery.length)add(C.add.gallery.length+' added gallery photo(s)',()=>C.add.gallery=[]);
