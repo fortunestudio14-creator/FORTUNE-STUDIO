@@ -3,7 +3,7 @@ const cut = (v, n = 200) => String(v ?? "").slice(0, n);
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).end();
-  if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: "not_configured" });
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PUBLISHABLE_KEY) return res.status(503).json({ error: "not_configured" });
   try {
     const b = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const d = cut(b.date, 10), today = new Date().toISOString().slice(0, 10);
@@ -18,6 +18,9 @@ module.exports = async (req, res) => {
     const origin = req.headers.origin || "https://" + req.headers.host;
     const session = await stripe().checkout.sessions.create({
       mode: "payment",
+      ui_mode: "embedded", // payment form shows inside the site, no redirect to another page
+      redirect_on_completion: "never",
+      payment_method_types: ["card"], // card + Apple Pay + Google Pay (PayPal and others off)
       customer_email: cut(b.email),
       locale: ["en", "es", "fr"].includes(b.lang) ? b.lang : "auto",
       line_items: [{ quantity: 1, price_data: {
@@ -32,10 +35,8 @@ module.exports = async (req, res) => {
         subtotal: q.wd ? "-" : money(q.subtotal), tax: q.wd ? "-" : money(q.tax), total: q.wd ? "Quote to be confirmed" : money(q.total), paid_now: money(q.due), balance: q.wd ? "Quote to be confirmed" : money(q.balance),
         delivery: b.delivery ? "yes" : "no", name: cut(b.name, 100), phone: cut(b.phone, 20), address: cut(b.address, 300), lang: cut(b.lang, 2),
       },
-      success_url: origin + "/?paid=1",
-      cancel_url: origin + "/?canceled=1",
     });
-    res.status(200).json({ url: session.url });
+    res.status(200).json({ clientSecret: session.client_secret, publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
   } catch (e) {
     console.error(e);
     res.status(400).json({ error: "bad_request" });
