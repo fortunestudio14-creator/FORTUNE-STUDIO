@@ -1,117 +1,43 @@
-// Vercel serverless function: POST /api/checkout
-// Creates a Stripe Checkout session and returns { url }.
-// Needs the environment variable STRIPE_SECRET_KEY (sk_live_... or sk_test_...) in Vercel.
-
-const TAX = 0.06;        // Pennsylvania sales tax, same as the website
-const DEP = 0.5;         // deposit percent for rentals and photo sessions
-const WED_HR = 150;      // wedding and event coverage, price per hour
-const WED_DEP = 100;     // wedding and event deposit
-const BASE_H = 4;        // hours included in rentals
-const EXTRA = 0.25;      // each extra rental hour adds 25 percent
-const PHOTO = { p30: 99, p45: 139, p60: 179, p90: 249, p120: 319 };
-const NAMES = {
-  c: 'Custom rental, tables and chairs',
-  55: 'Party package',
-  110: 'Celebration package',
-  w: 'Wedding and event coverage',
-  p30: 'Photo session 30 min',
-  p45: 'Photo session 45 min',
-  p60: 'Photo session 60 min',
-  p90: 'Photo session 90 min',
-  p120: 'Photo session 120 min'
-};
-
-const clamp = (v, a, b) => Math.min(b, Math.max(a, Math.floor(+v || 0)));
-const r2 = (n) => Math.round(n * 100) / 100;
-const cut = (v, n) => String(v == null ? '' : v).slice(0, n);
-
-function price(b) {
-  const pk = String(b.pk || '');
-  if (!(pk in NAMES)) throw new Error('bad package');
-  const isPhoto = pk[0] === 'p';
-  const wed = pk === 'w';
-  const h = clamp(b.hr, 1, 24) || BASE_H;
-  let s;
-  if (isPhoto) s = PHOTO[pk];
-  else if (pk === '55') s = 55;
-  else if (pk === '110') s = 110;
-  else if (wed) s = WED_HR * h;
-  else s = clamp(b.qt, 0, 6) * 12 + clamp(b.qc, 0, 40) * 3;
-  if (!isPhoto && !wed) s += Math.round(s * Math.max(0, h - BASE_H) * EXTRA);
-  if (!isPhoto && !wed && b.delivery) s += 25;
-  if (s <= 0) throw new Error('empty order');
-  const tax = r2(s * TAX);
-  const total = r2(s + tax);
-  const dep = wed || b.pp === 'dep';
-  const due = dep ? (wed ? Math.min(total, WED_DEP) : r2(total * DEP)) : total;
-  return { due, total, balance: r2(total - due), dep, name: NAMES[pk] };
-}
+const { stripe, quote, bookedDates, money } = require("./_lib");
+const cut = (v, n = 200) => String(v ?? "").slice(0, n);
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'method' });
-  }
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return res.status(500).json({ error: 'missing STRIPE_SECRET_KEY' });
-
-  let b = req.body;
-  if (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }
-  b = b || {};
-
-  let p;
-  try { p = price(b); } catch (e) { return res.status(400).json({ error: e.message }); }
-
-  const email = cut(b.email, 200);
-  if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: 'email' });
-
-  const proto = req.headers['x-forwarded-proto'] || 'https';
-  const origin = proto + '://' + (req.headers['x-forwarded-host'] || req.headers.host);
-
-  const f = new URLSearchParams();
-  f.set('mode', 'payment');
-  f.set('customer_email', email);
-  f.set('success_url', origin + '/?paid=1#book');
-  f.set('cancel_url', origin + '/#book');
-  f.set('line_items[0][quantity]', '1');
-  f.set('line_items[0][price_data][currency]', 'usd');
-  f.set('line_items[0][price_data][unit_amount]', String(Math.round(p.due * 100)));
-  f.set('line_items[0][price_data][product_data][name]',
-    'Fortune Studio - ' + p.name + (p.dep ? ' (deposit)' : ''));
-  f.set('line_items[0][price_data][product_data][description]',
-    cut((b.date || '') + ' ' + (b.time || ''), 200).trim() || 'Fortune Studio LLC');
-  f.set('payment_intent_data[receipt_email]', email);
-
-  const meta = {
-    service: p.name, date: cut(b.date, 100), time: cut(b.time, 100),
-    delivery: b.delivery ? 'yes' : 'no',
-    tables: String(clamp(b.qt, 0, 6)), chairs: String(clamp(b.qc, 0, 40)),
-    hours: String(clamp(b.hr, 0, 24)),
-    name: cut(b.name, 200), phone: cut(b.phone, 40), address: cut(b.address, 400),
-    total: p.total.toFixed(2), paid_now: p.due.toFixed(2), balance: p.balance.toFixed(2)
-  };
-  Object.keys(meta).forEach((k) => {
-    f.set('metadata[' + k + ']', meta[k]);
-    f.set('payment_intent_data[metadata][' + k + ']', meta[k]);
-  });
-
+  if (req.method !== "POST") return res.status(405).end();
+  if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: "not_configured" });
   try {
-    const r = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + key,
-        'Content-Type': 'application/x-www-form-urlencoded'
+    const b = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+    const d = cut(b.date, 10), today = new Date().toISOString().slice(0, 10);
+    const day = new Date(d + "T12:00:00Z");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d < today || day.getUTCDay() === 1) throw new Error("bad date");
+    if (!cut(b.name).trim() || !/^\S+@\S+\.\S+$/.test(cut(b.email)) || cut(b.phone).replace(/\D/g, "").length !== 10) throw new Error("bad contact");
+    if (!cut(b.address).trim()) throw new Error("missing address");
+    if ((await bookedDates()).includes(d)) return res.status(409).json({ error: "taken" });
+
+    const q = await quote(b);
+    const label = day.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+    const origin = req.headers.origin || "https://" + req.headers.host;
+    const session = await stripe().checkout.sessions.create({
+      mode: "payment",
+      customer_email: cut(b.email),
+      locale: ["en", "es", "fr"].includes(b.lang) ? b.lang : "auto",
+      line_items: [{ quantity: 1, price_data: {
+        currency: "usd", unit_amount: Math.round(q.due * 100),
+        product_data: {
+          name: (q.dep ? "Deposit: " : "") + q.label + " · " + label,
+          description: q.wd ? "Deposit to hold your date. Final price confirmed with your quote." : "Total " + money(q.total) + " with " + q.taxPct + "% tax." + (q.balance > 0 ? " Remaining balance " + money(q.balance) + "." : ""),
+        } } }],
+      payment_intent_data: { receipt_email: cut(b.email), description: "Fortune Studio · " + q.label + " · " + label },
+      metadata: {
+        app: "fortune", date: d, date_label: label, time: cut(b.time, 20), service: q.label,
+        subtotal: q.wd ? "-" : money(q.subtotal), tax: q.wd ? "-" : money(q.tax), total: q.wd ? "Quote to be confirmed" : money(q.total), paid_now: money(q.due), balance: q.wd ? "Quote to be confirmed" : money(q.balance),
+        delivery: b.delivery ? "yes" : "no", name: cut(b.name, 100), phone: cut(b.phone, 20), address: cut(b.address, 300), lang: cut(b.lang, 2),
       },
-      body: f.toString()
+      success_url: origin + "/?paid=1",
+      cancel_url: origin + "/?canceled=1",
     });
-    const j = await r.json();
-    if (!r.ok || !j.url) {
-      console.error('Stripe error', j && j.error);
-      return res.status(502).json({ error: 'stripe' });
-    }
-    return res.status(200).json({ url: j.url });
+    res.status(200).json({ url: session.url });
   } catch (e) {
     console.error(e);
-    return res.status(502).json({ error: 'network' });
+    res.status(400).json({ error: "bad_request" });
   }
 };
