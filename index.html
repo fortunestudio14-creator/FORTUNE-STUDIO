@@ -591,4 +591,78 @@ window.fsPaid();
 @keyframes fs-step-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){#book .pane{animation:none!important;scroll-behavior:auto!important}}
 </style>
+<style>
+/* ===== Smooth package -> date flow ===== */
+.fs-pick{animation:fsPick .65s cubic-bezier(.2,.8,.2,1)}
+@keyframes fsPick{0%{transform:scale(1)}30%{transform:scale(.97);box-shadow:0 0 0 2px var(--ac)}100%{transform:scale(1);box-shadow:0 0 0 14px #e8b99f00}}
+#book[open]{animation:fsOpen .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes fsOpen{from{opacity:0;transform:translateY(26px) scale(.97)}}
+#book[open]::backdrop{animation:fsFade .4s ease both}
+@keyframes fsFade{from{opacity:0}}
+#book .pane{animation:none}
+#book .pane.fwd{animation:fsFwd .45s cubic-bezier(.2,.8,.2,1) both}
+#book .pane.back{animation:fsBack .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fsFwd{from{opacity:0;transform:translateX(28px)}}
+@keyframes fsBack{from{opacity:0;transform:translateX(-28px)}}
+.sum{display:flex;gap:10px;align-items:center}
+.sum:before{content:"\2713";flex:none;width:22px;height:22px;border-radius:50%;background:var(--ok);color:#06210f;display:grid;place-items:center;font-size:.8rem;font-weight:700;animation:fsPop .5s .2s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes fsPop{from{transform:scale(0)}}
+#n2.rdy{animation:fsRdy 1.2s ease 1}
+@keyframes fsRdy{40%{box-shadow:0 0 0 9px #e8b99f44}}
+#cu.hl{animation:fsHl 1.3s ease 1}
+@keyframes fsHl{30%{box-shadow:0 0 0 2px var(--ac);border-radius:14px}}
+@media(prefers-reduced-motion:reduce){.fs-pick,#book[open],#book[open]::backdrop,#book .pane.fwd,#book .pane.back,.sum:before,#n2.rdy,#cu.hl{animation:none!important}}
+</style>
+<script>
+(function(){
+const RM=matchMedia("(prefers-reduced-motion:reduce)"),d=document.getElementById("book"),sm=()=>RM.matches?"auto":"smooth";
+let cur=1;
+// one clean scroll inside the dialog (no more double smooth-scroll)
+window.go=function(n){
+  const back=n<cur;cur=n;
+  ["s1","s2","s3"].forEach((x,i)=>{
+    const p=document.getElementById(x),show=i+1===n;
+    if(show){if(p.hidden){p.hidden=false;p.classList.remove("fwd","back");void p.offsetWidth;p.classList.add(back?"back":"fwd")}}else p.hidden=true;
+    document.getElementById("t"+(i+1)+"s").className=i+1===n?"on":i+1<n?"dn":"";
+  });
+  const bar=d.querySelector(".steps");
+  d.scrollTo({top:n===1?0:Math.max(0,bar.offsetTop-14),behavior:sm()});
+  upd();
+};
+window.openBook=function(n){
+  if(typeof loadBooked=="function")loadBooked();
+  if(!d.open){d.showModal();cur=1;["s1","s2","s3"].forEach(x=>document.getElementById(x).hidden=true)}
+  go(n||1);
+};
+// package / card click -> straight to the date step
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-bp]");if(!b)return;
+  const v=b.dataset.bp,r=document.querySelector("[name=pk][value='"+v+"']");if(!r)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  r.checked=true;
+  b.classList.remove("fs-pick");void b.offsetWidth;b.classList.add("fs-pick");setTimeout(()=>b.classList.remove("fs-pick"),700);
+  const open=()=>{
+    if(v!=="c"){openBook(2);return}
+    // tables / chairs cards: show the quantity box right away, no scrolling needed
+    openBook(1);upd();
+    const cu=document.getElementById("cu"),i=[...b.parentNode.children].indexOf(b);
+    setTimeout(()=>{
+      d.scrollTo({top:Math.max(0,cu.offsetTop-(d.clientHeight-cu.offsetHeight)/2),behavior:sm()});
+      cu.classList.remove("hl");void cu.offsetWidth;cu.classList.add("hl");
+      const f=document.getElementById(i===1?"qc":"qt");if(f)f.focus({preventScroll:true});
+    },RM.matches?0:260);
+  };
+  RM.matches?open():setTimeout(open,170);
+},true);
+// after picking a date, bring time + total + Continue into view automatically
+document.getElementById("cal").addEventListener("click",e=>{
+  const x=e.target.closest("button");if(!x||x.disabled)return;
+  setTimeout(()=>{
+    const n2=document.getElementById("n2"),r=n2.getBoundingClientRect(),dr=d.getBoundingClientRect();
+    if(r.bottom>dr.bottom-16)d.scrollBy({top:r.bottom-dr.bottom+28,behavior:sm()});
+    n2.classList.remove("rdy");void n2.offsetWidth;n2.classList.add("rdy");
+  },120);
+});
+})();
+</script>
 </body></html>
