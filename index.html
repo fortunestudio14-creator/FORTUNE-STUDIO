@@ -448,10 +448,25 @@ ad.addEventListener("blur",function(){setTimeout(hide,150)});
 #go:disabled{opacity:.7;cursor:progress}
 #pdn{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:200;max-width:min(520px,calc(100vw - 28px));background:#0f2a18;border:1px solid #7bd88f;color:#eaffef;border-radius:14px;padding:14px 18px;box-shadow:0 14px 40px #000a;font:500 .95rem Outfit,Arial,sans-serif}
 </style>
-<dialog id="stp" style="max-width:min(520px,calc(100vw - 20px));width:100%;padding:0;background:#fff;color:#111;overflow:auto">
-<button type="button" id="stx" aria-label="Close" style="position:absolute;right:10px;top:8px;z-index:2;border:0;background:#0001;color:#111;width:34px;height:34px;border-radius:50%;font:600 20px Arial;cursor:pointer">&times;</button>
-<div id="stc" style="min-height:320px;padding-top:6px"></div>
+<dialog id="stp" class="fortune-pay-dialog" aria-label="Fortune Studio secure payment">
+<div class="fortune-pay-head"><div class="fortune-pay-brand"><span class="fortune-pay-mark">F</span><span><strong>Fortune Studio</strong><small>SECURE CHECKOUT</small></span></div><button type="button" id="stx" aria-label="Close payment" class="fortune-pay-close">&times;</button></div>
+<div id="stc"></div>
+<div class="fortune-pay-foot"><span>🔒 Secure payment powered by Stripe</span><span>Fortune Studio LLC</span></div>
 </dialog>
+<style>
+.fortune-pay-dialog{width:min(620px,calc(100vw - 24px));max-width:620px;max-height:min(88vh,900px);padding:0;overflow:auto;background:#151515;color:#f4efe6;border:1px solid #3a302a;border-radius:22px;box-shadow:0 28px 90px #000b}
+.fortune-pay-dialog::backdrop{background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}
+.fortune-pay-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:17px 20px;background:#151515;border-bottom:1px solid #2a2a2a}
+.fortune-pay-brand{display:flex;align-items:center;gap:11px;color:#f4efe6}
+.fortune-pay-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#e8b99f;color:#17110e;font:700 22px Georgia,serif}
+.fortune-pay-brand strong{display:block;font:600 15px Outfit,Arial,sans-serif;letter-spacing:.02em}
+.fortune-pay-brand small{display:block;color:#a29d94;font:600 9px Outfit,Arial,sans-serif;letter-spacing:.18em}
+.fortune-pay-close{width:36px;height:36px;border:1px solid #39332e;border-radius:50%;background:#201e1b;color:#f4efe6;font:400 23px Arial;cursor:pointer}
+.fortune-pay-close:hover{background:#e8b99f;color:#17110e}
+#stc{min-height:320px;padding:18px 20px 12px;background:#151515;color:#f4efe6}
+.fortune-pay-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 20px 16px;border-top:1px solid #2a2a2a;color:#a29d94;font:500 11px Outfit,Arial,sans-serif}
+@media(max-width:520px){.fortune-pay-dialog{width:calc(100vw - 14px);max-height:92vh;border-radius:17px}.fortune-pay-head{padding:13px 15px}#stc{padding:12px 12px 8px}.fortune-pay-foot{padding:11px 15px}}
+</style>
 <script>
 (function(){
 var ck=null,loading=null;
@@ -481,7 +496,7 @@ var st=window.Stripe(j.publishableKey);
 var dlg=document.getElementById("stp");
 document.getElementById("stc").innerHTML="";
 if(!dlg.open)dlg.showModal();
-ck=await st.initEmbeddedCheckout({clientSecret:j.clientSecret,onComplete:function(){
+ck=await st.initEmbeddedCheckout({clientSecret:j.clientSecret,appearance:{theme:"night",variables:{colorPrimary:"#e8b99f",colorBackground:"#151515",colorText:"#f4efe6",colorTextSecondary:"#a29d94",colorBorder:"#3a302a",colorIcon:"#e8b99f",borderRadius:"12px",fontFamily:"Outfit, system-ui, sans-serif"}},onComplete:function(){
 setTimeout(function(){close();var b=document.getElementById("book");if(b&&b.open)b.close();window.fsPaid()},1200);
 }});
 ck.mount("#stc");
