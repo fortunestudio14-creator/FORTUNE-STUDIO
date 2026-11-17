@@ -463,9 +463,9 @@ ad.addEventListener("blur",function(){setTimeout(hide,150)});
 .fortune-pay-brand small{display:block;color:#a29d94;font:600 9px Outfit,Arial,sans-serif;letter-spacing:.18em}
 .fortune-pay-close{width:36px;height:36px;border:1px solid #39332e;border-radius:50%;background:#201e1b;color:#f4efe6;font:400 23px Arial;cursor:pointer}
 .fortune-pay-close:hover{background:#e8b99f;color:#17110e}
-#stc{min-height:320px;padding:18px 20px 12px;background:#151515;color:#f4efe6}
+#stc{min-height:320px;padding:0;background:#fff;color:#111;border-radius:0}
 .fortune-pay-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 20px 16px;border-top:1px solid #2a2a2a;color:#a29d94;font:500 11px Outfit,Arial,sans-serif}
-@media(max-width:520px){.fortune-pay-dialog{width:calc(100vw - 14px);max-height:92vh;border-radius:17px}.fortune-pay-head{padding:13px 15px}#stc{padding:12px 12px 8px}.fortune-pay-foot{padding:11px 15px}}
+@media(max-width:520px){.fortune-pay-dialog{width:calc(100vw - 14px);max-height:92vh;border-radius:17px}.fortune-pay-head{padding:13px 15px}#stc{padding:0}.fortune-pay-foot{padding:11px 15px}}
 </style>
 <script>
 (function(){
@@ -496,10 +496,12 @@ var st=window.Stripe(j.publishableKey);
 var dlg=document.getElementById("stp");
 document.getElementById("stc").innerHTML="";
 if(!dlg.open)dlg.showModal();
-ck=await st.initEmbeddedCheckout({clientSecret:j.clientSecret,appearance:{theme:"night",variables:{colorPrimary:"#e8b99f",colorBackground:"#151515",colorText:"#f4efe6",colorTextSecondary:"#a29d94",colorBorder:"#3a302a",colorIcon:"#e8b99f",borderRadius:"12px",fontFamily:"Outfit, system-ui, sans-serif"}},onComplete:function(){
+try{
+ck=await st.initEmbeddedCheckout({clientSecret:j.clientSecret,onComplete:function(){
 setTimeout(function(){close();var b=document.getElementById("book");if(b&&b.open)b.close();window.fsPaid()},1200);
 }});
 ck.mount("#stc");
+}catch(e){close();throw e}
 };
 if(/[?&]paid=1/.test(location.search)){
 try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}
