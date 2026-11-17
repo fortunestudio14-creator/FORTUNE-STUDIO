@@ -106,6 +106,13 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 
 /* ---- extras: background fx, reveal, flash, wedding, chat ---- */
 #fx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+/* Subtle animated ambient light — uses the existing champagne/black palette only */
+#fx:before{content:"";position:absolute;inset:-22%;background:
+ radial-gradient(ellipse at 18% 24%,rgba(232,185,159,.105),transparent 34%),
+ radial-gradient(ellipse at 82% 38%,rgba(232,185,159,.065),transparent 31%),
+ radial-gradient(ellipse at 52% 88%,rgba(244,239,230,.035),transparent 38%);
+ filter:blur(34px);transform:translate3d(0,0,0);animation:ambientDrift 24s ease-in-out infinite alternate;will-change:transform}
+@keyframes ambientDrift{0%{transform:translate3d(-2%,-1%,0) scale(1)}50%{transform:translate3d(2%,1.5%,0) scale(1.06)}100%{transform:translate3d(-1%,2%,0) scale(1.02)}}
 /* soft film grain */
 #fx:after{content:"";position:absolute;inset:-50%;opacity:.025;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
 /* camera viewfinder corners */
@@ -118,7 +125,7 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 .fl .card{animation:fc 1.6s ease}@keyframes fc{35%{box-shadow:0 0 0 1px #e8b99f,0 10px 50px #e8b99f33}}
 .card:hover,.card:focus-within{border-color:var(--ac)}.card[data-bp]:active{border-color:var(--ac)}.leg{flex-wrap:wrap}.cal button.cl{background:none;border:1px dashed #3a3a3a;color:#666;text-decoration:none}
 #cx{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line)}#cx a{text-decoration:none;font-size:.8rem}
-@media(prefers-reduced-motion:reduce){#fx:after{animation:none}#fx b{display:none}.rv{opacity:1;transform:none;transition:none}.fl h2,.fl .card{animation:none}}
+@media(prefers-reduced-motion:reduce){#fx:before{animation:none}#fx:after{animation:none}#fx b{display:none}.rv{opacity:1;transform:none;transition:none}.fl h2,.fl .card{animation:none}}
 .ix{font:500 .78rem Outfit;letter-spacing:.22em;color:var(--ac);padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--line);transition:border-color .3s}.card:hover .ix{border-color:var(--ac)}
 #cm .ty{display:flex;gap:4px;width:fit-content}.ty span{width:6px;height:6px;border-radius:50%;background:var(--mu);animation:ty 1s infinite}.ty span:nth-child(2){animation-delay:.15s}.ty span:nth-child(3){animation-delay:.3s}@keyframes ty{50%{transform:translateY(-4px);opacity:.4}}
 #lf{display:grid;gap:8px;padding:12px;border-top:1px solid var(--line)}#lf[hidden],#cf[hidden]{display:none}#lf input,#lf textarea{padding:10px}#lf textarea{min-height:70px;resize:none}
@@ -130,39 +137,30 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 @media(max-width:480px){.pw{grid-template-columns:1fr}}
 </style>
 <style id="fortune-refresh">
-:root{
- --bg:#171d1a;--card:#222b26;--line:#3b4941;--tx:#f5f0e5;--mu:#b7b9ad;
- --ac:#c9ad78;--ok:#91c6a0;--bad:#563b3b;color-scheme:dark;
-}
-body{background:radial-gradient(ellipse at 50% 0%,#344238 0%,#1b241f 42%,#141916 100%);background-attachment:fixed}
+:root{--bg:#0a0a0a;--card:#151515;--line:#2a2a2a;--tx:#f4efe6;--mu:#a29d94;--ac:#e8b99f;--ok:#7bd88f;--bad:#5a3a3a;color-scheme:dark}
+body{background:#0a0a0a;color:var(--tx);background-attachment:fixed}
 section{position:relative}
-section:after{content:"";position:absolute;z-index:-1;left:8%;right:8%;bottom:12px;height:42px;border-radius:50%;background:radial-gradient(ellipse,#c9ad7830,transparent 72%);filter:blur(14px);pointer-events:none}
-nav.sc{background:rgba(23,29,26,.94)}
-.card,.opt,#cw,dialog{background:linear-gradient(145deg,#28332c,#1d2520);border-color:#465349;box-shadow:0 16px 44px #0003}
-.btn{background:linear-gradient(135deg,#e8d7b4,#c9ad78);color:#182019;box-shadow:0 8px 24px #c9ad7825}
-.btn.o{background:transparent;color:var(--tx);border-color:#c9ad78;box-shadow:none}
-.price,.opt b,.fb{color:#d8bd8b}
-.mq{border-color:#465349}.mq div{color:#c4c7b9}
-#cb{background:linear-gradient(135deg,#e8d7b4,#c9ad78);color:#172019;box-shadow:0 8px 26px #0005}
-#cw{background:#202a24;border-color:#586653;box-shadow:0 20px 55px #0008}
-#cm .b{background:#344239;color:#f5f0e5}
-#cm .u{background:#d4bd91;color:#1b211c}
-#cf{background:#1c241f}
-input,select,textarea{background:#1d2620;border-color:#48564b}
-.g{box-shadow:0 12px 34px #0004}
-.fs-video{position:relative;min-width:0;min-height:220px;overflow:hidden;border-radius:18px;background:#101512;isolation:isolate}
+/* Subtle champagne light on a true black background; no green tint or color swap. */
+section:after{content:"";position:absolute;z-index:-1;left:8%;right:8%;bottom:12px;height:38px;border-radius:50%;background:radial-gradient(ellipse,rgba(232,185,159,.10),transparent 72%);filter:blur(16px);pointer-events:none}
+nav.sc{background:rgba(10,10,10,.94)}
+.card,.opt,#cw,dialog{background:#151515;border-color:#2a2a2a;box-shadow:0 16px 44px #0008}
+.btn{background:var(--tx);color:#000;box-shadow:0 8px 24px #0005}
+.btn.o{background:transparent;color:var(--tx);border-color:var(--tx);box-shadow:none}
+.price,.opt b,.fb{color:var(--ac)}
+.mq{border-color:#2a2a2a}.mq div{color:var(--mu)}
+#cb{background:var(--ac);color:#17110e;box-shadow:0 8px 26px #0008}
+#cw{background:#151515;border-color:#3a3a3a;box-shadow:0 20px 55px #000b}
+#cm .b{background:#222;color:#f4efe6}
+#cm .u{background:var(--ac);color:#17110e}
+#cf{background:#111;border-top:1px solid #2a2a2a}
+input,select,textarea{background:#151515;border-color:#3a3a3a}
+.g{box-shadow:0 12px 34px #0007}
+.fs-video{position:relative;min-width:0;min-height:220px;overflow:hidden;border-radius:18px;background:#101010;isolation:isolate}
 .fs-video video{display:block;width:100%;height:100%;min-height:220px;max-height:520px;object-fit:cover;border-radius:18px;cursor:pointer}
-.fs-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;border:1px solid #f5f0e5bb;background:#c9ad78ed;color:#172019;font-size:25px;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s}
+.fs-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;border:1px solid #f4efe6bb;background:#e8b99fed;color:#17110e;font-size:25px;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s}
 .fs-play:active{transform:translate(-50%,-50%) scale(.94)}
 .fs-video.is-playing .fs-play{opacity:0;pointer-events:none}
 .fs-video:hover .fs-play{opacity:1}
-.fs-video.is-playing:hover .fs-play{opacity:1}
-@media(max-width:700px){
- .fs-video,.fs-video video{min-height:210px}
- .fs-play{width:62px;height:62px;opacity:1!important}
- .fs-video.is-playing .fs-play{opacity:0!important}
-}
-@media(prefers-reduced-motion:reduce){.fs-play{transition:none}}
 </style>
 </head><body>
 <!-- Google Tag Manager (noscript) -->
@@ -402,8 +400,9 @@ else if(/date|fecha|free|avail|dispon|libre|when|cuando|quand|book|reserv/.test(
 else if(/chair|table|silla|mesa|chaise|stock|have|tien|avez/.test(s))r="bs";else r="bx";return t(r)}
 const hist=[];
 $("#cf").onsubmit=async e=>{e.preventDefault();const q=$("#ci").value.trim();if(!q)return;$("#ci").value="";add("u",q);hist.push({role:"user",content:q});const ty=document.createElement("p");ty.className="b ty";ty.innerHTML="<span></span><span></span><span></span>";cm.appendChild(ty);cm.scrollTop=1e9;let r=null;
-try{const x=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:hist.slice(-12),lang:L,booked:taken().slice(0,60)})});if(x.ok)r=(await x.json()).reply}catch(e){}
-ty.remove();if(!r)r=rb(q);hist.push({role:"assistant",content:r});bot(r)};
+let errMsg=L==="fr"?"Je n'arrive pas à joindre l'assistant pour le moment. Veuillez réessayer ou laisser un message à notre équipe." : L==="es"?"No puedo conectar con el asistente ahora. Inténtelo de nuevo o deje un mensaje a nuestro equipo." : "I can't connect to the AI assistant right now. Please try again or leave a message for our team.";
+try{const x=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:hist.slice(-12),lang:L,booked:taken().slice(0,60)})});const data=await x.json().catch(()=>({}));if(x.ok&&data.reply)r=data.reply;else if(data.error)console.error("Chat API:",data.error)}catch(e){console.error("Chat request failed",e)}
+ty.remove();if(!r)r=errMsg;hist.push({role:"assistant",content:r});bot(r)};
 $("#lm").onclick=()=>{const f=$("#lf");f.hidden=!f.hidden;$("#cf").hidden=!f.hidden;if(!f.hidden)$("#lfn").focus()};
 $("#lf").onsubmit=async e=>{e.preventDefault();const n=$("#lfn").value.trim(),c=$("#lfc").value.trim(),m=$("#lfm").value.trim();if(!n||!c||!m){bot(t("lme"));return}
 const b=$("#lf button");b.disabled=true;let ok=false;try{const r=await fetch("https://formsubmit.co/ajax/fortunestudio14@gmail.com",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({_subject:"Website message - "+n,_template:"table",_captcha:"false",Name:n,Contact:c,Message:m,Chat:hist.map(x=>x.role+": "+x.content).join("\n")})});const j=await r.json();ok=r.ok&&String(j.success)==="true"}catch(e){}
