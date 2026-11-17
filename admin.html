@@ -57,10 +57,17 @@ $('signIn').onclick=async()=>{try{
 }catch(e){say('loginStatus',e.message)}};
 function start(){
   win=$('view').contentWindow;doc=win.document;
+  if(win.FS_CMS)return ready(false);
+  const sc=doc.createElement('script');sc.onload=()=>ready(true);
+  sc.onerror=()=>say('status','cms.js was not found. Upload cms.js to GitHub in the same folder as index.html, then redeploy.');
+  sc.src='/cms.js';doc.body.appendChild(sc);
+}
+function ready(injected){
   const s=doc.createElement('style');s.textContent='[data-cms],[data-cmsa],[data-cmsm],[data-cmsx]{cursor:pointer}[data-cms]:hover{outline:2px dashed #e8b99f;outline-offset:2px}.cms-sel{outline:3px solid #4da3ff!important;outline-offset:2px}';doc.head.appendChild(s);
   doc.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();pick(e.target)},true);
   doc.addEventListener('submit',e=>e.preventDefault(),true);
   refresh();drawAll();
+  if(injected)say('status','Editing works. IMPORTANT: upload the new index.html to GitHub, or the public site will not show your changes.');
 }
 function refresh(){win.FS_CMS.content=C;win.FS_CMS.applyAll()}
 function drawAll(){drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
