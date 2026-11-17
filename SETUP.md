@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/34992208/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/34986220/SETUP.md)
 # Setup (10 minutes)
 
@@ -5,9 +6,9 @@ Put `index.html`, `package.json` and the `api/` folder in the root of your Verce
 
 1. **Stripe** (stripe.com, free account). Dashboard > Developers > API keys. Copy the Secret key.
 2. **Webhook**: Developers > Webhooks > Add endpoint
-   URL `https://fortunestudiollc.vercel.app/api/webhook`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Copy the Signing secret.
+   URL `https://fortunestudio.vercel.app/api/webhook`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Copy the Signing secret.
 3. **Payment methods**: Settings > Payment methods. Apple Pay and Google Pay are automatic. PayPal is not used.
-4. **Emails** (resend.com, free): create an API key. Without a verified domain, Resend only delivers to your own email, so verify fortunestudio14 domain or use your own domain for `MAIL_FROM`. Stripe also emails the customer a receipt on its own.
+4. **Emails** (resend.com): create an API key and add it to Vercel as `RESEND_API_KEY`. The email template displays a Fortune Studio text wordmark; to show the actual logo image, add a publicly hosted logo image URL and update the template. Resend's `onboarding@resend.dev` sender is for testing and can only send to the account owner's verified email. To email customers, verify a domain in Resend and set `MAIL_FROM` to an address on that verified domain, for example `Fortune Studio <bookings@yourdomain.com>`. Stripe also sends its own payment receipt.
 5. **Vercel > Settings > Environment Variables**, then redeploy:
    - `STRIPE_SECRET_KEY`
    - `STRIPE_PUBLISHABLE_KEY` (pk_live_... or pk_test_..., Developers > API keys)
@@ -15,6 +16,8 @@ Put `index.html`, `package.json` and the `api/` folder in the root of your Verce
    - `RESEND_API_KEY`
    - `MAIL_FROM` (example `Fortune Studio <hello@yourdomain.com>`)
    - `OWNER_EMAIL` (optional, default fortunestudio14@gmail.com)
+
+After changing environment variables, redeploy the Production deployment. Confirm the Stripe webhook endpoint is exactly `https://fortunestudio.vercel.app/api/webhook` and that the endpoint has the two events listed above.
 
 Test first with Stripe test keys and card 4242 4242 4242 4242.
 
