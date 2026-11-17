@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
     if (!cut(b.address).trim()) throw new Error("missing address");
     if ((await bookedDates()).includes(d)) return res.status(409).json({ error: "taken" });
 
-    const q = quote(b);
+    const q = await quote(b);
     const label = day.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
     const origin = req.headers.origin || "https://" + req.headers.host;
     const session = await stripe().checkout.sessions.create({
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
         currency: "usd", unit_amount: Math.round(q.due * 100),
         product_data: {
           name: (q.dep ? "Deposit: " : "") + q.label + " · " + label,
-          description: q.wd ? "Deposit to hold your date. Final price confirmed with your quote." : "Total " + money(q.total) + " with 6% tax." + (q.balance > 0 ? " Remaining balance " + money(q.balance) + "." : ""),
+          description: q.wd ? "Deposit to hold your date. Final price confirmed with your quote." : "Total " + money(q.total) + " with " + q.taxPct + "% tax." + (q.balance > 0 ? " Remaining balance " + money(q.balance) + "." : ""),
         } } }],
       payment_intent_data: { receipt_email: cut(b.email), description: "Fortune Studio · " + q.label + " · " + label },
       metadata: {
