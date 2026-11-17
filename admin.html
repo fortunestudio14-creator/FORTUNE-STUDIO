@@ -25,12 +25,13 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <details><summary>Colors</summary><div id="colors"></div></details>
 <details><summary>Show or hide sections</summary><div id="sections"></div></details>
 <details><summary>Add new item (photo, video, text, button)</summary>
-<label>What to add</label><select id="ns_ty"><option value="photo">Photo</option><option value="video">Video</option><option value="text">Text</option><option value="button">Button</option></select>
+<label>What to add</label><select id="ns_ty"><option value="photo">Photo</option><option value="video">Video</option><option value="text">Text</option><option value="embed">Video link (YouTube / Vimeo)</option><option value="bar">Info bar (banner)</option><option value="button">Button</option></select>
 <label>Where on the site</label><select id="ns_pos"></select>
 <label>Title (optional)</label><input id="ns_t"><label>Text (optional)</label><textarea id="ns_x" rows="3"></textarea>
 <div id="ns_fw"><label>Photo or video file</label><input id="ns_f" type="file" accept="image/*,video/*"></div>
-<div id="ns_bw"><label>Button text and link</label><input id="ns_bt" placeholder="Button text"><input id="ns_bl" placeholder="https://..."></div>
-<button id="ns_add">Add to site</button><div class="hint">After adding, you can change its size, position and look below.</div><div id="ns_list"></div></details>
+<div id="ns_ew"><label>YouTube or Vimeo link</label><input id="ns_el" placeholder="https://www.youtube.com/watch?v=..."></div>
+<div id="ns_bw"><label>Button text and link (optional for bar/text)</label><input id="ns_bt" placeholder="Button text"><input id="ns_bl" placeholder="https://..."></div>
+<button id="ns_add">Add to site</button><div class="hint">You can add as many as you want. Below, use the arrows to move each one up or down, and "Position" to put it after any section.</div><div id="ns_list"></div></details>
 <details><summary>Background and effects</summary><div id="fxp"></div></details>
 <details><summary>Add photo to gallery</summary><input id="ng_f" type="file" accept="image/*"><button id="ng_add">Upload and add</button><div id="ng_list"></div></details>
 <details><summary>Prices (real, also at checkout)</summary><div id="prices"></div></details>
@@ -72,12 +73,13 @@ function start(){
 }
 function ready(injected){
   const s=doc.createElement('style');s.textContent='[data-cms],[data-cmsa],[data-cmsm],[data-cmsx]{cursor:pointer}[data-cms]:hover{outline:2px dashed #e8b99f;outline-offset:2px}.cms-sel{outline:3px solid #4da3ff!important;outline-offset:2px}';doc.head.appendChild(s);
-  doc.addEventListener('click',e=>{if(bypass)return;e.preventDefault();e.stopPropagation();pick(e.target)},true);
+  doc.addEventListener('click',e=>{if(bypass)return;e.preventDefault();e.stopPropagation();const ad=e.target.closest&&e.target.closest('[data-addi]');if(ad&&!e.target.closest('[data-cms]')){const i=+ad.dataset.addi;drawAdded(i);const dd=$('ns_list').closest('details');if(dd)dd.open=true;const x=$('ns_list').querySelector('[data-addi="'+i+'"]');if(x)x.scrollIntoView({behavior:'smooth',block:'center'});say('status','Selected added item #'+(i+1)+'. Edit it in the side panel.');return}pick(e.target)},true);
   doc.addEventListener('submit',e=>e.preventDefault(),true);
-  refresh();drawAll();
+  refresh();drawAll();dirty=false;
   if(injected)say('status','Editing works. IMPORTANT: upload the new index.html to GitHub, or the public site will not show your changes.');
 }
-function refresh(){win.FS_CMS.content=C;win.FS_CMS.applyAll()}
+let dirty=false;function refresh(){dirty=true;win.FS_CMS.content=C;win.FS_CMS.applyAll()}
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
 function drawAll(){drawFx();drawPrices();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
@@ -175,40 +177,59 @@ function drawSections(){const b=$('sections');b.textContent='';
   doc.querySelectorAll('section[data-cmsx]').forEach(s=>{const k=s.dataset.cmsx,h=s.querySelector('h2'),c=el('input',{type:'checkbox',checked:!C.h[k],style:'width:auto'});
     c.onchange=()=>{if(c.checked)delete C.h[k];else C.h[k]=true;refresh()};
     b.append(el('div',{className:'row'},c,el('label',{textContent:(h&&h.textContent)||s.id||'Section'}),el('button',{className:'s',textContent:'Go',onclick:()=>s.scrollIntoView({behavior:'smooth'})})))})}
-const POS=[['top','After the top (hero)'],['about','After About'],['rent','After Rentals'],['gal','After Photography gallery'],['wed','After Weddings'],['vid','After Videos'],['area','After the map'],['','At the end, above the footer']];
+const POS=[['start','At the very top (before the hero video)'],['top','After the top (hero)'],['mq','After the moving words banner'],['about','After About'],['rent','After Rentals'],['gal','After Photography gallery'],['wed','After Weddings'],['vid','After Videos'],['area','After the map'],['','At the end, above the footer']];
+const posName=v=>(POS.find(p=>p[0]===(v||''))||['',''])[1];
 function fld(label,node){return el('div',{},el('label',{className:'hint',textContent:label}),node)}
 function opt(v,t,cur){return el('option',{value:v,textContent:t,selected:String(cur)===String(v)})}
-function drawAdded(){const a=$('ns_list'),g=$('ng_list');a.textContent='';g.textContent='';
+function drawAdded(openIdx){const a=$('ns_list'),g=$('ng_list');a.textContent='';g.textContent='';
   const sp=$('ns_pos');if(!sp.options.length)POS.forEach(([v,t])=>sp.append(opt(v,t,'')));
+  const kind=s=>s.kind==='bar'?'Bar':s.embed?'Video link':s.media?(/\.(mp4|webm|mov)(\?|$)/i.test(s.media)?'Video':'Photo'):s.btnText&&!s.text&&!s.title?'Button':'Text';
+  const mv=(i,d)=>{const j=i+d;if(j<0||j>=C.add.sections.length)return;const t=C.add.sections[i];C.add.sections[i]=C.add.sections[j];C.add.sections[j]=t;refresh();drawAdded(j)};
   C.add.sections.forEach((s,i)=>{
     const d=el('details',{style:'margin-top:8px'}),on=(k,n,ev='oninput')=>{n[ev]=()=>{s[k]=n.type==='checkbox'?n.checked:n.value;refresh()};return n};
-    d.append(el('summary',{textContent:(s.title||s.btnText||(s.media?'Media':'Item'))+' #'+(i+1)}));
+    if(openIdx===i)d.open=true;d.dataset.addi=i;
+    d.append(el('summary',{textContent:'#'+(i+1)+' '+kind(s)+': '+(s.title||s.btnText||s.text||'').slice(0,24)+' — '+posName(s.after)}));
+    d.append(el('div',{className:'row'},el('button',{className:'s',textContent:'↑ Up',onclick:()=>mv(i,-1)}),el('button',{className:'s',textContent:'↓ Down',onclick:()=>mv(i,1)}),el('button',{className:'s',textContent:'Show',onclick:()=>{const n=doc.querySelector('[data-addi="'+i+'"]');if(n)n.scrollIntoView({behavior:'smooth',block:'center'})}}),el('button',{className:'s',textContent:'Duplicate',onclick:()=>{C.add.sections.splice(i+1,0,JSON.parse(JSON.stringify(s)));refresh();drawAdded(i+1)}})));
     d.append(fld('Title',on('title',el('input',{value:s.title||''}))),fld('Text',on('text',el('textarea',{rows:3,value:s.text||''}))));
-    if(s.media){
-      const w=on('w',el('input',{type:'range',min:10,max:100,value:s.w||100})),wl=el('span',{className:'hint',textContent:(s.w||100)+'%'});w.addEventListener('input',()=>wl.textContent=w.value+'%');
-      d.append(fld('Width',el('div',{className:'row'},w,wl)),fld('Height in px (empty = automatic)',on('h',el('input',{type:'number',min:0,value:s.h||''}))),
-        fld('Fit',on('fit',el('select',{},opt('cover','Fill (crop)',s.fit),opt('contain','Show all',s.fit)),'onchange')),
-        fld('Round corners (px)',on('radius',el('input',{type:'number',min:0,max:80,value:s.radius===undefined?14:s.radius}))));
-      if(/\.(mp4|webm|mov)(\?|$)/i.test(s.media))d.append(el('label',{className:'row'},on('auto',el('input',{type:'checkbox',checked:!!s.auto,style:'width:auto'}),'onchange'),el('span',{textContent:'Play automatically (muted, loop)'})))}
-    d.append(fld('Align',on('align',el('select',{},opt('center','Center',s.align||'center'),opt('left','Left',s.align),opt('right','Right',s.align)),'onchange')),
-      fld('Position',on('after',el('select',{},...POS.map(([v,t])=>opt(v,t,s.after||'')) ),'onchange')));
+    if(s.kind==='bar'){
+      d.append(fld('Bar color',on('bg',el('input',{type:'color',value:s.bg||'#b88963'}))),fld('Text color',on('fg',el('input',{type:'color',value:s.fg||'#111111'}))));
+    }else{
+      if(s.embed!==undefined)d.append(fld('YouTube / Vimeo link',on('embed',el('input',{value:s.embed||'',placeholder:'https://www.youtube.com/watch?v=...'}))));
+      if(s.media||s.embed!==undefined){
+        const w=on('w',el('input',{type:'range',min:10,max:100,value:s.w||100})),wl=el('span',{className:'hint',textContent:(s.w||100)+'%'});w.addEventListener('input',()=>wl.textContent=w.value+'%');
+        d.append(fld('Width',el('div',{className:'row'},w,wl)),fld('Height in px (empty = automatic)',on('h',el('input',{type:'number',min:0,value:s.h||''}))));
+        if(s.media)d.append(fld('Fit',on('fit',el('select',{},opt('cover','Fill (crop)',s.fit),opt('contain','Show all',s.fit)),'onchange')));
+        d.append(fld('Round corners (px)',on('radius',el('input',{type:'number',min:0,max:80,value:s.radius===undefined?14:s.radius}))));
+        if(s.media&&/\.(mp4|webm|mov)(\?|$)/i.test(s.media))d.append(el('label',{className:'row'},on('auto',el('input',{type:'checkbox',checked:!!s.auto,style:'width:auto'}),'onchange'),el('span',{textContent:'Play automatically (muted, loop)'})));
+      }
+      d.append(fld('Align',on('align',el('select',{},opt('center','Center',s.align||'center'),opt('left','Left',s.align),opt('right','Right',s.align)),'onchange')));
+    }
+    d.append(fld('Position (put it after which part of the site)',Object.assign(el('select',{},...POS.map(([v,t])=>opt(v,t,s.after||''))),{onchange(){s.after=this.value;refresh();drawAdded(i)}})));
     if(s.btnText!==undefined)d.append(fld('Button text',on('btnText',el('input',{value:s.btnText||''}))),fld('Button link',on('btnLink',el('input',{value:s.btnLink||''}))));
     d.append(el('button',{className:'d',textContent:'Remove',onclick:()=>{C.add.sections.splice(i,1);refresh();drawAdded()}}));a.append(d)});
   C.add.gallery.forEach((u,i)=>g.append(el('div',{className:'row'},el('img',{className:'thumb',src:u}),el('label',{textContent:'Gallery photo '+(i+1)}),el('button',{className:'d',textContent:'Remove',onclick:()=>{C.add.gallery.splice(i,1);refresh();drawAdded()}}))))}
-function nsMode(){const t=$('ns_ty').value;$('ns_fw').style.display=(t==='photo'||t==='video')?'':'none';$('ns_bw').style.display=t==='button'?'':'none';$('ns_f').accept=t==='video'?'video/*':t==='photo'?'image/*':'image/*,video/*'}
+function nsMode(){const t=$('ns_ty').value;$('ns_fw').style.display=(t==='photo'||t==='video')?'':'none';$('ns_ew').style.display=t==='embed'?'':'none';$('ns_bw').style.display=(t==='button'||t==='bar'||t==='text')?'':'none';$('ns_f').accept=t==='video'?'video/*':t==='photo'?'image/*':'image/*,video/*'}
 $('ns_ty').onchange=nsMode;nsMode();
 $('ns_add').onclick=async()=>{try{const t=$('ns_ty').value,f=$('ns_f').files[0];
   if((t==='photo'||t==='video')&&!f)throw Error('Choose a '+t+' file first.');
+  if(t==='embed'&&!/^https:\/\/(www\.)?(youtube\.com|youtu\.be|vimeo\.com)\//i.test($('ns_el').value.trim()))throw Error('Paste a full YouTube or Vimeo link starting with https://');
   if(t==='button'&&(!$('ns_bt').value||!$('ns_bl').value))throw Error('Write the button text and the link.');
-  if(t==='text'&&!$('ns_t').value&&!$('ns_x').value)throw Error('Write a title or a text.');
+  if((t==='text'||t==='bar')&&!$('ns_t').value&&!$('ns_x').value)throw Error('Write a title or a text.');
   say('status','Adding...');const it={title:$('ns_t').value,text:$('ns_x').value,after:$('ns_pos').value,align:'center',w:100,radius:14,fit:'cover'};
+  if(t==='bar'){it.kind='bar';it.bg='#b88963';it.fg='#111111'}
   if(f&&(t==='photo'||t==='video'))it.media=await upload(f);
-  if(t==='button'){it.btnText=$('ns_bt').value;it.btnLink=$('ns_bl').value}
-  C.add.sections.push(it);['ns_t','ns_x','ns_f','ns_bt','ns_bl'].forEach(i=>$(i).value='');refresh();drawAdded();say('status','Added. Open it in the list below to change size and position. Then click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
+  if(t==='embed')it.embed=$('ns_el').value.trim();
+  if($('ns_bt').value&&$('ns_bl').value&&(t==='button'||t==='bar'||t==='text')){it.btnText=$('ns_bt').value;it.btnLink=$('ns_bl').value}
+  C.add.sections.push(it);['ns_t','ns_x','ns_f','ns_bt','ns_bl','ns_el'].forEach(i=>$(i).value='');refresh();drawAdded(C.add.sections.length-1);
+  const n=doc.querySelector('[data-addi="'+(C.add.sections.length-1)+'"]');if(n)n.scrollIntoView({behavior:'smooth',block:'center'});
+  say('status','Added. You can add more. Use ↑ ↓ and Position in the list to place it. Then click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
 $('ng_add').onclick=async()=>{try{const f=$('ng_f').files[0];if(!f)throw Error('Choose a photo first.');say('status','Uploading...');C.add.gallery.push(await upload(f));$('ng_f').value='';refresh();drawAdded();say('status','Photo added to the gallery. Click Save and publish.')}catch(e){say('status','Error: '+e.message)}};
 async function doSave(){const {error}=await sb.from('site_settings').upsert({id:1,content:C,updated_at:new Date().toISOString()});if(error)throw error;
-  const h=await sb.from('site_history').insert({content:C});if(h.error)console.warn('History not saved. Run the new SQL.',h.error);drawEdits();drawVers()}
-$('save').onclick=async()=>{try{await doSave();say('status','Saved. The public website now shows your changes (refresh it to see). A copy was kept in Saved versions.')}catch(e){say('status','Save error: '+e.message)}};
+  const h=await sb.from('site_history').insert({content:C});if(h.error)console.warn('History not saved. Run the new SQL.',h.error);dirty=false;drawEdits();drawVers()}
+$('save').onclick=async()=>{const btn=$('save');btn.disabled=true;try{say('status','Saving...');await doSave();
+  const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
+  if(JSON.stringify(q.data&&q.data.content)!==JSON.stringify(JSON.parse(JSON.stringify(C))))throw Error('Saved, but the stored copy is different. Click Save again.');
+  dirty=false;say('status','✔ Saved and checked. The public website now shows everything (refresh it, or reopen the tab). A copy was kept in Saved versions.')}catch(e){say('status','Save error: '+e.message)}btn.disabled=false};
 function drawEdits(){const b=$('edits');b.textContent='';let n=0;
   const add=(l,fn)=>{n++;b.append(el('div',{className:'row'},el('label',{textContent:l}),el('button',{className:'s',textContent:'Undo',onclick:()=>{fn();refresh();drawAll()}})))};
   Object.entries(C.t).forEach(([lg,m])=>Object.entries(m).forEach(([k,v])=>add('Text ('+lg+'): '+String(v).slice(0,40),()=>delete m[k])));
