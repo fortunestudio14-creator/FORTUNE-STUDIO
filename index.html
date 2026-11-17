@@ -237,14 +237,14 @@ function chord(){const a=AC.currentTime;CH[mi++%4].forEach(f=>{const o=AC.create
 function music(){if(MU){const x=MU;MU=null;clearInterval(x.t);x.m.gain.cancelScheduledValues(AC.currentTime);x.m.gain.setTargetAtTime(0,AC.currentTime,.5);return}AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();const m=AC.createGain();m.gain.setValueAtTime(0,AC.currentTime);m.gain.linearRampToValueAtTime(.03,AC.currentTime+1.2);m.gain.setValueAtTime(.03,AC.currentTime+2.6);m.gain.linearRampToValueAtTime(0,AC.currentTime+4);const f=AC.createBiquadFilter();f.type="lowpass";f.frequency.value=900;m.connect(f).connect(AC.destination);MU={m,t:0};chord();setTimeout(()=>{MU=null;try{m.disconnect()}catch(e){}},4100)}
 const ev=["click","keydown","touchend"],st=()=>{if(!MU)music();ev.forEach(v=>removeEventListener(v,st))};ev.forEach(v=>addEventListener(v,st));
 const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()),{threshold:.5});document.querySelectorAll("#vid video").forEach(v=>io.observe(v));
-function openBook(n){loadBooked();const d=$("#book");if(!d.open)d.showModal();go(n||1)}
+function openBook(n){loadBooked();const d=$("#book");if(!d.open)d.showModal();const step=n||1;go(step);requestAnimationFrame(()=>{d.scrollTo({top:0,behavior:"smooth"});const target=d.querySelector("#s"+step+" [autofocus],#s"+step+" input,#s"+step+" button");if(target){target.focus({preventScroll:true})}})}
 document.addEventListener("click",e=>{const a=e.target.closest('a[href="#book"]');if(a){e.preventDefault();openBook(1)}});
 $("#bx").onclick=()=>$("#book").close();$("#book").addEventListener("click",e=>{if(e.target.id==="book")e.target.close()});
 document.addEventListener("pointerdown",e=>{const b=e.target.closest(".btn,.supb,.lang button,.cal button,.hb");if(!b||b.disabled||matchMedia("(prefers-reduced-motion:reduce)").matches)return;const r=b.getBoundingClientRect(),z=Math.max(r.width,r.height)*2,k=document.createElement("span");k.className="rp";k.style.cssText=`width:${z}px;height:${z}px;left:${e.clientX-r.left-z/2}px;top:${e.clientY-r.top-z/2}px`;b.appendChild(k);setTimeout(()=>k.remove(),650)});
 // ---- Steps ----
 const pkv=()=>document.querySelector("[name=pk]:checked").value;
 const names=()=>{const v=pkv();if(v[0]=="p"){const x=P.find(a=>"p"+a[0]==v);return x[0]+" min · $"+x[1]}return({c:t("cu"),55:t("p1")+" $"+FSP.a,110:t("p2")+" $"+FSP.b,w:t("wd")})[v]};
-function go(n){["s1","s2","s3"].forEach((x,i)=>{$("#"+x).hidden=i+1!==n;const s=$("#t"+(i+1)+"s");s.className=i+1===n?"on":i+1<n?"dn":""});$("#book").scrollTo({top:0});upd()}
+function go(n){["s1","s2","s3"].forEach((x,i)=>{$("#"+x).hidden=i+1!==n;const s=$("#t"+(i+1)+"s");s.className=i+1===n?"on":i+1<n?"dn":""});const d=$("#book");d.scrollTo({top:0,behavior:"smooth"});requestAnimationFrame(()=>{const panel=$("#s"+n);if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"})});upd()}
 function upd(){const x=names()+(sel?" · "+fd(sel)+" · "+tmf():"")+(pkv()[0]=="p"||pkv()=="w"?"":" · "+durf())+" · "+tot();document.querySelectorAll("[data-sm]").forEach(e=>e.textContent=x)}
 $("#n1").onclick=()=>go(2);$("#b2").onclick=()=>go(1);$("#b3").onclick=()=>go(2);
 $("#cal").onclick=e=>{const b=e.target.closest("button");if(b&&!b.disabled){sel=b.dataset.d;cal();$("#n2").disabled=false;upd()}};
@@ -272,7 +272,12 @@ $("#pr").oninput=()=>{document.querySelector('[name=pk][value=\"p'+P[$("#pr").va
 const lb=$("#lb");document.querySelectorAll(".g").forEach(f=>f.onclick=()=>{lb.querySelector("img").src=f.querySelector("img").src;lb.showModal()});lb.onclick=()=>lb.close();
 addEventListener("scroll",()=>document.querySelectorAll(".g img").forEach(i=>{const r=i.parentNode.getBoundingClientRect();i.style.translate="0 "+((r.top+r.height/2-innerHeight/2)*-.05)+"px"}),{passive:true});
 document.querySelectorAll("[name=pk],#qt,#qc,#dl,#hr,#st").forEach(i=>i.addEventListener("input",upd));
-document.querySelectorAll("[name=pk]").forEach(r=>r.addEventListener("change",()=>{if(r.value!="c")setTimeout(()=>go(2),250)}));
+let customQtyTouched={tables:false,chairs:false},customAdvanceTimer=null;
+function focusCustomQuantities(){const d=$("#book"),q=$("#cu");if(!d||!q)return;requestAnimationFrame(()=>{q.scrollIntoView({behavior:"smooth",block:"center"});const first=$("#qt");if(first)setTimeout(()=>first.focus({preventScroll:true}),420)})}
+function maybeAdvanceCustom(){if(pkv()!=="c")return;if(customQtyTouched.tables&&customQtyTouched.chairs){clearTimeout(customAdvanceTimer);customAdvanceTimer=setTimeout(()=>{if(pkv()==="c")go(2)},450)}}
+document.querySelectorAll("[name=pk]").forEach(r=>r.addEventListener("change",()=>{if(r.value==="c"){customQtyTouched={tables:false,chairs:false};focusCustomQuantities()}else setTimeout(()=>go(2),250)}));
+$("#qt").addEventListener("change",()=>{customQtyTouched.tables=true;maybeAdvanceCustom()});
+$("#qc").addEventListener("change",()=>{customQtyTouched.chairs=true;maybeAdvanceCustom()});
 const nv=$("#nv"),sc=()=>nv.classList.toggle("sc",scrollY>20);addEventListener("scroll",sc,{passive:true});sc();
 $("#hb").onclick=()=>{const o=nv.classList.toggle("open");$("#hb").setAttribute("aria-expanded",o)};$("#lk").onclick=e=>{if(e.target.closest("a,button"))nv.classList.remove("open")};
 const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll("#lk a").forEach(a=>a.classList.toggle("act",a.getAttribute("href")=="#"+e.target.id))}),{rootMargin:"-45% 0px -50% 0px"});["about","rent","gal","wed","vid","book"].forEach(i=>spy.observe($("#"+i)));
@@ -577,4 +582,13 @@ window.fsPaid();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/cms.js"></script>
+
+<style>
+/* Guided reservation transitions */
+#book .pane{animation:fs-step-in .42s cubic-bezier(.2,.75,.25,1) both}
+#book .opt{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+#book #cu{scroll-margin:30px}
+@keyframes fs-step-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){#book .pane{animation:none!important;scroll-behavior:auto!important}}
+</style>
 </body></html>
