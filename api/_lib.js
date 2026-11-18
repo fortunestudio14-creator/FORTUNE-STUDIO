@@ -1,7 +1,7 @@
 const Stripe = require("stripe");
 const stripe = () => new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const DEF = { t: 12, c: 3, a: 55, b: 110, wh: 150, wd: 100, tax: 6, dep: 50, xh: 25, ph: { 30: 99, 45: 139, 60: 179, 90: 249, 120: 319 } };
+const DEF = { t: 12, c: 3, a: 55, b: 110, wh: 150, wd: 100, sh: 80, tax: 6, dep: 50, xh: 25, ph: { 30: 99, 45: 139, 60: 179, 90: 249, 120: 319 } };
 const clamp = (v, a, b) => Math.min(b, Math.max(a, Math.round(+v || 0)));
 const money = (n) => "$" + n.toFixed(2);
 const num = (v, d, lo, hi) => (Number.isFinite(+v) && v !== "" && v !== null && +v >= lo && +v <= hi ? +v : d);
@@ -18,7 +18,7 @@ async function prices() {
       const j = r.ok ? await r.json() : [];
       const c = (j[0] && j[0].content && j[0].content.prices) || {};
       p = { t: num(c.t, DEF.t, 0, 10000), c: num(c.c, DEF.c, 0, 10000), a: num(c.a, DEF.a, 0, 100000), b: num(c.b, DEF.b, 0, 100000),
-        wh: num(c.wh, DEF.wh, 0, 100000), wd: num(c.wd, DEF.wd, 0, 100000), tax: num(c.tax, DEF.tax, 0, 30), dep: num(c.dep, DEF.dep, 1, 100), xh: num(c.xh, DEF.xh, 0, 200), ph: {} };
+        wh: num(c.wh, DEF.wh, 0, 100000), wd: num(c.wd, DEF.wd, 0, 100000), sh: num(c.sh, DEF.sh, 0, 100000), tax: num(c.tax, DEF.tax, 0, 30), dep: num(c.dep, DEF.dep, 1, 100), xh: num(c.xh, DEF.xh, 0, 200), ph: {} };
       for (const m in DEF.ph) { const x = c.ph && c.ph[m]; p.ph[m] = num(Array.isArray(x) ? x[0] : x, DEF.ph[m], 0, 100000); }
     }
   } catch (e) { console.error("prices fallback", e); }
@@ -29,7 +29,7 @@ async function prices() {
 // Prices are computed here so nobody can change the amount in the browser.
 async function quote(b) {
   const P = await prices(), TAX = P.tax / 100, DEPS = P.dep / 100, EXTRA = P.xh / 100;
-  const pk = String(b.pk), wd = pk === "w", h = clamp(b.hr, 4, 12);
+  const pk = String(b.pk), wd = pk === "w", sp = pk === "s", h = clamp(b.hr, sp ? 1 : 4, 12);
   if (wd) return { label: "Wedding or event coverage", subtotal: 0, tax: 0, total: P.wd, due: P.wd, balance: 0, dep: true, wd: true, taxPct: P.tax }; // flat deposit, final price is quoted
   let s, label;
   if (pk[0] === "p") {
@@ -38,11 +38,12 @@ async function quote(b) {
   } else {
     if (pk === "55") { s = P.a; label = "Party package"; }
     else if (pk === "110") { s = P.b; label = "Celebration package"; }
+    else if (sp) { s = P.sh * h; if (!s) throw new Error("no price"); label = "Space rental, " + h + (h === 1 ? " hour" : " hours"); }
     else if (pk === "c") {
       const q = clamp(b.qt, 0, 6), c = clamp(b.qc, 0, 40); s = q * P.t + c * P.c;
       if (!s) throw new Error("empty"); label = "Rental: " + q + " tables, " + c + " chairs";
     } else throw new Error("bad service");
-    s += Math.round(s * Math.max(0, h - 4) * EXTRA); // extra hours add a share of the price each
+    if (!sp) s += Math.round(s * Math.max(0, h - 4) * EXTRA); // extra hours add a share of the price each
   }
   const tax = Math.round(s * TAX * 100) / 100, total = s + tax;
   const dep = b.pp === "dep";
