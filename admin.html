@@ -110,7 +110,7 @@ function replaceRow(m,label){
   return w;
 }
 
-const PF=[['t','Table price, each ($)'],['c','Chair price, each ($)'],['a','Party package ($)'],['b','Celebration package ($)'],['wh','Wedding or event coverage, per hour ($)'],['wd','Wedding deposit ($)'],['tax','Sales tax (%)'],['dep','Deposit share when paying a deposit (%)'],['xh','Extra hour adds (% of price)']];
+const PF=[['t','Table price, each ($)'],['c','Chair price, each ($)'],['a','Party package ($)'],['b','Celebration package ($)'],['wh','Wedding or event coverage, per hour ($)'],['wd','Wedding deposit ($)'],['sh','Space rental, per hour ($)'],['tax','Sales tax (%)'],['dep','Deposit share when paying a deposit (%)'],['xh','Extra hour adds (% of price)']];
 const PT=[['ex','Extra edited photo ($) - shown on site only'],['dl','Delivery fee ($) - shown on site only'],['phr','Photography add-on, per hour ($) - shown on site only']];
 function drawPrices(){const b=$('prices');b.textContent='';const D=win.FS_CMS.DEF;C.prices=C.prices||{};
   const num=(k,l)=>{const i=el('input',{type:'number',min:0,step:'any',value:C.prices[k]!==undefined?C.prices[k]:'',placeholder:'Now: '+D[k]});i.oninput=()=>{if(i.value==='')delete C.prices[k];else C.prices[k]=i.value;refresh()};b.append(el('label',{textContent:l}),i)};
