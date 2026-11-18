@@ -162,6 +162,31 @@ nav .lg{display:flex}nav img{height:38px;border-radius:0}footer img{height:90px;
 #space .sp-cta .btn.o{margin-left:0}
 @media(max-width:900px){#space .sp-card{grid-template-columns:1fr;justify-items:start}#space .sp-cta{justify-content:flex-start}}
 @media(max-width:700px){#space .sp-grid{grid-template-columns:1fr}#space .sp-main img{aspect-ratio:4/3}}
+
+/* Space gallery - compact, professional, with hover + reveal effects */
+#space .sp-grid{grid-template-columns:repeat(4,1fr);grid-auto-rows:clamp(150px,15vw,200px);gap:12px;max-width:980px;margin:26px auto 0}
+#space .sp-t{border-radius:14px;box-shadow:0 8px 24px #00000055;transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s ease}
+#space .sp-t img,#space .sp-t video{height:100%;aspect-ratio:auto;transform:scale(1.001);transition:transform .9s cubic-bezier(.2,.7,.2,1),filter .5s ease}
+#space .sp-main{grid-column:1/3;grid-row:1/3}
+#space .sp-main img{aspect-ratio:auto;object-position:50% 62%}
+#space .sp-front{grid-column:3/5;grid-row:1}
+#space .sp-t:nth-child(3){grid-column:3;grid-row:2}
+#space .sp-t:nth-child(4){grid-column:4;grid-row:2}
+#space .sp-t:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 55%,#000000a6);opacity:.55;transition:opacity .5s ease;pointer-events:none}
+#space figcaption{transition:transform .45s cubic-bezier(.2,.7,.2,1),opacity .45s ease,background .3s ease}
+@media(hover:hover){
+#space .sp-t:hover{transform:translateY(-4px);box-shadow:0 18px 38px #00000088}
+#space .sp-t:hover img,#space .sp-t:hover video{transform:scale(1.07)}
+#space .sp-t:hover:before{opacity:1}
+#space .sp-t:hover figcaption{transform:translateY(-3px);background:#0a0a0aee}
+#space .sp-front:hover figcaption{transform:translateY(3px)}
+}
+#space.js-rv .sp-t{opacity:0;transform:translateY(26px) scale(.98);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1),box-shadow .5s ease}
+#space.js-rv .sp-t.in{opacity:1;transform:none}
+#space.js-rv .sp-t.in:hover{transform:translateY(-4px)}
+@media(max-width:900px){#space .sp-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:170px}#space .sp-main{grid-column:1/-1;grid-row:auto;height:260px}#space .sp-front{grid-column:1/-1;grid-row:auto}#space .sp-t:nth-child(3),#space .sp-t:nth-child(4){grid-column:auto;grid-row:auto}}
+@media(max-width:700px){#space .sp-grid{grid-template-columns:repeat(2,1fr)}#space .sp-main img{aspect-ratio:auto}}
+@media(prefers-reduced-motion:reduce){#space .sp-t,#space .sp-t img,#space .sp-t video{transition:none!important}#space.js-rv .sp-t{opacity:1;transform:none}}
 </style>
 <style id="fortune-refresh">
 :root{--bg:#0a0a0a;--card:#151515;--line:#2a2a2a;--tx:#f4efe6;--mu:#a29d94;--ac:#e8b99f;--ok:#7bd88f;--bad:#5a3a3a;color-scheme:dark}
@@ -296,10 +321,10 @@ input,select,textarea{background:#151515;border-color:#3a3a3a}
 <section id="space" data-cmsx="space"><h2 data-i="sph"></h2><p style="color:var(--mu);max-width:640px" data-i="spp"></p>
 <div class="sp-ev"><span data-i="spe1"></span><span data-i="spe2"></span><span data-i="spe3"></span><span data-i="spe4"></span><span data-i="spe5"></span></div>
 <div class="sp-grid">
-<figure class="sp-t sp-main"><img data-cmsm="space-hall" src="images/space-hall.jpg" alt="Open event space at Fortune Studio" loading="lazy" decoding="async"><figcaption data-i="spc1"></figcaption></figure>
-<figure class="sp-t sp-front"><img data-cmsm="space-front" src="images/space-storefront.jpg" alt="Fortune Studio entrance with welcome bench" loading="lazy" decoding="async"><figcaption data-i="spc2"></figcaption></figure>
+<figure class="sp-t sp-main"><img data-cmsm="space-hall" src="videos/space-hall.jpg" alt="Open event space at Fortune Studio" loading="lazy" decoding="async"><figcaption data-i="spc1"></figcaption></figure>
+<figure class="sp-t sp-front"><img data-cmsm="space-front" src="videos/space-storefront.jpg" alt="Fortune Studio entrance with welcome bench" loading="lazy" decoding="async"><figcaption data-i="spc2"></figcaption></figure>
 <figure class="sp-t"><video data-cmsm="space-clip" src="videos/space-lounge.mp4" poster="videos/space-lounge-poster.jpg" preload="none" muted loop playsinline disablepictureinpicture aria-label="Lounge area"></video><figcaption data-i="spc3"></figcaption></figure>
-<figure class="sp-t"><img data-cmsm="space-restroom" src="images/space-restroom.jpg" alt="Private restroom" loading="lazy" decoding="async"><figcaption data-i="spc4"></figcaption></figure>
+<figure class="sp-t"><img data-cmsm="space-restroom" src="videos/space-restroom.jpg" alt="Private restroom" loading="lazy" decoding="async"><figcaption data-i="spc4"></figcaption></figure>
 </div>
 <div class="card sp-card"><div><h3 data-i="spt"></h3><div class="sp-rate"><div class="price" data-i="spr"></div><small data-i="spu"></small></div><p class="sp-note" data-i="spn"></p></div>
 <ul><li data-i="spa"></li><li data-i="spb"></li><li data-i="spd"></li></ul>
@@ -861,6 +886,19 @@ document.querySelectorAll("#vid .fs-video").forEach(function(box){
   new IntersectionObserver(function(es){es.forEach(function(e){
     if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){})}else{v.pause()}
   })},{threshold:.35}).observe(v);
+})();
+</script>
+
+<script id="fortune-space-reveal">
+(function(){
+  var sec=document.getElementById("space");
+  if(!sec||!("IntersectionObserver" in window))return;
+  var t=[].slice.call(sec.querySelectorAll(".sp-t"));
+  sec.classList.add("js-rv");
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting){var i=t.indexOf(e.target);setTimeout(function(){e.target.classList.add("in")},i*110);io.unobserve(e.target)}
+  })},{threshold:.15});
+  t.forEach(function(x){io.observe(x)});
 })();
 </script>
 
