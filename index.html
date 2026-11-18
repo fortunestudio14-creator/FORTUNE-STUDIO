@@ -321,10 +321,10 @@ input,select,textarea{background:#151515;border-color:#3a3a3a}
 <section id="space" data-cmsx="space"><h2 data-i="sph"></h2><p style="color:var(--mu);max-width:640px" data-i="spp"></p>
 <div class="sp-ev"><span data-i="spe1"></span><span data-i="spe2"></span><span data-i="spe3"></span><span data-i="spe4"></span><span data-i="spe5"></span></div>
 <div class="sp-grid">
-<figure class="sp-t sp-main"><img data-cmsm="space-hall" src="videos/space-hall.jpg" alt="Open event space at Fortune Studio" loading="lazy" decoding="async"><figcaption data-i="spc1"></figcaption></figure>
-<figure class="sp-t sp-front"><img data-cmsm="space-front" src="videos/space-storefront.jpg" alt="Fortune Studio entrance with welcome bench" loading="lazy" decoding="async"><figcaption data-i="spc2"></figcaption></figure>
+<figure class="sp-t sp-main"><img data-cmsm="space-hall" src="images/space-hall.jpg" onerror="this.onerror=null;this.src='videos/space-hall.jpg'" alt="Open event space at Fortune Studio" loading="lazy" decoding="async"><figcaption data-i="spc1"></figcaption></figure>
+<figure class="sp-t sp-front"><img data-cmsm="space-front" src="images/space-storefront.jpg" onerror="this.onerror=null;this.src='videos/space-storefront.jpg'" alt="Fortune Studio entrance with welcome bench" loading="lazy" decoding="async"><figcaption data-i="spc2"></figcaption></figure>
 <figure class="sp-t"><video data-cmsm="space-clip" src="videos/space-lounge.mp4" poster="videos/space-lounge-poster.jpg" preload="none" muted loop playsinline disablepictureinpicture aria-label="Lounge area"></video><figcaption data-i="spc3"></figcaption></figure>
-<figure class="sp-t"><img data-cmsm="space-restroom" src="videos/space-restroom.jpg" alt="Private restroom" loading="lazy" decoding="async"><figcaption data-i="spc4"></figcaption></figure>
+<figure class="sp-t"><img data-cmsm="space-restroom" src="images/space-restroom.jpg" onerror="this.onerror=null;this.src='videos/space-restroom.jpg'" alt="Private restroom" loading="lazy" decoding="async"><figcaption data-i="spc4"></figcaption></figure>
 </div>
 <div class="card sp-card"><div><h3 data-i="spt"></h3><div class="sp-rate"><div class="price" data-i="spr"></div><small data-i="spu"></small></div><p class="sp-note" data-i="spn"></p></div>
 <ul><li data-i="spa"></li><li data-i="spb"></li><li data-i="spd"></li></ul>
@@ -899,6 +899,7 @@ document.querySelectorAll("#vid .fs-video").forEach(function(box){
     if(e.isIntersecting){var i=t.indexOf(e.target);setTimeout(function(){e.target.classList.add("in")},i*110);io.unobserve(e.target)}
   })},{threshold:.15});
   t.forEach(function(x){io.observe(x)});
+  setTimeout(function(){t.forEach(function(x){x.classList.add("in")})},2500);
 })();
 </script>
 
