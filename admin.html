@@ -67,7 +67,12 @@ async function init(){
     say('loginStatus',pkGet()?'Welcome back. Use Face ID / fingerprint / laptop password, or type the code.':'Welcome back. Use Face ID / Touch ID to continue.');await askCode()}
 }
 /* ===== Face ID / fingerprint / laptop PIN (Windows Hello, Touch ID) as a quick unlock on THIS device ===== */
-const PK='fs_admin_pk';
+const PK='fs_admin_pk',LK='fs_admin_lock';
+const lockGet=()=>{try{return JSON.parse(localStorage.getItem(LK)||'{}')}catch(e){return {}}};
+function lockLeft(){const l=lockGet();return l.until&&l.until>Date.now()?Math.ceil((l.until-Date.now())/60000):0}
+function lockFail(){const l=lockGet();l.n=(l.n||0)+1;if(l.n>=10){l.until=Date.now()+15*60000;l.n=0}try{localStorage.setItem(LK,JSON.stringify(l))}catch(e){}}
+function lockReset(){try{localStorage.removeItem(LK)}catch(e){}}
+function lockMsg(){const m=lockLeft();if(!m)return false;say('loginStatus','Too many wrong tries (10). Locked on this device for '+m+' more minute(s).');return true}
 const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const pkGet=()=>{try{return localStorage.getItem(PK)}catch(e){return null}};
@@ -93,7 +98,7 @@ $('mfaPk').onclick=async()=>{try{if(await pkUnlock())await enterAdmin();else{sho
 /* ===== Verification (authenticator app code) ===== */
 let MFA_ID=null,fails=0;
 function showBack(on){$('mfaBack').style.display=on?'block':'none';$('mfaMore').style.display=(!on&&pkGet())?'block':'none';$('mfaLbl').textContent='Backup code';if(on&&!$('mfaCode').matches(':focus'))try{$('mfaCode').focus()}catch(e){}}
-function failed(msg){fails++;if(pkGet()&&fails>=2&&$('mfaBack').style.display==='none'){showBack(true);msg+=' The Backup code is now open below.'}say('loginStatus',msg)}
+function failed(msg){lockFail();fails++;if(pkGet()&&fails>=2&&$('mfaBack').style.display==='none'){showBack(true);msg+=' The Backup code is now open below.'}say('loginStatus',msg)}
 function errTxt(e){const m=(e&&e.message)||String(e),c=(e&&e.code)||'';
   if(/rate|too many|over_/i.test(m+c))return 'Too many tries. Wait 5 minutes, then type the NEWEST code from your app.';
   if(/sending|smtp|email/i.test(m))return 'Email verification is unavailable. Use the 6-digit backup code from your authenticator app.';
@@ -110,15 +115,15 @@ async function askCode(){
   $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaPk').style.display=pkGet()?'block':'none';$('mfaCode').value='';fails=0;showBack(!pkGet());if(pkGet()){$('mfaBack').style.display='none';$('mfaMore').style.display='block';$('mfaPk').click();}
 }
 $('mfaGo').onclick=async()=>{try{
-  const code=$('mfaCode').value.replace(/\D/g,'');
+  if(lockMsg())return;const code=$('mfaCode').value.replace(/\D/g,'');
   if(code.length!==6)throw Error('Type the Backup code from your app.');
   const ch=await sb.auth.mfa.challenge({factorId:MFA_ID});if(ch.error)throw ch.error;
   const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error){$('mfaCode').value='';const rl=/rate|too many|over_/i.test(v.error.message+(v.error.code||''));if(rl)say('loginStatus',errTxt(v.error));else failed('Wrong or expired code. Wait for the NEXT code in your app and type it again.');return}
   if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
-  await enterAdmin();
+  lockReset();await enterAdmin();
 }catch(e){say('loginStatus',errTxt(e))}};
 $('mfaCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('mfaGo').click()});
-$('mfaOut').onclick=async()=>{try{localStorage.removeItem(PK)}catch(e){}await sb.auth.signOut();location.reload()};
+$('mfaOut').onclick=async()=>{await sb.auth.signOut();location.reload()}; // Face ID stays ON for this device (turn it off only with the button in the editor)
 async function enterAdmin(){
   pkRefresh();
   const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
@@ -127,8 +132,9 @@ async function enterAdmin(){
 }
 $('signIn').disabled=true;init().catch(e=>say('loginStatus',e.message));
 $('signIn').onclick=async()=>{try{
+  if(lockMsg())return;
   const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});
-  if(error)throw error;if(!data.session)throw Error('Sign-in did not create a session');
+  if(error){lockFail();throw error}if(!data.session)throw Error('Sign-in did not create a session');
   say('loginStatus','Password OK. Now verify with your code.');await askCode();
 }catch(e){say('loginStatus',e.message)}};
 function start(){
@@ -333,7 +339,7 @@ async function drawVers(){const b=$('vers');b.textContent='';
   q.data.forEach(v=>b.append(el('div',{className:'row'},el('label',{textContent:new Date(v.created_at).toLocaleString()}),el('button',{className:'s',textContent:'Restore',onclick:()=>{if(!confirm('Bring back this version?'))return;C=norm(JSON.parse(JSON.stringify(v.content)));refresh();drawAll();say('status','Version restored in the preview. Click Save and publish to keep it.')}}))))}
 $('reset').onclick=async()=>{if(!confirm('Remove ALL your edits and return the site to its default?'))return;try{C=norm({});refresh();await doSave();drawAll();say('status','Done. The site is back to its default. Old versions are in Saved versions.')}catch(e){say('status','Error: '+e.message)}};
 $('exitEd').onclick=()=>{if(dirty&&!confirm('You have changes that are not saved. Leave without saving?'))return;dirty=false;location.href='/'};
-$('logout').onclick=async()=>{try{localStorage.removeItem(PK)}catch(e){}await sb.auth.signOut();location.reload()};
+$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()}; // Face ID stays ON for this device
 /* ===== Rent for your event: title, text and button ===== */
 function drawRent(){const b=$('rentp');if(!b)return;b.textContent='';const lg=win.FS_CMS.lang(),D=Dobj();
   b.append(el('div',{className:'hint',textContent:'Language you are editing: '+lg.toUpperCase()+' (change it with the language buttons on the site or the selector in "All texts"). You can also click the title directly on the site.'}));
