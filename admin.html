@@ -16,7 +16,7 @@ details{background:#1b1d22;border:1px solid #343840;border-radius:12px;padding:1
 input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6px;font-size:12px}
 @media(max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:auto 45vh 1fr}#top{grid-column:1}#side{border-right:0;order:3}}
 </style></head><body>
-<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (you will still verify with a code each time)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><label>6-digit code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaOut" class="s" type="button">Use another account</button></div><div class="status" id="loginStatus">Loading...</div></section>
+<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (you will still verify with a code each time)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><label>6-digit code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaPk" class="s" type="button" style="display:none">Use Face ID / fingerprint / device PIN</button><button id="mfaOut" class="s" type="button">Use another account</button></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
 <div id="top"><button id="save">Save and publish</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
@@ -60,8 +60,26 @@ async function init(){
   if(!r.ok)throw Error(cfg.error||'Could not load Supabase configuration.');
   sb=window.supabase.createClient(cfg.url,cfg.key);$('signIn').disabled=false;say('loginStatus','Enter the admin account created in Supabase Authentication.');
   const cur=(await sb.auth.getSession()).data.session;
-  if(cur){say('loginStatus','Welcome back. Enter your authenticator code to continue.');await askCode()}
+  if(cur){
+    try{if(await pkUnlock()){await enterAdmin();return}}catch(e){} // Face ID / fingerprint / device PIN cancelled or failed: fall back to the code
+    say('loginStatus','Welcome back. Enter your authenticator code to continue.');await askCode()}
 }
+/* ===== Face ID / fingerprint / laptop PIN (Windows Hello, Touch ID) as a quick unlock on THIS device ===== */
+const PK='fs_admin_pk';
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const pkGet=()=>{try{return localStorage.getItem(PK)}catch(e){return null}};
+async function pkAvail(){try{return !!(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())}catch(e){return false}}
+async function pkEnable(){
+  const c=await navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:'Fortune Studio Admin'},user:{id:rnd(16),name:'admin',displayName:'Admin'},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
+  localStorage.setItem(PK,b64(c.rawId))}
+async function pkUnlock(){
+  const id=pkGet();if(!id)return false;
+  await navigator.credentials.get({publicKey:{challenge:rnd(32),allowCredentials:[{type:'public-key',id:unb64(id)}],userVerification:'required',timeout:60000}});
+  const a=await sb.auth.mfa.getAuthenticatorAssuranceLevel(); // the saved login must already be verified with a code before
+  return !!(a.data&&a.data.currentLevel==='aal2')}
+$('mfaPk').onclick=async()=>{try{if(await pkUnlock())await enterAdmin();else say('loginStatus','This device is not verified yet. Type your code.')}catch(e){say('loginStatus','Not unlocked. Try again or type your code.')}};
 /* ===== Verification (authenticator app code) ===== */
 let MFA_ID=null;
 async function askCode(){
@@ -72,17 +90,18 @@ async function askCode(){
     const e=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'Admin '+Date.now()});if(e.error)throw e.error;
     MFA_ID=e.data.id;first=true;$('mfaQr').src=e.data.totp.qr_code;$('mfaKey').textContent=e.data.totp.secret}
   $('mfaEnroll').style.display=first?'block':'none';$('mfaTitle').textContent=first?'Set up verification (one time)':'Verify it is you';
-  $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaCode').value='';$('mfaCode').focus();
+  $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaPk').style.display=pkGet()?'block':'none';$('mfaCode').value='';$('mfaCode').focus();
 }
 $('mfaGo').onclick=async()=>{try{
   const code=$('mfaCode').value.replace(/\D/g,'');if(code.length!==6)throw Error('Type the 6-digit code from your app.');
   const ch=await sb.auth.mfa.challenge({factorId:MFA_ID});if(ch.error)throw ch.error;
   const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error)throw Error('Wrong or expired code. Try the newest one.');
   if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
+  if(!pkGet()&&await pkAvail()&&confirm('Next time on this device, unlock with Face ID / fingerprint / your laptop PIN instead of typing a code?')){try{await pkEnable()}catch(e){}}
   await enterAdmin();
 }catch(e){say('loginStatus',e.message)}};
 $('mfaCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('mfaGo').click()});
-$('mfaOut').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('mfaOut').onclick=async()=>{try{localStorage.removeItem(PK)}catch(e){}await sb.auth.signOut();location.reload()};
 async function enterAdmin(){
   const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
   C=norm(q.data&&q.data.content);$('login').style.display='none';$('app').style.display='grid';
@@ -295,7 +314,7 @@ async function drawVers(){const b=$('vers');b.textContent='';
   if(!q.data.length)b.append(el('div',{className:'hint',textContent:'No saved versions yet. One is kept each time you save.'}));
   q.data.forEach(v=>b.append(el('div',{className:'row'},el('label',{textContent:new Date(v.created_at).toLocaleString()}),el('button',{className:'s',textContent:'Restore',onclick:()=>{if(!confirm('Bring back this version?'))return;C=norm(JSON.parse(JSON.stringify(v.content)));refresh();drawAll();say('status','Version restored in the preview. Click Save and publish to keep it.')}}))))}
 $('reset').onclick=async()=>{if(!confirm('Remove ALL your edits and return the site to its default?'))return;try{C=norm({});refresh();await doSave();drawAll();say('status','Done. The site is back to its default. Old versions are in Saved versions.')}catch(e){say('status','Error: '+e.message)}};
-$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('logout').onclick=async()=>{try{localStorage.removeItem(PK)}catch(e){}await sb.auth.signOut();location.reload()};
 /* ===== Rent for your event: title, text and button ===== */
 function drawRent(){const b=$('rentp');if(!b)return;b.textContent='';const lg=win.FS_CMS.lang(),D=Dobj();
   b.append(el('div',{className:'hint',textContent:'Language you are editing: '+lg.toUpperCase()+' (change it with the language buttons on the site or the selector in "All texts"). You can also click the title directly on the site.'}));
