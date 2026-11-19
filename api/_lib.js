@@ -198,8 +198,9 @@ async function isOwner(req) {
   try {
     const r = await fetch(url.replace(/\/$/, "") + "/auth/v1/user", { headers: { apikey: key, Authorization: "Bearer " + tok } });
     if (!r.ok) return false;
-    let aal = ""; try { aal = JSON.parse(Buffer.from(tok.split(".")[1], "base64url").toString()).aal; } catch (e) {}
-    if (aal !== "aal2") return false; // password alone is not enough: the code step must be done
+    let aal = "", amr = []; try { const p = JSON.parse(Buffer.from(tok.split(".")[1], "base64url").toString()); aal = p.aal; amr = p.amr || []; } catch (e) {}
+    const emailCode = Array.isArray(amr) && amr.some((x) => x && x.method === "otp"); // signed in with a code sent to the owner's email
+    if (aal !== "aal2" && !emailCode) return false; // password alone is not enough: an app code or an email code is required
     const u = await r.json();
     return String(u.email || "").toLowerCase() === String(process.env.OWNER_EMAIL || "fortunestudio14@gmail.com").toLowerCase();
   } catch (e) { return false; }
