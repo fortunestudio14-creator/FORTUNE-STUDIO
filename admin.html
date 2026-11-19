@@ -18,7 +18,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 </style></head><body>
 <section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (next time Face ID, fingerprint or your laptop password opens it)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the Backup code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><button id="mfaPk" type="button" style="display:none">🔐 Open with Face ID / fingerprint / laptop password</button><button id="mfaMore" class="s" type="button" style="display:none">Face ID not working? Use the Backup code</button><div id="mfaBack"><label id="mfaLbl">Backup code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaOut" class="s" type="button">Use another account</button></div></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
-<div id="top"><button id="save">Save and publish</button><button id="pkBtn" class="s" style="display:none"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
+<div id="top"><button id="save">Save and publish</button><button id="pkBtn" class="s" style="display:none"></button><button id="ncBtn" class="s" title="Choose if the backup code is asked when you sign in"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
 <details open><summary>Selected item</summary><div id="sel" class="hint">Click something on the site preview.</div></details>
 <details><summary>Photos, logo and videos</summary><div id="media"></div></details>
@@ -63,6 +63,7 @@ async function init(){
   const cur=(await sb.auth.getSession()).data.session;
   if(cur&&fromLink&&await verified()){try{history.replaceState(null,'','/admin')}catch(e){}await enterAdmin();return}
   if(cur){
+    if(await noCode()){await enterAdmin();return}
     try{if(await pkUnlock()){await enterAdmin();return}}catch(e){} // Face ID / fingerprint / device PIN cancelled or failed: fall back to the code
     say('loginStatus',pkGet()?'Welcome back. Use Face ID / fingerprint / laptop password, or type the code.':'Welcome back. Use Face ID / Touch ID to continue.');await askCode()}
 }
@@ -124,8 +125,20 @@ $('mfaGo').onclick=async()=>{try{
 }catch(e){say('loginStatus',errTxt(e))}};
 $('mfaCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('mfaGo').click()});
 $('mfaOut').onclick=async()=>{await sb.auth.signOut();location.reload()}; // Face ID stays ON for this device (turn it off only with the button in the editor)
+/* ===== Backup code ON/OFF (owner switch, saved in Supabase table admin_security) ===== */
+let NC=false;
+async function noCode(){try{const q=await sb.from('admin_security').select('nocode').eq('id',1).maybeSingle();NC=!!(q.data&&q.data.nocode===true)}catch(e){NC=false}return NC}
+function ncRefresh(){$('ncBtn').textContent=NC?'🔒 Ask for the backup code again':'🔓 Stop asking for the backup code'}
+$('ncBtn').onclick=async()=>{
+  try{
+    if(!NC&&!confirm('Turn OFF the backup code?\n\nAnyone who knows your email and password will be able to sign in, create coupon codes and see bookings. Only do this if your password is long and private.'))return;
+    const {data,error}=await sb.from('admin_security').update({nocode:!NC,updated_at:new Date().toISOString()}).eq('id',1).select('nocode');
+    if(error)throw error;if(!data||!data.length)throw Error('Setting not found. Run supabase-nocode.sql in Supabase once.');
+    NC=data[0].nocode===true;ncRefresh();
+    say('status',NC?'✔ Backup code is OFF. Next time only email + password is needed.':'✔ Backup code is ON again.')
+  }catch(e){say('status','Could not change it: '+(e&&e.message?e.message:e)+(/row-level|policy|permission/i.test((e&&e.message)||'')?' (sign in WITH the backup code once, then try again)':''))}};
 async function enterAdmin(){
-  pkRefresh();
+  pkRefresh();noCode().then(ncRefresh);
   const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
   C=norm(q.data&&q.data.content);$('login').style.display='none';$('app').style.display='grid';
   const v=$('view');const go=()=>start();v.contentWindow&&v.contentDocument&&v.contentDocument.readyState==='complete'&&v.contentWindow.FS_CMS?go():v.addEventListener('load',go,{once:true});
@@ -135,6 +148,7 @@ $('signIn').onclick=async()=>{try{
   if(lockMsg())return;
   const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});
   if(error){lockFail();throw error}if(!data.session)throw Error('Sign-in did not create a session');
+  if(await noCode()){say('loginStatus','Password OK.');await enterAdmin();return}
   say('loginStatus','Password OK. Now verify with your code.');await askCode();
 }catch(e){say('loginStatus',e.message)}};
 function start(){
