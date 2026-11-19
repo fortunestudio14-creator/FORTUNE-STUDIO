@@ -397,7 +397,7 @@ const $=s=>document.querySelector(s),t=k=>{const v=D[L][k];return typeof v=="str
 const BOOKED=[]; // dates you block by hand. Saturdays and Sundays are open. Mondays are always closed (see cal()).
 let mine=[];try{mine=JSON.parse(localStorage.getItem("fs_b")||"[]")}catch(e){}
 let remote=[];const taken=()=>BOOKED.concat(mine,remote);
-async function loadBooked(){try{const r=await fetch("/api/booked");if(r.ok){remote=(await r.json()).dates||[];cal()}}catch(e){}}
+var WIN={};async function loadBooked(){try{const r=await fetch("/api/booked");if(r.ok){const j=await r.json();remote=j.dates||[];WIN=j.windows||{};cal();fillT()}}catch(e){}}
 const LC={en:"en-US",es:"es-US",fr:"fr-FR"},fd=k=>new Date(k+"T12:00:00").toLocaleDateString(LC[L],{month:"short",day:"numeric",year:"numeric"});
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const now=new Date();now.setHours(0,0,0,0);let vm=new Date(now.getFullYear(),now.getMonth(),1),sel=null;
@@ -458,7 +458,7 @@ const names=()=>{const v=pkv();if(v[0]=="p"){const x=P.find(a=>"p"+a[0]==v);retu
 function go(n){["s1","s2","s3"].forEach((x,i)=>{$("#"+x).hidden=i+1!==n;const s=$("#t"+(i+1)+"s");s.className=i+1===n?"on":i+1<n?"dn":""});const d=$("#book");d.scrollTo({top:0,behavior:"smooth"});requestAnimationFrame(()=>{const panel=$("#s"+n);if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"})});upd()}
 function upd(){const tv=tot(),x=names()+(sel?" · "+fd(sel)+" · "+tmf():"")+(pkv()[0]=="p"||pkv()=="w"?"":" · "+durf())+" · "+tv;document.querySelectorAll("[data-sm]").forEach(e=>e.textContent=x)}
 $("#n1").onclick=()=>go(2);$("#b2").onclick=()=>go(1);$("#b3").onclick=()=>go(2);
-$("#cal").onclick=e=>{const b=e.target.closest("button");if(b&&!b.disabled){sel=b.dataset.d;cal();$("#n2").disabled=false;upd()}};
+$("#cal").onclick=e=>{const b=e.target.closest("button");if(b&&!b.disabled){sel=b.dataset.d;cal();fillT();$("#n2").disabled=false;upd()}};
 $("#n2").onclick=()=>go(3);
 // ---- Total ----
 const P=[[30,99,5],[45,139,8],[60,179,12],[90,249,18],[120,319,25]];
@@ -466,14 +466,14 @@ var FSP={t:12,c:3,a:55,b:110,wh:150,wd:100,sh:80,dep:.5,xh:.25,tax:.06,mt:30,mc:
 const BASE_H=4; // rentals: price includes BASE_H hours, each extra hour adds FSP.xh of the price
 const tmv=v=>new Date(2000,0,1,Math.floor(v),(v%1)*60).toLocaleTimeString(LC[L],{hour:"numeric",minute:"2-digit"});
 const tmf=()=>tmv(+$("#st").value),durf=()=>{const v=pkv();return v[0]=="p"?v.slice(1)+" min":$("#hr").value+" "+t("hrs")};
-function fillT(){const c=$("#st").value||"10";$("#st").innerHTML=[...Array(25).keys()].map(i=>{const v=8+i/2;return`<option value="${v}">${tmv(v)}</option>`}).join("");$("#st").value=c}
+function fillT(){const c=$("#st").value||"10",w=(sel&&WIN[sel])||null;$("#st").innerHTML=[...Array(25).keys()].map(i=>8+i/2).filter(v=>!w||w.some(a=>v>=a[0]&&v<=a[1])).map(v=>`<option value="${v}">${tmv(v)}</option>`).join("");if([...$("#st").options].some(o=>o.value==c))$("#st").value=c;let h=$("#twh");if(!h){h=document.createElement("small");h.id="twh";h.style.cssText="display:block;color:var(--mu);margin:6px 0 0";$("#st").parentNode.insertBefore(h,$("#st").nextSibling)}h.textContent=w?({en:"Available start times: ",es:"Horarios de inicio disponibles: ",fr:"Heures de début disponibles : "}[L]||"")+w.map(a=>tmv(a[0])+" – "+tmv(a[1])).join(", "):""}
  // Pennsylvania state sales tax, 6 percent. Confirm with the PA Department of Revenue or your accountant what applies to each service.
 const money=n=>"$"+n.toFixed(2),fp=n=>Number.isInteger(n)?String(n):(Math.round(n*100)/100).toFixed(2);
 function tot(){const p=pkv(),ph=p[0]=="p",wd=p==="w",sp=p==="s";const pf=document.querySelector("[name=pp][value=full]");pf.parentNode.style.display=wd?"none":"";if(wd)document.querySelector("[name=pp][value=dep]").checked=true;let s,x=0,nt;const q=$("#qt"),c=$("#qc");$("#cu").style.display=p==="c"?"grid":"none";$("#qmx").style.display=p==="c"?"block":"none";$("#qmx").textContent=t("qmx");$("#qt").max=FSP.mt;$("#qc").max=FSP.mc;$("#dl").disabled=ph||wd||sp;
 if(ph){q.value=0;c.value=0;const i=P.findIndex(a=>"p"+a[0]==p);s=P[i][1];$("#dl").checked=false;$("#pr").value=i;$("#pv2").textContent=P[i][0]+" min";nt=P[i][2]+" "+t("pic")}
 else{if(p==="55"){q.value=2;c.value=12;s=FSP.a}else if(p==="110"){q.value=4;c.value=25;s=FSP.b}else if(wd){q.value=0;c.value=0;$("#dl").checked=false;s=FSP.wh*(+$("#hr").value)}else if(sp){q.value=0;c.value=0;$("#dl").checked=false;s=FSP.sh*(+$("#hr").value)}else{q.value=Math.min(FSP.mt,Math.max(0,+q.value||0));c.value=Math.min(FSP.mc,Math.max(0,+c.value||0));s=Math.round((q.value*FSP.t+c.value*FSP.c)*100)/100}
 $("#hr").min=sp?1:BASE_H;const h=+$("#hr").value;x=(wd||sp)?0:Math.round(s*Math.max(0,h-BASE_H)*FSP.xh);s=Math.round((s+x)*100)/100;$("#hv").textContent=h+" "+t("hrs");$("#rl1").textContent=(sp?1:BASE_H)+" "+t("hrs");$("#rl2").textContent="12 "+t("hrs");nt=wd?"$"+fp(FSP.wh)+"/h":sp?"$"+fp(FSP.sh)+"/h":x?t("ex2")+" +$"+x:""}
-const tax=Math.round(s*FSP.tax*100)/100,tt=s+tax,qm=wd&&!FSP.wh,fm=v=>qm?t("wq"):money(v),dep=$("[name=pp]:checked").value=="dep";$("#lx").textContent=qm?t("wqn"):[nt,t("taxs")+" "+money(tax)].filter(Boolean).join(" · ");
+let cd=0;if(window.FS_CPN&&!wd&&s>0){const ns=Math.round(s*(1-FS_CPN.pct/100)*100)/100;cd=Math.round((s-ns)*100)/100;s=ns}window.fsCpnShow&&fsCpnShow(cd,wd);const tax=Math.round(s*FSP.tax*100)/100,tt=s+tax,qm=wd&&!FSP.wh,fm=v=>qm?t("wq"):money(v),dep=$("[name=pp]:checked").value=="dep";$("#lx").textContent=qm?t("wqn"):[nt,t("taxs")+" "+money(tax)].filter(Boolean).join(" · ");
 $("#rng").hidden=ph||wd;$("#prng").hidden=!ph;$("#lp").textContent=fm(tt);$("#sb").textContent=fm(s);$("#tx").textContent=qm?"—":money(tax);$("#tv").textContent=fm(tt);$("#due").textContent=qm?"—":money(dep?(wd?Math.min(tt,FSP.wd):Math.round(tt*FSP.dep*100)/100):tt);$("#pdl").textContent=wd?t("pdw").replace("{a}","$"+FSP.wd):t("pdep").replace("{p}",Math.round(FSP.dep*100));const da=wd?Math.min(tt,FSP.wd):Math.round(tt*FSP.dep*100)/100,du=dep?da:tt,bl=Math.round((tt-du)*100)/100;$("#pfa").textContent=qm?"":money(tt);$("#pda").textContent=qm?"":money(da);$("#blr").style.display=!qm&&bl>0?"flex":"none";$("#bl").textContent=money(bl);$("#go").textContent=qm?t("rs"):t(dep?"gpay":"gpf").replace("{a}",money(du));if(wd){[$("#sb"),$("#tx"),$("#tv"),$("#due")].forEach(e=>e.parentNode.style.display="none");$("#lp").textContent=money(du);$("#lx").textContent=""}else{[$("#sb"),$("#tx"),$("#tv"),$("#due")].forEach(e=>e.parentNode.style.display="flex")}$("#lp").closest(".tot").firstElementChild.textContent=t(wd?"dpl":"tt");$(".pw").style.display=wd?"none":"";$(".pw").previousElementSibling.style.display=wd?"none":"";return wd&&!qm?money(du):fm(tt)}
 $("#sp").onclick=()=>$("#sd").showModal();$("#sx").onclick=()=>$("#sd").close();$("#sd").onclick=e=>{if(e.target.id==="sd")e.target.close()};
 $("#pho").innerHTML=P.map(a=>`<label class="opt"><input type="radio" name="pk" value="p${a[0]}"><h3 data-n="${a[0]}" data-k="h"></h3><b>$${a[1]}</b><small data-n="${a[0]}" data-k="p"></small></label>`).join("");
@@ -496,11 +496,11 @@ $("#tl").oninput=e=>{let v=e.target.value.replace(/\D/g,"");if(v.length>10&&v[0]
 function note(x){const m=$("#mg");m.style.display="block";m.className="msg err";m.textContent=x}
 const nmv=()=>($("#fn").value.trim()+" "+$("#ln").value.trim()).trim(),adv=()=>[$("#ad").value.trim(),$("#ad2").value.trim(),$("#cy").value.trim(),$("#sa").value+" "+$("#zp").value.trim()].filter(Boolean).join(", ");
 $("#zp").oninput=e=>e.target.value=e.target.value.replace(/\D/g,"").slice(0,5);
-async function checkout(d,nm,m){try{const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L})});
+async function checkout(d,nm,m){try{const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||""})});
 const j=await r.json().catch(()=>({}));
 if(r.ok&&j.clientSecret){m.className="msg";m.textContent=t("pwait");await openPay(j);m.style.display="none";$("#go").disabled=false;return 1}
 if(r.ok&&j.url){m.className="msg";m.textContent=t("pwait");location.href=j.url;return 1}
-if(r.status==409){m.textContent=t("ptk");loadBooked();return 2}}catch(e){}return 0}
+if(r.status==409){m.textContent=(j.error=="coupon"&&window.fsCpnErr)?fsCpnErr(j.reason):(j.error=="time"&&window.fsTimeErr)?fsTimeErr():t("ptk");if(j.error=="coupon"&&window.fsCpnReset)fsCpnReset();window.FS_ERR2=(j.error=="coupon"||j.error=="time")?1:0;loadBooked();return 2}}catch(e){}return 0}
 $("#go").onclick=async()=>{const m=$("#mg"),g=$("#go");m.style.display="block";m.className="msg err";
 if(!sel){m.textContent=t("e1");return}
 if(!nmv()||$("#tl").value.replace(/\D/g,"").length!==10||!/^\S+@\S+\.\S+$/.test($("#em").value)){m.textContent=t("e2");return}
@@ -513,7 +513,7 @@ try{sessionStorage.setItem("fs_pending_booking",JSON.stringify({name:nm,email:$(
 const c=await checkout(d,nm,m);
 if(c===1)return;
 g.disabled=false;
-if(c===2){m.className="msg err";m.textContent=t("ptk");return}
+if(c===2){m.className="msg err";if(!window.FS_ERR2)m.textContent=t("ptk");window.FS_ERR2=0;return}
 m.className="msg err";
 m.textContent=t("pErr");
 m.scrollIntoView({behavior:"smooth",block:"center"});
@@ -794,7 +794,7 @@ window.fsPaid();
 })();
 </script>
 
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="/blackfriday.js"></script><script defer src="/ux.js"></script><script defer src="/cms.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="/blackfriday.js"></script><script defer src="/ux.js"></script><script defer src="/cms.js"></script><script defer src="/coupon.js"></script>
 
 <style>
 /* Guided reservation transitions */
