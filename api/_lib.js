@@ -42,10 +42,22 @@ const money = (n) => "$" + n.toFixed(2);
 const num = (v, d, lo, hi) => (Number.isFinite(+v) && v !== "" && v !== null && +v >= lo && +v <= hi ? +v : d);
 
 // Prices come from the admin editor (Supabase site_settings.content.prices). Falls back to the defaults.
-let cache = { at: 0, p: DEF, bf: bfConfig() };
+const CP_DEF = { stack: false }, AV_DEF = { freed: [], win: {} };
+function cpConfig(c) { return { stack: !!(c && c.stack) }; }
+function avConfig(c) { // dates the owner re-opened in /admin: freed = booking ids whose date is open again, win = booking ids whose date is open only for some start hours
+  c = c || {};
+  const freed = Array.isArray(c.freed) ? c.freed.filter((x) => typeof x === "string").slice(0, 500) : [];
+  const win = {};
+  Object.keys(c.win || {}).slice(0, 500).forEach((id) => {
+    const w = c.win[id], a = Array.isArray(w) ? +w[0] : NaN, z = Array.isArray(w) ? +w[1] : NaN;
+    if (Number.isFinite(a) && Number.isFinite(z) && a >= 0 && z <= 24 && a <= z) win[id] = [a, z];
+  });
+  return { freed, win };
+}
+let cache = { at: 0, p: DEF, bf: bfConfig(), cp: CP_DEF, av: AV_DEF };
 async function load() {
   if (Date.now() - cache.at < 30000) return cache;
-  let p = DEF, bf = bfConfig();
+  let p = DEF, bf = bfConfig(), cp = CP_DEF, av = AV_DEF;
   try {
     const url = process.env.FORTUNE_SUPABASE_URL, key = process.env.FORTUNE_SUPABASE_KEY;
     if (url && key) {
@@ -56,9 +68,11 @@ async function load() {
         wh: num(c.wh, DEF.wh, 0, 100000), wd: num(c.wd, DEF.wd, 0, 100000), sh: num(c.sh, DEF.sh, 0, 100000), tax: num(c.tax, DEF.tax, 0, 30), dep: num(c.dep, DEF.dep, 1, 100), xh: num(c.xh, DEF.xh, 0, 200), mt: Math.round(num(c.mt, DEF.mt, 0, 10000)), mc: Math.round(num(c.mc, DEF.mc, 0, 100000)), ph: {} };
       for (const m in DEF.ph) { const x = c.ph && c.ph[m]; p.ph[m] = num(Array.isArray(x) ? x[0] : x, DEF.ph[m], 0, 100000); }
       bf = bfConfig(j[0] && j[0].content && j[0].content.bf);
+      cp = cpConfig(j[0] && j[0].content && j[0].content.cp);
+      av = avConfig(j[0] && j[0].content && j[0].content.av);
     }
   } catch (e) { console.error("prices fallback", e); }
-  cache = { at: Date.now(), p, bf };
+  cache = { at: Date.now(), p, bf, cp, av };
   return cache;
 }
 // Prices with the Black Friday discount already applied when the sale is live (same rounding as the browser).
@@ -73,7 +87,7 @@ async function priced() {
 }
 
 // Prices are computed here so nobody can change the amount in the browser.
-async function quote(b) {
+async function quote(b, coupon) {
   const { P, sale } = await priced(), TAX = P.tax / 100, DEPS = P.dep / 100, EXTRA = P.xh / 100;
   const off = sale.state === "live" ? " · Black Friday " + sale.pct + "% off" : "";
   const pk = String(b.pk), wd = pk === "w", sp = pk === "s", h = clamp(b.hr, sp ? 1 : 4, 12);
@@ -93,22 +107,89 @@ async function quote(b) {
     if (!sp) s += Math.round(s * Math.max(0, h - 4) * EXTRA); // extra hours add a share of the price each
   }
   s = rd(s);
+  let disc = 0, cl = "";
+  if (coupon && coupon.pct > 0) { const ns = rd(s * (1 - coupon.pct / 100)); disc = rd(s - ns); s = ns; cl = " · Code −" + coupon.pct + "%"; } // same rounding as the browser
   const tax = Math.round(s * TAX * 100) / 100, total = rd(s + tax);
   const dep = b.pp === "dep";
   const due = dep ? Math.round(total * DEPS * 100) / 100 : total;
-  return { label: label + off, subtotal: s, tax, total, due, balance: Math.round((total - due) * 100) / 100, dep, taxPct: P.tax, sale: sale.state === "live" ? "Black Friday " + sale.pct + "% off" : "" };
+  return { label: label + off + cl, disc, subtotal: s, tax, total, due, balance: Math.round((total - due) * 100) / 100, dep, taxPct: P.tax, sale: sale.state === "live" ? "Black Friday " + sale.pct + "% off" : "" };
 }
 
 // Booked dates = paid Checkout sessions. Stripe is the source of truth, no database needed.
-async function bookedDates() {
-  const today = new Date().toISOString().slice(0, 10), out = new Set();
+// The owner can re-open a booking's date (or only some start hours) in /admin; that list comes from site_settings.content.av.
+async function availability() {
+  const { av } = await load();
+  const today = new Date().toISOString().slice(0, 10), blocked = new Set(), part = {}, list = [];
   let n = 0;
   for await (const x of stripe().checkout.sessions.list({ limit: 100 })) {
     const m = x.metadata || {};
-    if (m.app === "fortune" && x.status === "complete" && x.payment_status === "paid" && m.date >= today) out.add(m.date);
+    if (m.app === "fortune" && x.status === "complete" && x.payment_status === "paid" && m.date >= today) {
+      list.push({ id: x.id, date: m.date, label: m.date_label, time: m.time, service: m.service, name: m.name, phone: m.phone, paid: m.paid_now, coupon: m.coupon || "" });
+      if (av.freed.includes(x.id)) { /* date is open again */ }
+      else if (av.win[x.id]) (part[m.date] = part[m.date] || []).push(av.win[x.id]);
+      else blocked.add(m.date);
+    }
     if (++n >= 500) break;
   }
-  return [...out];
+  Object.keys(part).forEach((d) => { if (blocked.has(d)) delete part[d]; }); // a new full booking on that date closes it again
+  list.sort((a, b) => (a.date < b.date ? -1 : 1));
+  return { blocked: [...blocked], windows: part, list };
+}
+async function bookedDates() { return (await availability()).blocked; }
+
+// ---- One-time discount codes (Stripe Promotion Codes are the code list; a code is switched off the moment its payment is confirmed) ----
+const crypto = require("crypto");
+const cleanCode = (v) => String(v ?? "").toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 40);
+async function findCode(code) {
+  code = cleanCode(code);
+  if (code.length < 4) return { state: "none" };
+  const r = await stripe().promotionCodes.list({ code, limit: 5 });
+  const pc = r.data.find((x) => String(x.code).toUpperCase() === code && x.metadata && x.metadata.app === "fortune");
+  if (!pc) return { state: "none" };
+  let pct = Number(pc.metadata.pct) || (pc.coupon && pc.coupon.percent_off) || 0;
+  pct = Math.min(90, Math.max(0, pct));
+  if (!pct) return { state: "none" };
+  if (pc.metadata.used === "1") return { state: "used", pc, pct };
+  if (!pc.active) return { state: "off", pc, pct };
+  return { state: "ok", pc, pct };
+}
+// Public check (the website calls it when someone presses Apply). Never says anything about other codes.
+async function couponFor(code) {
+  const { cp, bf } = await load();
+  const f = await findCode(code);
+  if (f.state !== "ok") return { ok: false, reason: f.state === "none" ? "invalid" : f.state };
+  if (saleState(bf).state === "live" && !cp.stack) return { ok: false, reason: "sale" };
+  return { ok: true, pct: f.pct, code: String(f.pc.code).toUpperCase(), id: f.pc.id };
+}
+// Right before payment: refuse a code that already has a paid booking, and close the same person's older unfinished checkouts that hold the code.
+async function claimCode(code) {
+  let n = 0, used = false;
+  for await (const x of stripe().checkout.sessions.list({ limit: 100 })) {
+    const m = x.metadata || {};
+    if (m.app === "fortune" && m.coupon === code) {
+      if (x.status === "complete" && x.payment_status === "paid") { used = true; break; }
+      if (x.status === "open") { try { await stripe().checkout.sessions.expire(x.id); } catch (e) { console.error("expire", e.message); } }
+    }
+    if (++n >= 500) break;
+  }
+  return !used;
+}
+function newCode() {
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = crypto.randomBytes(8);
+  const c = (i) => A[b[i] % A.length];
+  return "FS-" + c(0) + c(1) + c(2) + c(3) + "-" + c(4) + c(5) + c(6) + c(7);
+}
+// Only the signed-in owner (Supabase login from /admin) may call the admin API.
+async function isOwner(req) {
+  const h = String(req.headers.authorization || ""), tok = h.startsWith("Bearer ") ? h.slice(7) : "";
+  const url = process.env.FORTUNE_SUPABASE_URL, key = process.env.FORTUNE_SUPABASE_KEY;
+  if (!tok || !url || !key) return false;
+  try {
+    const r = await fetch(url.replace(/\/$/, "") + "/auth/v1/user", { headers: { apikey: key, Authorization: "Bearer " + tok } });
+    if (!r.ok) return false;
+    const u = await r.json();
+    return String(u.email || "").toLowerCase() === String(process.env.OWNER_EMAIL || "fortunestudio14@gmail.com").toLowerCase();
+  } catch (e) { return false; }
 }
 
 // ---- Basic abuse protection (best effort: memory is per server instance; add a Vercel Firewall rate-limit rule for a hard limit) ----
@@ -126,4 +207,4 @@ function badOrigin(req) { // browsers always send Origin on POST; refuse other w
   if (!o) return false;
   try { return new URL(o).host.replace(/^www\./, "") !== String(req.headers.host || "").replace(/^www\./, ""); } catch (e) { return true; }
 }
-module.exports = { stripe, quote, bookedDates, money, priced, load, bfConfig, saleState, limited, badOrigin };
+module.exports = { stripe, quote, bookedDates, availability, couponFor, claimCode, findCode, newCode, cleanCode, isOwner, money, priced, load, bfConfig, saleState, limited, badOrigin };
