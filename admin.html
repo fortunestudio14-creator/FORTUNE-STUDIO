@@ -16,7 +16,7 @@ details{background:#1b1d22;border:1px solid #343840;border-radius:12px;padding:1
 input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6px;font-size:12px}
 @media(max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:auto 45vh 1fr}#top{grid-column:1}#side{border-right:0;order:3}}
 </style></head><body>
-<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (then Face ID, fingerprint or your laptop password opens it, and the 6-digit code is the backup)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><label>6-digit code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaMail" class="s" type="button">Send me a code by email instead</button><button id="mfaPk" type="button" style="display:none">Use Face ID / fingerprint / device PIN</button><button id="mfaOut" class="s" type="button">Use another account</button></div><div class="status" id="loginStatus">Loading...</div></section>
+<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (then Face ID, fingerprint or your laptop password opens it, and the 6-digit code is the backup)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><button id="mfaPk" type="button" style="display:none">🔐 Open with Face ID / fingerprint / laptop password</button><div id="mfaBack"><label>6-digit code (backup)</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaMail" class="s" type="button">Send me a code by email instead</button><button id="mfaOut" class="s" type="button">Use another account</button></div></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
 <div id="top"><button id="save">Save and publish</button><button id="pkBtn" class="s" style="display:none"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
@@ -54,12 +54,14 @@ const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null,bypass=false;
 const say=(id,s)=>$(id).textContent=s;
 function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
 function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.cp=c.cp||{};c.av=c.av||{};c.av.freed=c.av.freed||[];c.av.win=c.av.win||{};c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
+const fromLink=/access_token=/.test(location.hash);
 async function init(){
   if(!window.supabase)throw Error('Supabase library did not load. Refresh the page.');
   const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();
   if(!r.ok)throw Error(cfg.error||'Could not load Supabase configuration.');
   sb=window.supabase.createClient(cfg.url,cfg.key);$('signIn').disabled=false;say('loginStatus','Enter the admin account created in Supabase Authentication.');
   const cur=(await sb.auth.getSession()).data.session;
+  if(cur&&fromLink&&await verified()){try{history.replaceState(null,'','/admin')}catch(e){}await enterAdmin();return}
   if(cur){
     try{if(await pkUnlock()){await enterAdmin();return}}catch(e){} // Face ID / fingerprint / device PIN cancelled or failed: fall back to the code
     say('loginStatus',pkGet()?'Welcome back. Use Face ID / fingerprint / laptop password, or type the code.':'Welcome back. Enter your authenticator code to continue.');await askCode()}
@@ -87,12 +89,14 @@ $('pkBtn').onclick=async()=>{ // direct click = the browser allows the Touch ID 
   else{await pkEnable();say('status','✔ Touch ID / PIN unlock is ON for this device only. Next time, just confirm with your fingerprint or laptop password.')}}
   catch(e){say('status','Could not turn it on: '+(e&&e.message?e.message:e)+'. Choose "This device" / Touch ID in the browser box, not another phone.')}
   pkRefresh()};
-$('mfaPk').onclick=async()=>{try{if(await pkUnlock())await enterAdmin();else say('loginStatus','Your saved login on this device expired, so the 6-digit code is needed one time. After that, Face ID / fingerprint works again.')}catch(e){say('loginStatus','Not unlocked. Try again or type your code.')}};
+$('mfaPk').onclick=async()=>{try{if(await pkUnlock())await enterAdmin();else{showBack(true);say('loginStatus','Face ID is fine, but this new login still has to be verified with the backup code one time. After that, Face ID works again.')}}catch(e){failed('Face ID did not work. Try again.')}};
 /* ===== Verification (authenticator app code) ===== */
-let MFA_ID=null,MAIL=null;
+let MFA_ID=null,MAIL=null,fails=0;
+function showBack(on){$('mfaBack').style.display=on?'block':'none';if(on&&!$('mfaCode').matches(':focus'))try{$('mfaCode').focus()}catch(e){}}
+function failed(msg){fails++;if(fails>=4){showBack(true);msg+=' Backup code is now open below.'}say('loginStatus',msg)}
 $('mfaMail').onclick=async()=>{try{
   const u=((await sb.auth.getSession()).data.session||{}).user;const em=(u&&u.email)||$('email').value.trim();if(!em)throw Error('Type your email first.');
-  const r=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});if(r.error)throw r.error;
+  const r=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false,emailRedirectTo:location.origin+'/admin'}});if(r.error)throw r.error;
   MAIL=em;$('mfaCode').value='';$('mfaCode').maxLength=10;$('mfaCode').focus();
   say('loginStatus','Code sent to '+em+'. Open your email, type the code here and press Verify. (Check spam. You can ask for a new one in a minute.)')
 }catch(e){say('loginStatus',e.message)}};
@@ -104,17 +108,17 @@ async function askCode(){
     const e=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'Admin '+Date.now()});if(e.error)throw e.error;
     MFA_ID=e.data.id;first=true;$('mfaQr').src=e.data.totp.qr_code;$('mfaKey').textContent=e.data.totp.secret}
   $('mfaEnroll').style.display=first?'block':'none';$('mfaTitle').textContent=first?'Set up verification (one time)':'Verify it is you';
-  $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaPk').style.display=pkGet()?'block':'none';$('mfaCode').value='';$('mfaCode').focus();
+  $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaPk').style.display=pkGet()?'block':'none';$('mfaCode').value='';fails=0;showBack(!pkGet());if(pkGet())$('mfaPk').click();
 }
 $('mfaGo').onclick=async()=>{try{
   const code=$('mfaCode').value.replace(/\D/g,'');
   if(MAIL){if(code.length<6)throw Error('Type the code from your email.');
-    const v=await sb.auth.verifyOtp({email:MAIL,token:code,type:'email'});if(v.error)throw Error('Wrong or expired email code. Send a new one.');
+    const v=await sb.auth.verifyOtp({email:MAIL,token:code,type:'email'});if(v.error){failed('Wrong or expired email code.');return};
     if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
     await enterAdmin();return}
   if(code.length!==6)throw Error('Type the 6-digit code from your app.');
   const ch=await sb.auth.mfa.challenge({factorId:MFA_ID});if(ch.error)throw ch.error;
-  const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error)throw Error('Wrong or expired code. Try the newest one.');
+  const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error){failed('Wrong or expired code. Try the newest one.');return}
   if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
   await enterAdmin();
 }catch(e){say('loginStatus',e.message)}};
