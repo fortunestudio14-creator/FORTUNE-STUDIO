@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
       metadata: {
         app: "fortune", date: d, date_label: label, time: cut(b.time, 20), service: q.label,
         subtotal: q.wd ? "-" : money(q.subtotal), tax: q.wd ? "-" : money(q.tax), total: q.wd ? "Quote to be confirmed" : money(q.total), paid_now: money(q.due), balance: q.wd ? "Quote to be confirmed" : money(q.balance),
-        sale: q.sale || "-", coupon: coupon ? coupon.code : "", coupon_id: coupon ? coupon.id : "", discount: coupon ? money(q.disc) + " (" + coupon.pct + "% off)" : "", tv: cut(b.tv, 6), delivery: b.delivery ? "yes" : "no", name: cut(b.name, 100), phone: cut(b.phone, 20), address: cut(b.address, 300), lang: cut(b.lang, 2),
+        sale: q.sale || "-", coupon: coupon ? coupon.code : "", coupon_id: coupon ? coupon.id : "", discount: coupon ? money(q.disc) + (coupon.amt > 0 ? " (" + money(coupon.amt) + " off)" : " (" + coupon.pct + "% off)") : "", tv: cut(b.tv, 6), delivery: b.delivery ? "yes" : "no", name: cut(b.name, 100), phone: cut(b.phone, 20), address: cut(b.address, 300), lang: cut(b.lang, 2),
       },
     });
     res.status(200).json({ clientSecret: session.client_secret, publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
