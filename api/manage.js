@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
       const out = []; let n = 0;
       for await (const x of S.promotionCodes.list({ limit: 100 })) {
         const m = x.metadata || {};
-        if (m.app === "fortune") out.push({ id: x.id, code: x.code, pct: Number(m.pct) || (x.coupon && x.coupon.percent_off) || 0, note: m.note || "", created: x.created,
+        if (m.app === "fortune") out.push({ id: x.id, code: x.code, pct: Number(m.pct) || (x.coupon && x.coupon.percent_off) || 0, amt: Number(m.amt) || (x.coupon && x.coupon.amount_off ? x.coupon.amount_off / 100 : 0) || 0, note: m.note || "", created: x.created,
           state: m.used === "1" ? "used" : x.active ? "ok" : "off", usedDate: m.used_date || "", booking: m.booking || "", customer: m.customer || "" });
         if (++n >= 400) break;
       }
@@ -26,16 +26,29 @@ module.exports = async (req, res) => {
     }
 
     if (b.action === "create") {
-      const pct = Math.min(90, Math.max(1, Math.round(Number(b.pct) || 10)));
+      // The owner chooses the kind: "pct" = percent off (1 to 100) or "amt" = dollars off (0.50 to 10,000), and the exact number.
+      const isAmt = b.kind === "amt";
       const count = Math.min(20, Math.max(1, Math.round(Number(b.count) || 1)));
       const note = String(b.note || "").slice(0, 80);
-      const coupon = await S.coupons.create({ percent_off: pct, duration: "once", name: "Fortune Studio code " + pct + "%" });
+      let pct = 0, amt = 0, cp;
+      if (isAmt) {
+        amt = Math.round(Number(b.amt) * 100) / 100;
+        if (!Number.isFinite(amt) || amt < 0.5 || amt > 10000) return res.status(400).json({ error: "Dollar amount must be between $0.50 and $10,000." });
+        cp = { amount_off: Math.round(amt * 100), currency: "usd", duration: "once", name: "Fortune Studio code $" + amt.toFixed(2) };
+      } else {
+        pct = Math.round(Number(b.pct) * 100) / 100;
+        if (!Number.isFinite(pct) || pct < 0.01 || pct > 100) return res.status(400).json({ error: "Percent must be between 0.01 and 100." });
+        cp = { percent_off: pct, duration: "once", name: "Fortune Studio code " + pct + "%" };
+      }
+      const coupon = await S.coupons.create(cp);
       const made = [];
       for (let i = 0; i < count; i++) {
         for (let tries = 0; tries < 5; tries++) {
           try {
-            const pc = await S.promotionCodes.create({ coupon: coupon.id, code: newCode(), metadata: { app: "fortune", pct: String(pct), note } });
-            made.push({ id: pc.id, code: pc.code, pct, note, state: "ok", created: pc.created }); break;
+            const meta = { app: "fortune", note };
+            if (isAmt) meta.amt = String(amt); else meta.pct = String(pct);
+            const pc = await S.promotionCodes.create({ coupon: coupon.id, code: newCode(), metadata: meta });
+            made.push({ id: pc.id, code: pc.code, pct, amt, note, state: "ok", created: pc.created }); break;
           } catch (e) { if (tries === 4) throw e; }
         }
       }
