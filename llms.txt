@@ -1,0 +1,28 @@
+# Fortune Studio LLC
+
+> Fortune Studio LLC is a photography studio and event-rental company in Scranton, Pennsylvania, USA. We offer professional portrait photography sessions and table & chair rentals for birthdays, weddings, baby showers, graduations and other events.
+
+## Services
+- Portrait photography sessions (30 to 120 minutes), starting from $99
+- Table and chair rentals, with optional delivery and pickup
+- Party and celebration packages
+- Studio space rental by the hour
+- Wedding and event photo/video coverage (deposit to hold the date, final price quoted)
+
+## Booking and contact
+- Book online (date, time, payment): https://fortunestudiollc.com/#book
+- Phone: 570-309-5776
+- Email: fortunestudio14@gmail.com
+- Location: Scranton, PA (we also serve nearby areas)
+- Languages on the website: English, Spanish, French
+
+## Links
+- Website: https://fortunestudiollc.com/
+- Instagram: https://www.instagram.com/fortunestudiollc
+- Facebook: https://www.facebook.com/share/1FRFNU91LK/?mibextid=wwXIfr
+- TikTok: https://www.tiktok.com/@fortunestudiollc14
+- YouTube: https://youtube.com/@fortunestudiollc
+
+## Notes
+- Prices on the website are the current prices; Pennsylvania sales tax applies.
+- Online booking uses secure card payment (Stripe).
