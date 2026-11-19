@@ -16,7 +16,7 @@ details{background:#1b1d22;border:1px solid #343840;border-radius:12px;padding:1
 input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6px;font-size:12px}
 @media(max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:auto 45vh 1fr}#top{grid-column:1}#side{border-right:0;order:3}}
 </style></head><body>
-<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><button id="signIn">Sign in</button><div class="status" id="loginStatus">Loading...</div></section>
+<section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (you will still verify with a code each time)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><label>6-digit code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaOut" class="s" type="button">Use another account</button></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
 <div id="top"><button id="save">Save and publish</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
@@ -59,14 +59,40 @@ async function init(){
   const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();
   if(!r.ok)throw Error(cfg.error||'Could not load Supabase configuration.');
   sb=window.supabase.createClient(cfg.url,cfg.key);$('signIn').disabled=false;say('loginStatus','Enter the admin account created in Supabase Authentication.');
+  const cur=(await sb.auth.getSession()).data.session;
+  if(cur){say('loginStatus','Welcome back. Enter your authenticator code to continue.');await askCode()}
+}
+/* ===== Verification (authenticator app code) ===== */
+let MFA_ID=null;
+async function askCode(){
+  const {data:f,error}=await sb.auth.mfa.listFactors();if(error)throw error;
+  for(const x of (f.all||[]))if(x.status!=='verified')await sb.auth.mfa.unenroll({factorId:x.id}); // clean half-finished setups
+  const t=(f.totp||[])[0];let first=false;
+  if(t)MFA_ID=t.id;else{
+    const e=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'Admin '+Date.now()});if(e.error)throw e.error;
+    MFA_ID=e.data.id;first=true;$('mfaQr').src=e.data.totp.qr_code;$('mfaKey').textContent=e.data.totp.secret}
+  $('mfaEnroll').style.display=first?'block':'none';$('mfaTitle').textContent=first?'Set up verification (one time)':'Verify it is you';
+  $('signIn').style.display='none';$('mfaBox').style.display='block';$('mfaCode').value='';$('mfaCode').focus();
+}
+$('mfaGo').onclick=async()=>{try{
+  const code=$('mfaCode').value.replace(/\D/g,'');if(code.length!==6)throw Error('Type the 6-digit code from your app.');
+  const ch=await sb.auth.mfa.challenge({factorId:MFA_ID});if(ch.error)throw ch.error;
+  const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error)throw Error('Wrong or expired code. Try the newest one.');
+  if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
+  await enterAdmin();
+}catch(e){say('loginStatus',e.message)}};
+$('mfaCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('mfaGo').click()});
+$('mfaOut').onclick=async()=>{await sb.auth.signOut();location.reload()};
+async function enterAdmin(){
+  const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
+  C=norm(q.data&&q.data.content);$('login').style.display='none';$('app').style.display='grid';
+  const v=$('view');const go=()=>start();v.contentWindow&&v.contentDocument&&v.contentDocument.readyState==='complete'&&v.contentWindow.FS_CMS?go():v.addEventListener('load',go,{once:true});
 }
 $('signIn').disabled=true;init().catch(e=>say('loginStatus',e.message));
 $('signIn').onclick=async()=>{try{
   const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});
   if(error)throw error;if(!data.session)throw Error('Sign-in did not create a session');
-  const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
-  C=norm(q.data&&q.data.content);$('login').style.display='none';$('app').style.display='grid';
-  const v=$('view');const go=()=>start();v.contentWindow&&v.contentDocument&&v.contentDocument.readyState==='complete'&&v.contentWindow.FS_CMS?go():v.addEventListener('load',go,{once:true});
+  say('loginStatus','Password OK. Now verify with your code.');await askCode();
 }catch(e){say('loginStatus',e.message)}};
 function start(){
   win=$('view').contentWindow;doc=win.document;
