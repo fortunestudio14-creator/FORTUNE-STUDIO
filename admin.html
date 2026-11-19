@@ -290,20 +290,23 @@ const copy=async(t,msg)=>{try{await navigator.clipboard.writeText(t);say('status
 /* ===== Coupon codes ===== */
 let CODES=null,NEWC=[];
 function drawCoupons(){const b=$('cpp');if(!b)return;b.textContent='';
-  b.append(el('div',{className:'hint',textContent:'Each code works for ONE booking, one time only. It takes the % off the price before tax. It is switched off automatically when the payment is confirmed. Give one code to each person.'}));
-  const pc=el('input',{type:'number',min:1,max:90,value:10}),ct=el('input',{type:'number',min:1,max:20,value:1}),nt=el('input',{placeholder:'For who? (optional, only you see it)',maxLength:80});
-  b.append(fld('Discount (%)',pc),fld('How many codes',ct),fld('Note',nt));
-  b.append(el('button',{textContent:'Create code(s)',onclick:async function(){this.disabled=true;try{say('status','Creating...');const j=await srv({action:'create',pct:+pc.value,count:+ct.value,note:nt.value});NEWC=j.made;say('status','✔ '+j.made.length+' code(s) created. Copy and send them.');await loadCodes()}catch(e){say('status','Error: '+e.message)}this.disabled=false}}));
+  b.append(el('div',{className:'hint',textContent:'Each code works for ONE booking, one time only. You choose % off (up to 100) or $ off, and the exact number. It comes off the price before tax. The customer always pays at least about $1 (card payments cannot be lower than $0.50). It is switched off automatically when the payment is confirmed. Give one code to each person.'}));
+  const kd=el('select',{},el('option',{value:'pct',textContent:'Percent off (%)'}),el('option',{value:'amt',textContent:'Dollars off ($)'})),pc=el('input',{type:'number',min:0.01,max:100,step:'any',value:20}),ct=el('input',{type:'number',min:1,max:20,value:1}),nt=el('input',{placeholder:'For who? (optional, only you see it)',maxLength:80});
+  kd.onchange=()=>{if(kd.value==='amt'){pc.max=10000;pc.min=0.5;pc.value=25;lab.textContent='How many dollars off ($)'}else{pc.max=100;pc.min=0.01;pc.value=20;lab.textContent='How many percent off (%) · 100 = free'}};
+  const lab=el('label',{className:'hint',textContent:'How many percent off (%) · 100 = free'});
+  b.append(fld('Type of discount',kd),el('div',{},lab,pc),fld('How many codes',ct),fld('Note',nt));
+  b.append(el('button',{textContent:'Create code(s)',onclick:async function(){this.disabled=true;try{say('status','Creating...');const j=await srv({action:'create',kind:kd.value,pct:+pc.value,amt:+pc.value,count:+ct.value,note:nt.value});NEWC=j.made;say('status','✔ '+j.made.length+' code(s) created. Copy and send them.');await loadCodes()}catch(e){say('status','Error: '+e.message)}this.disabled=false}}));
   const sk=el('input',{type:'checkbox',checked:!!C.cp.stack,style:'width:auto;margin:0 8px 0 0'});sk.onchange=()=>{if(sk.checked)C.cp.stack=true;else delete C.cp.stack;refresh()};
   b.append(el('label',{style:'display:flex;align-items:center;margin:12px 0 4px'},sk,'Allow codes during the Black Friday sale too (both discounts add up). Click Save and publish after changing this.'));
   const nb=el('div',{id:'cp_new'});b.append(nb);
   const lb=el('div',{id:'cp_list',className:'hint',textContent:CODES?'':'Loading codes...'});b.append(el('button',{className:'s',textContent:'Refresh list',onclick:loadCodes}),lb);
   paintCodes();if(!CODES)loadCodes()}
 async function loadCodes(){try{CODES=(await srv({action:'codes'})).codes}catch(e){CODES=CODES||[];const l=$('cp_list');if(l)l.textContent='Could not load codes: '+e.message;return}paintCodes()}
-function msgFor(c){return 'Your Fortune Studio discount code: '+c.code+' ('+c.pct+'% off, one use only). Enter it in the last step of the booking form at '+location.origin+'/#book'}
+const dsc=c=>c.amt>0?'$'+(+c.amt).toFixed(2):(+c.pct)+'%';
+function msgFor(c){return 'Your Fortune Studio discount code: '+c.code+' ('+dsc(c)+' off, one use only). Enter it in the last step of the booking form at '+location.origin+'/#book'}
 function codeRow(c,fresh){const stc={ok:'Available',used:'USED',off:'Disabled'}[c.state]||c.state;
   const d=el('div',{style:'border:1px solid #343840;border-radius:10px;padding:8px 10px;margin:8px 0;'+(fresh?'border-color:#7bd88f;background:#12241a':'')});
-  d.append(el('div',{className:'row'},el('b',{textContent:c.code,style:'font-family:ui-monospace,monospace;letter-spacing:.06em;flex:1'}),el('span',{className:'hint',textContent:c.pct+'% · '+stc})));
+  d.append(el('div',{className:'row'},el('b',{textContent:c.code,style:'font-family:ui-monospace,monospace;letter-spacing:.06em;flex:1'}),el('span',{className:'hint',textContent:dsc(c)+' · '+stc})));
   if(c.note)d.append(el('div',{className:'hint',textContent:'For: '+c.note}));
   if(c.state==='used')d.append(el('div',{className:'hint',textContent:'Used'+(c.usedDate?' on '+c.usedDate:'')+(c.customer?' by '+c.customer:'')+(c.booking?' · booking '+c.booking:'')}));
   if(c.state==='ok')d.append(el('div',{className:'row'},el('button',{className:'s',textContent:'Copy code',onclick:()=>copy(c.code,'Code copied.')}),el('button',{className:'s',textContent:'Copy message',onclick:()=>copy(msgFor(c),'Message copied. Paste it in WhatsApp, SMS or email.')}),
