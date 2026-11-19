@@ -1,6 +1,6 @@
 /* Fortune Studio visual editor runtime. Runs on the public site and inside admin.html. */
 (function(){
-var SKIP='#book,#chat,#mq,#space,script,style,svg,iframe,noscript,.cms-add';
+var SKIP='#book,#chat,#mq,#space,#bf,#bfn,script,style,svg,iframe,noscript,.cms-add';
 var BLOCK='.card,figure,section,li,.btn,.soc a,.lc a,.lc span';
 var LEAF={H1:1,H2:1,H3:1,H4:1,H5:1,P:1,LI:1,SPAN:1,EM:1,STRONG:1,B:1,A:1,BUTTON:1,DIV:1,FIGCAPTION:1,LABEL:1,SMALL:1};
 var SAFE=/^(https?:|mailto:|tel:|#|\/)/i;
@@ -10,7 +10,7 @@ function tag(){
   var n=0,a=0,m=0,x=0;
   document.body.querySelectorAll('*').forEach(function(el){
     var g=el.tagName;
-    if(el.dataset&&el.dataset.i&&LEAF[g]&&el.children.length===0&&!el.closest('script,style,svg,noscript')){el.dataset.cms='i:'+el.dataset.i;return}
+    if(el.dataset&&el.dataset.i&&LEAF[g]&&el.children.length===0&&!el.closest('script,style,svg,noscript')){el.dataset.cms='i:'+el.dataset.i;if(g==='A'&&el.hasAttribute('href')&&!el.closest(SKIP)){var cx=el.closest('section[id],nav[id],header[id]');el.dataset.cmsa='ai:'+el.dataset.i+'@'+(cx?cx.id:el.closest('footer')?'ft':'x')}return}
     if(el.closest(SKIP)||!el.closest('nav,header,section,footer'))return;
     if(g==='IMG'||g==='VIDEO')el.dataset.cmsm='m'+(m++);
     if(g==='A'&&el.hasAttribute('href'))el.dataset.cmsa='a'+(a++);
@@ -21,12 +21,18 @@ function tag(){
   });
 }
 
-var DEF={t:12,c:3,a:55,b:110,wh:150,wd:100,sh:80,ex:20,dl:25,phr:120,tax:6,dep:50,xh:25,ph:{30:[99,5],45:[139,8],60:[179,12],90:[249,18],120:[319,25]}};
+var DEF={t:12,c:3,a:55,b:110,wh:150,wd:100,sh:80,ex:20,dl:25,phr:120,tax:6,dep:50,xh:25,mt:30,mc:200,ph:{30:[99,5],45:[139,8],60:[179,12],90:[249,18],120:[319,25]}};
 F.DEF=DEF;
+function rd(v){return Math.round(v*100)/100}
+function fx(n){return n%1===0?String(n):n.toFixed(2)}
 function curPrices(c){
   var p=(c&&c.prices)||{},o={ph:{}};
-  ['t','c','a','b','wh','wd','sh','ex','dl','phr','tax','dep','xh'].forEach(function(k){var v=parseFloat(p[k]);o[k]=isFinite(v)&&v>=0?v:DEF[k]});
+  ['t','c','a','b','wh','wd','sh','ex','dl','phr','tax','dep','xh','mt','mc'].forEach(function(k){var v=parseFloat(p[k]);o[k]=isFinite(v)&&v>=0?v:DEF[k]});
+  o.mt=Math.round(o.mt);o.mc=Math.round(o.mc);
   Object.keys(DEF.ph).forEach(function(m){var q=(p.ph&&p.ph[m])||{},a=parseFloat(q[0]),b=parseInt(q[1],10);o.ph[m]=[isFinite(a)&&a>=0?a:DEF.ph[m][0],isFinite(b)&&b>=0?b:DEF.ph[m][1]]});
+  // Black Friday: while the sale is live every price is lowered (same rounding as the server). Deposits, tax and stock are not touched.
+  var f=(window.FS_BF&&window.FS_BF.factor&&window.FS_BF.factor())||1;o.sale=f;
+  if(f<1){['t','c','a','b','wh','sh','ex','dl','phr'].forEach(function(k){o[k]=rd(o[k]*f)});Object.keys(o.ph).forEach(function(m){o.ph[m][0]=rd(o.ph[m][0]*f)})}
   return o;
 }
 function priceMap(o){
@@ -36,8 +42,8 @@ function priceMap(o){
 }
 function swapText(str,m,o){
   var nums=Object.keys(m).sort(function(a,b){return b.length-a.length}).join('|');
-  str=str.replace(new RegExp('\\$('+nums+')(?![\\d])','g'),function(x,n){return '$'+m[n]});
-  str=str.replace(new RegExp('(?<![\\d.,])('+nums+')(?=[\\s\\u00a0\\u202f]\\$)','g'),function(x,n){return m[n]});
+  str=str.replace(new RegExp('\\$('+nums+')(?![\\d])','g'),function(x,n){return '$'+fx(m[n])});
+  str=str.replace(new RegExp('(?<![\\d.,])('+nums+')(?=[\\s\\u00a0\\u202f]\\$)','g'),function(x,n){var r=fx(m[n]);return lang()==='fr'?r.replace('.',','):r});
   if(o.tax!==DEF.tax)str=str.replace(/(?<![\d.,])6(?=\s?%)/g,o.tax);
   if(o.xh!==DEF.xh)str=str.replace(/(?<![\d.,])25(?=\s?%)/g,o.xh);
   return str;
@@ -56,7 +62,7 @@ function applyData(c){
     Object.keys(T[l]).forEach(function(k){if(k.indexOf('i:')===0&&typeof T[l][k]==='string')D[l][k.slice(2)]=T[l][k]});
   });
   if(typeof FSP!=='undefined'){
-    FSP.t=o.t;FSP.c=o.c;FSP.a=o.a;FSP.b=o.b;FSP.wh=o.wh;FSP.wd=o.wd;FSP.sh=o.sh;FSP.tax=o.tax/100;FSP.dep=o.dep/100;FSP.xh=o.xh/100;
+    FSP.t=o.t;FSP.c=o.c;FSP.a=o.a;FSP.b=o.b;FSP.wh=o.wh;FSP.wd=o.wd;FSP.sh=o.sh;FSP.tax=o.tax/100;FSP.dep=o.dep/100;FSP.xh=o.xh/100;FSP.mt=o.mt;FSP.mc=o.mc;
   }
   if(typeof P!=='undefined')P.forEach(function(r){var q=o.ph[r[0]];if(q){r[1]=q[0];r[2]=q[1]}});
   F.o=o;F.m=m;
@@ -65,13 +71,12 @@ function patchPrices(c){
   var o=F.o,m=F.m;if(!o)return;
   document.querySelectorAll('.price,label.opt b').forEach(function(e){
     if(e._op===undefined)e._op=e.textContent;
-    var base=e._op.replace(/\s/g,'');if(!/^\$\d+$/.test(base))return;
-    e.textContent=swapText(base,m,o);
+    var base=e._op.replace(/\s/g,'');if(!/^\$\d+(\/\$\d+)?\+?$/.test(base))return;
+    var nv=swapText(e._op,m,o);
+    if(o.sale<1&&nv!==e._op){ // show the old price crossed out next to the sale price
+      e.textContent='';var w=document.createElement('s');w.className='bf-was';w.textContent=e._op.trim();e.appendChild(w);e.appendChild(document.createTextNode(' '+nv));
+    }else e.textContent=nv;
   });
-  if(typeof P!=='undefined'){
-    document.querySelectorAll('#pho label b').forEach(function(b,i){if(P[i])b.textContent='$'+P[i][1]});
-    document.querySelectorAll('#pg .price').forEach(function(b,i){if(P[i])b.textContent='$'+P[i][1]});
-  }
   try{if(typeof upd==='function')upd()}catch(e){}
 }
 
@@ -217,6 +222,7 @@ function applyAll(){
     }
   });
   applyFx(c);
+  try{if(window.FS_BF&&window.FS_BF.render)window.FS_BF.render()}catch(e){}
 }
 F.tag=tag;F.applyAll=applyAll;F.applyText=applyText;F.lang=lang;
 var st=document.createElement('style');st.textContent='.cms-hide{display:none!important}img,video{max-width:100%}body{overflow-x:clip}.cms-add{overflow-wrap:anywhere}.cms-add img,.cms-add video{max-width:100%}.cms-add .btn{display:inline-block}.cms-bar a{color:inherit}';document.head.appendChild(st);
@@ -224,6 +230,7 @@ tag();
 if(typeof window.tr==='function'){var o=window.tr;window.tr=function(){var r=o.apply(this,arguments);applyText();return r}}
 if(/[?&]cmsedit=1/.test(location.search)){F.edit=true;return}
 var CL=null,LAST='';
+try{applyAll()}catch(e){console.warn('first apply failed',e)}
 async function pull(){
   try{
     if(!CL){
@@ -234,6 +241,7 @@ async function pull(){
     var q=await CL.from('site_settings').select('content').eq('id',1).maybeSingle();
     if(q.data&&q.data.content){var j=JSON.stringify(q.data.content);if(j!==LAST){LAST=j;F.content=q.data.content;applyAll()}}
   }catch(e){console.warn('Fortune CMS unavailable',e)}
+  F.loaded=true;
 }
 pull();
 document.addEventListener('visibilitychange',function(){if(!document.hidden)pull()});
