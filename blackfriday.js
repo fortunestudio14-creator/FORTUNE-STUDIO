@@ -18,7 +18,7 @@
   }
   function cfg() {
     var c = (window.FS_CMS && window.FS_CMS.content && window.FS_CMS.content.bf) || {}, p = parseFloat(c.pct);
-    return { on: c.on !== false, pct: isFinite(p) && p > 0 && p <= 90 ? p : DEF.pct, start: YMD.test(c.start || '') ? c.start : DEF.start, end: YMD.test(c.end || '') ? c.end : DEF.end };
+    return { on: c.on !== false, al: c.alert !== false, pct: isFinite(p) && p > 0 && p <= 90 ? p : DEF.pct, start: YMD.test(c.start || '') ? c.start : DEF.start, end: YMD.test(c.end || '') ? c.end : DEF.end };
   }
   function info() {
     var c = cfg(), s = etMidnight(c.start), e = etMidnight(c.end), n = Date.now() + skew;
@@ -41,6 +41,19 @@
     return a.toLocaleDateString(loc, o) + ' – ' + b.toLocaleDateString(loc, { day: 'numeric', month: mo(a) === mo(b) ? undefined : 'short', timeZone: TZ });
   }
 
+  var ALERT_CSS = '#bf{display:none!important}' +
+    '#bfa{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:18px;background:rgba(5,5,5,.6);backdrop-filter:blur(6px);opacity:0;transition:opacity .35s ease}#bfa[hidden]{display:none}#bfa.on{opacity:1}' +
+    '.bfa-card{position:relative;width:min(440px,100%);overflow:hidden;text-align:center;padding:34px 26px 26px;border-radius:26px;border:1px solid rgba(232,185,159,.4);box-shadow:0 30px 90px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07);' +
+    'background:radial-gradient(120% 90% at 50% 0%,rgba(232,185,159,.2),transparent 60%),linear-gradient(150deg,#1a1410,#0d0d0d 70%);transform:translateY(22px) scale(.97);transition:transform .5s cubic-bezier(.2,.8,.2,1)}#bfa.on .bfa-card{transform:none}' +
+    '.bfa-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--tx);font:400 18px/1 Outfit,system-ui,sans-serif;cursor:pointer;padding:0;display:grid;place-items:center}.bfa-x:hover{background:var(--ac);color:#17110d}' +
+    '.bfa-eye{display:inline-flex;align-items:center;gap:9px;font:500 .72rem Outfit,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:var(--ac)}' +
+    '.bfa-t{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 16px;margin:12px 0 4px;padding:0}.bfa-t span{font:400 clamp(2.6rem,12vw,3.6rem)/1 Yellowtail,cursive;background:linear-gradient(180deg,#fff7ea,#e8b99f 70%,#b98a70);-webkit-background-clip:text;background-clip:text;color:transparent}' +
+    '.bfa-t b{display:grid;place-items:center;width:74px;aspect-ratio:1;border-radius:50%;transform:rotate(-8deg);background:conic-gradient(from 210deg,#f3cdb8,#e8b99f,#b98a70,#f3cdb8);color:#1a1210;font:600 1.5rem/1 Outfit,system-ui,sans-serif;box-shadow:0 10px 30px rgba(232,185,159,.28)}' +
+    '.bfa-sub{margin:8px auto 16px;max-width:30rem;color:var(--mu);font:300 1.02rem/1.5 Outfit,system-ui,sans-serif}' +
+    '.bfa-cd{display:inline-flex;flex-direction:column;gap:4px;margin:0 0 18px;padding:10px 22px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}.bfa-cd span{font:500 .68rem Outfit,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--mu)}.bfa-cd b{font:600 1.8rem/1.1 Outfit,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--tx)}' +
+    '.bfa-cta{display:flex;justify-content:center;background:var(--ac);color:#17110d!important;font-weight:600}.bfa-fine{display:block;margin-top:12px;color:var(--mu);font:400 .78rem Outfit,system-ui,sans-serif}' +
+    '#bfpill{opacity:.26;padding:6px 11px 6px 9px;font-size:.7rem;gap:7px;background:rgba(18,14,11,.7);cursor:pointer;transition:opacity .25s ease;-webkit-appearance:none;appearance:none}#bfpill:hover,#bfpill:focus-visible,#bfpill:active{opacity:1}#bfpill i{width:7px;height:7px}' +
+    '@media(max-width:480px){.bfa-card{padding:30px 18px 22px}#bfa{place-items:end center;padding:12px}}@media(prefers-reduced-motion:reduce){#bfa,.bfa-card,#bfpill{transition:none}}';
   var CSS = '#bf{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:clamp(18px,3vw,34px) 20px 0}' +
     '#bf[hidden]{display:none}' +
     '.bf-card{position:relative;overflow:hidden;border-radius:28px;padding:clamp(24px,4.2vw,46px);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(22px,4vw,48px);align-items:center;' +
@@ -82,7 +95,7 @@
     '#bfpill{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));z-index:60;display:none;align-items:center;gap:10px;padding:10px 16px 10px 12px;border-radius:99px;background:rgba(18,14,11,.94);backdrop-filter:blur(10px);border:1px solid rgba(232,185,159,.5);box-shadow:0 12px 34px rgba(0,0,0,.55);color:var(--tx);text-decoration:none;font:500 .82rem Outfit,system-ui,sans-serif;cursor:pointer}#bfpill.on{display:inline-flex;animation:bfin .5s cubic-bezier(.2,.8,.2,1)}#bfpill i{width:9px;height:9px;border-radius:50%;background:var(--ac)}#bfpill[data-s=live] i{background:#ff4d4d;animation:bfpulse 1.6s infinite}#bfpill b{color:var(--ac);font-variant-numeric:tabular-nums;font-weight:600}@keyframes bfin{from{transform:translateY(20px);opacity:0}}' +
     '.bf-note b{color:var(--tx)}' +
     '@media(max-width:820px){.bf-card{grid-template-columns:1fr;text-align:center}.bf-t{justify-content:center}.bf-sub{margin-left:auto;margin-right:auto}.bf-eye{justify-content:center}.bf-lab{justify-content:center;flex-wrap:wrap}}' +
-    '@media(max-width:820px){.bf-chips,.bf-trust{justify-content:center}}@media(max-width:480px){#bfpill{font-size:.76rem;padding:9px 13px 9px 11px}}@media(prefers-reduced-motion:reduce){.bf-card:before,.bf-dot,.bf-n.tick,#bfpill{animation:none}.bf-bar i{transition:none}}';
+    '@media(max-width:820px){.bf-chips,.bf-trust{justify-content:center}}@media(max-width:480px){#bfpill{font-size:.76rem;padding:9px 13px 9px 11px}}@media(prefers-reduced-motion:reduce){.bf-card:before,.bf-dot,.bf-n.tick,#bfpill{animation:none}.bf-bar i{transition:none}}' + ALERT_CSS;
 
   function build() {
     if (root) return true;
@@ -101,15 +114,62 @@
     root.querySelectorAll('[data-k]').forEach(function (e) { els[e.dataset.k] = e; });
     root.querySelectorAll('[data-n]').forEach(function (e) { els['n' + e.dataset.n] = e; });
     root.querySelectorAll('[data-u]').forEach(function (e) { els['u' + e.dataset.u] = e; });
-    var pill = document.createElement('a'); pill.id = 'bfpill'; pill.href = '#book'; pill.innerHTML = '<i></i><span data-p="t"></span><b data-p="c"></b>'; document.body.appendChild(pill);
+    var pill = document.createElement('button'); pill.id = 'bfpill'; pill.type = 'button'; pill.onclick = function () { F.showAlert(true); }; pill.innerHTML = '<i></i><span data-p="t"></span><b data-p="c"></b>'; document.body.appendChild(pill);
     els.pill = pill; els.pt = pill.querySelector('[data-p=t]'); els.pc = pill.querySelector('[data-p=c]'); inView = true;
-    if (window.IntersectionObserver) new IntersectionObserver(function (en) { inView = en[0].isIntersecting; F.render(); }, { threshold: 0.15 }).observe(root);
     els.card = root.firstChild; els.bar = root.querySelector('.bf-bar i'); els.barw = root.querySelector('.bf-bar');
     // note inside the booking window (shown only while the sale is live)
     var tot = document.querySelector('#s2 .tot');
     if (tot && !document.getElementById('bfn')) { var nt = document.createElement('div'); nt.id = 'bfn'; nt.className = 'bf-note'; nt.hidden = true; tot.parentNode.insertBefore(nt, tot.nextSibling); }
     return true;
   }
+  // ---- Alert shown when someone opens the site (once per visit), then it shrinks to a nearly invisible reminder ----
+  var EDIT = /[?&]cmsedit=1/.test(location.search), A = { el: null, open: false, dismissed: false, key: '', t0: Date.now(), mem: '', timer: 0, hover: false, e: {} };
+  function akey(i) { return 'fs_bfa_' + i.st + '_' + i.pct + '_' + i.c.start + '_' + i.c.end; }
+  function seen(i) { try { return sessionStorage.getItem(akey(i)) === '1'; } catch (e) { return A.mem === akey(i); } }
+  function mark(i) { try { sessionStorage.setItem(akey(i), '1'); } catch (e) { A.mem = akey(i); } }
+  function buildAlert() {
+    if (A.el) return;
+    var d = document.createElement('div'); d.id = 'bfa'; d.hidden = true; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-labelledby', 'bfa-t');
+    d.innerHTML = '<div class="bfa-card"><button type="button" class="bfa-x" aria-label="Close">✕</button><span class="bfa-eye"><i class="bf-dot"></i><span data-a="eye"></span></span>' +
+      '<h2 class="bfa-t" id="bfa-t"><span data-a="title"></span><b data-a="pct"></b></h2><p class="bfa-sub" data-a="sub"></p>' +
+      '<div class="bfa-cd"><span data-a="lab"></span><b data-a="cd"></b></div><a class="btn bfa-cta" href="#book" data-a="cta"></a><small class="bfa-fine" data-a="fine"></small></div>';
+    document.body.appendChild(d); A.el = d;
+    d.querySelectorAll('[data-a]').forEach(function (e) { A.e[e.dataset.a] = e; });
+    d.querySelector('.bfa-x').onclick = closeAlert;
+    d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('.bfa-cta')) closeAlert(); });
+    d.addEventListener('mouseenter', function () { A.hover = true; }); d.addEventListener('mouseleave', function () { A.hover = false; });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && A.open) closeAlert(); });
+  }
+  function paintAlert(i, T, live, p, cd) {
+    if (!A.el) return;
+    setText(A.e.eye, T.eyebrow + ' · ' + dr(i)); setText(A.e.title, T.title); setText(A.e.pct, '−' + p + '%');
+    setText(A.e.sub, (live ? T.subL : T.subB).replace('{p}', p)); setText(A.e.lab, live ? T.live : T.before); setText(A.e.cd, cd);
+    setText(A.e.cta, T.cta.replace('{p}', p)); setText(A.e.fine, T.t1);
+  }
+  function openAlert(i) {
+    buildAlert(); A.open = true; A.el.hidden = false; if (i) mark(i);
+    F.render(); requestAnimationFrame(function () { A.el.classList.add('on'); var x = A.el.querySelector('.bfa-x'); if (x) x.focus({ preventScroll: true }); });
+    clearTimeout(A.timer);
+    (function wait() { A.timer = setTimeout(function () { if (!A.open) return; if (A.hover) return wait(); closeAlert(); }, 12000); })(); // shrinks by itself after 12 seconds
+  }
+  function closeAlert() {
+    clearTimeout(A.timer); if (!A.open) return; A.open = false; A.dismissed = true;
+    if (A.el) { A.el.classList.remove('on'); setTimeout(function () { if (!A.open && A.el) A.el.hidden = true; }, 380); }
+    F.render();
+  }
+  F.showAlert = function (force) { var i = info(); if (i.st !== 'before' && i.st !== 'live') return false; openAlert(force ? null : i); return true; };
+  function driveAlert(i, T, live, p, cd) {
+    if (A.key !== akey(i)) { A.key = akey(i); A.dismissed = false; if (A.open) closeAlert(); }
+    if (A.open) paintAlert(i, T, live, p, cd);
+    if (EDIT || A.open || A.dismissed) return;
+    if (seen(i)) { A.dismissed = true; return; } // already shown in this visit: only the faint reminder
+    var ready = (window.FS_CMS && window.FS_CMS.loaded) || Date.now() - A.t0 > 2500; // wait for the saved settings so a switched-off alert never flashes
+    if (!ready) return;
+    if (!i.c.al || seen(i)) { A.dismissed = true; return; }
+    if (document.querySelector('dialog[open]') || document.hidden) return; // do not interrupt the booking window; try again in a second
+    openAlert(i);
+  }
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
   function setText(e, v) { if (e && e.textContent !== v) e.textContent = v; }
 
@@ -120,7 +180,7 @@
     if (nt) { nt.hidden = !live; if (live) { var sb = document.getElementById('sb'), sv = sb ? parseFloat(sb.textContent.replace(/[^0-9.]/g, '')) : NaN, ff = 1 - i.pct / 100, a = isFinite(sv) && sv > 0 ? Math.round((sv / ff - sv) * 100) / 100 : 0;
       nt.innerHTML = ''; nt.append(T.note.replace('{p}', fmtp(i.pct))); if (a > 0) { nt.append(' · '); var bb = document.createElement('b'); bb.textContent = T.save.replace('{a}', '$' + a.toFixed(2)); nt.append(bb); } } }
     root.hidden = !show;
-    if (!show) { if (els.pill) els.pill.classList.remove('on'); return; }
+    if (!show) { if (els.pill) els.pill.classList.remove('on'); if (A.open) closeAlert(); return; }
     var p = fmtp(i.pct), target = live ? i.e : i.s, left = Math.max(0, Math.floor((target - i.n) / 1000));
     var v = { d: Math.floor(left / 86400), h: Math.floor(left % 86400 / 3600), m: Math.floor(left % 3600 / 60), s: left % 60 };
     els.card.dataset.s = i.st;
@@ -144,10 +204,11 @@
     setText(els.t1, T.t1); setText(els.t2, T.t2); setText(els.t3, T.t3);
     var cd = (v.d ? v.d + 'd ' : '') + pad(v.h) + ':' + pad(v.m) + ':' + pad(v.s);
     els.pill.dataset.s = i.st; setText(els.pt, live ? T.pill.replace('{p}', p) + ' · ' : T.pillB + ' '); setText(els.pc, cd);
-    els.pill.classList.toggle('on', !inView);
+    els.pill.classList.toggle('on', A.dismissed && !A.open && !EDIT);
     var pr = live ? Math.min(100, Math.max(0, (i.n - i.s) / (i.e - i.s) * 100)) : 0;
     els.bar.style.width = pr + '%'; els.barw.setAttribute('aria-valuenow', Math.round(pr)); els.barw.setAttribute('aria-label', T.prog);
     root._init = true;
+    driveAlert(i, T, live, p, cd);
     var mk = Math.floor(left / 60); // screen readers get the time once a minute, not every second
     if (root._mk !== mk) { root._mk = mk; root.setAttribute('aria-label', (live ? T.live : T.before) + ' ' + v.d + ' ' + T.d + ' ' + v.h + ' ' + T.h + ' ' + v.m + ' ' + T.m); }
   };
