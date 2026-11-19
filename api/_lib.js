@@ -108,7 +108,15 @@ async function quote(b, coupon) {
   }
   s = rd(s);
   let disc = 0, cl = "";
-  if (coupon && coupon.pct > 0) { const ns = rd(s * (1 - coupon.pct / 100)); disc = rd(s - ns); s = ns; cl = " · Code −" + coupon.pct + "%"; } // same rounding as the browser
+  if (coupon && (coupon.pct > 0 || coupon.amt > 0)) {
+    // The code is "% off" or "$ off", taken from the price before tax. The customer always pays a small minimum
+    // (Stripe cannot charge less than $0.50), so the price never goes below floorS. Same formula as the browser.
+    const floorS = Math.max(1, Math.ceil(0.5 / (DEPS * (1 + TAX)) * 100) / 100 + 0.01);
+    let ns = coupon.amt > 0 ? rd(s - coupon.amt) : rd(s * (1 - coupon.pct / 100));
+    ns = rd(Math.max(ns, Math.min(s, floorS)));
+    disc = rd(s - ns); s = ns;
+    cl = " · Code −" + (coupon.amt > 0 ? money(coupon.amt) : coupon.pct + "%");
+  }
   const tax = Math.round(s * TAX * 100) / 100, total = rd(s + tax);
   const dep = b.pp === "dep";
   const due = dep ? Math.round(total * DEPS * 100) / 100 : total;
@@ -146,12 +154,15 @@ async function findCode(code) {
   const r = await stripe().promotionCodes.list({ code, limit: 5 });
   const pc = r.data.find((x) => String(x.code).toUpperCase() === code && x.metadata && x.metadata.app === "fortune");
   if (!pc) return { state: "none" };
+  // A code is either "% off" (pct, up to 100) or "$ off" (amt, dollars). The owner picks which one in /admin.
   let pct = Number(pc.metadata.pct) || (pc.coupon && pc.coupon.percent_off) || 0;
-  pct = Math.min(90, Math.max(0, pct));
-  if (!pct) return { state: "none" };
-  if (pc.metadata.used === "1") return { state: "used", pc, pct };
-  if (!pc.active) return { state: "off", pc, pct };
-  return { state: "ok", pc, pct };
+  pct = Math.min(100, Math.max(0, pct));
+  let amt = Number(pc.metadata.amt) || (pc.coupon && pc.coupon.amount_off ? pc.coupon.amount_off / 100 : 0) || 0;
+  amt = Math.min(10000, Math.max(0, amt));
+  if (!pct && !amt) return { state: "none" };
+  if (pc.metadata.used === "1") return { state: "used", pc, pct, amt };
+  if (!pc.active) return { state: "off", pc, pct, amt };
+  return { state: "ok", pc, pct, amt };
 }
 // Public check (the website calls it when someone presses Apply). Never says anything about other codes.
 async function couponFor(code) {
@@ -159,7 +170,7 @@ async function couponFor(code) {
   const f = await findCode(code);
   if (f.state !== "ok") return { ok: false, reason: f.state === "none" ? "invalid" : f.state };
   if (saleState(bf).state === "live" && !cp.stack) return { ok: false, reason: "sale" };
-  return { ok: true, pct: f.pct, code: String(f.pc.code).toUpperCase(), id: f.pc.id };
+  return { ok: true, pct: f.pct, amt: f.amt, code: String(f.pc.code).toUpperCase(), id: f.pc.id };
 }
 // Right before payment: refuse a code that already has a paid booking, and close the same person's older unfinished checkouts that hold the code.
 async function claimCode(code) {
