@@ -18,7 +18,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 </style></head><body>
 <section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (you will still verify with a code each time)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the 6-digit code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><label>6-digit code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaPk" type="button" style="display:none">Use Face ID / fingerprint / device PIN</button><button id="mfaOut" class="s" type="button">Use another account</button></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
-<div id="top"><button id="save">Save and publish</button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
+<div id="top"><button id="save">Save and publish</button><button id="pkBtn" class="s" style="display:none"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
 <details open><summary>Selected item</summary><div id="sel" class="hint">Click something on the site preview.</div></details>
 <details><summary>Photos, logo and videos</summary><div id="media"></div></details>
@@ -72,13 +72,19 @@ const pkGet=()=>{try{return localStorage.getItem(PK)}catch(e){return null}};
 async function pkAvail(){try{return !!(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())}catch(e){return false}}
 async function pkEnable(){
   const c=await navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:'Fortune Studio Admin'},user:{id:rnd(16),name:'admin',displayName:'Admin'},
-    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},hints:['client-device'],timeout:60000}});
   localStorage.setItem(PK,b64(c.rawId))}
 async function pkUnlock(){
   const id=pkGet();if(!id)return false;
-  await navigator.credentials.get({publicKey:{challenge:rnd(32),allowCredentials:[{type:'public-key',id:unb64(id)}],userVerification:'required',timeout:60000}});
+  await navigator.credentials.get({publicKey:{challenge:rnd(32),allowCredentials:[{type:'public-key',id:unb64(id)}],userVerification:'required',hints:['client-device'],timeout:60000}});
   const a=await sb.auth.mfa.getAuthenticatorAssuranceLevel(); // the saved login must already be verified with a code before
   return !!(a.data&&a.data.currentLevel==='aal2')}
+async function pkRefresh(){const b=$('pkBtn');if(!await pkAvail()){b.style.display='none';return}b.style.display='';b.textContent=pkGet()?'🔓 Turn OFF Touch ID / PIN unlock':'🔐 Turn ON Touch ID / PIN unlock'}
+$('pkBtn').onclick=async()=>{ // direct click = the browser allows the Touch ID / PIN prompt
+  try{if(pkGet()){localStorage.removeItem(PK);say('status','Touch ID / PIN unlock is OFF on this device. You will type the code next time.')}
+  else{await pkEnable();say('status','✔ Touch ID / PIN unlock is ON for this device only. Next time, just confirm with your fingerprint or laptop password.')}}
+  catch(e){say('status','Could not turn it on: '+(e&&e.message?e.message:e)+'. Choose "This device" / Touch ID in the browser box, not another phone.')}
+  pkRefresh()};
 $('mfaPk').onclick=async()=>{try{if(await pkUnlock())await enterAdmin();else say('loginStatus','This device is not verified yet. Type your code.')}catch(e){say('loginStatus','Not unlocked. Try again or type your code.')}};
 /* ===== Verification (authenticator app code) ===== */
 let MFA_ID=null;
@@ -97,12 +103,12 @@ $('mfaGo').onclick=async()=>{try{
   const ch=await sb.auth.mfa.challenge({factorId:MFA_ID});if(ch.error)throw ch.error;
   const v=await sb.auth.mfa.verify({factorId:MFA_ID,challengeId:ch.data.id,code});if(v.error)throw Error('Wrong or expired code. Try the newest one.');
   if(!$('remember').checked)addEventListener('pagehide',()=>{sb.auth.signOut({scope:'local'})});
-  if(!pkGet()&&await pkAvail()&&confirm('Next time on this device, unlock with Face ID / fingerprint / your laptop PIN instead of typing a code?')){try{await pkEnable()}catch(e){}}
   await enterAdmin();
 }catch(e){say('loginStatus',e.message)}};
 $('mfaCode').addEventListener('keydown',e=>{if(e.key==='Enter')$('mfaGo').click()});
 $('mfaOut').onclick=async()=>{try{localStorage.removeItem(PK)}catch(e){}await sb.auth.signOut();location.reload()};
 async function enterAdmin(){
+  pkRefresh();
   const q=await sb.from('site_settings').select('content').eq('id',1).maybeSingle();if(q.error)throw q.error;
   C=norm(q.data&&q.data.content);$('login').style.display='none';$('app').style.display='grid';
   const v=$('view');const go=()=>start();v.contentWindow&&v.contentDocument&&v.contentDocument.readyState==='complete'&&v.contentWindow.FS_CMS?go():v.addEventListener('load',go,{once:true});
