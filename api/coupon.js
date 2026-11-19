@@ -10,6 +10,6 @@ module.exports = async (req, res) => {
   try {
     const b = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const r = await couponFor(b.code);
-    res.status(200).json(r.ok ? { ok: true, pct: r.pct, code: r.code } : { ok: false, reason: r.reason });
+    res.status(200).json(r.ok ? { ok: true, pct: r.pct, amt: r.amt, code: r.code } : { ok: false, reason: r.reason });
   } catch (e) { console.error(e); res.status(200).json({ ok: false, reason: "error" }); }
 };
