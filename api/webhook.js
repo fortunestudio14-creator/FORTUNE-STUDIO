@@ -1,5 +1,12 @@
 const { stripe } = require("./_lib");
 
+// A discount code is used up the moment its payment is confirmed (idempotent: safe if Stripe retries the webhook).
+async function redeem(m) {
+  if (!m.coupon_id) return;
+  try { await stripe().promotionCodes.update(m.coupon_id, { active: false, metadata: { used: "1", used_date: new Date().toISOString().slice(0, 10), booking: m.date_label || "", customer: String(m.name || "").slice(0, 100) } }); }
+  catch (e) { console.error("coupon redeem failed", e.message); }
+}
+
 const raw = (r) => new Promise((ok, no) => { const c = []; r.on("data", (x) => c.push(x)); r.on("end", () => ok(Buffer.concat(c))); r.on("error", no); });
 const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const OWNER = process.env.OWNER_EMAIL || "fortunestudio14@gmail.com";
@@ -23,7 +30,8 @@ async function notify(s) {
   if (m.app !== "fortune") return;
   const email = s.customer_details?.email || s.customer_email;
   const rows = [["date_label", "Date"], ["time", "Start time"], ["service", "Service"], ["subtotal", "Subtotal"], ["tax", "Tax"], ["total", "Total"], ["paid_now", "Paid now"], ["balance", "Remaining balance"]];
-  const owner = [...rows, ["name", "Name"], ["phone", "Phone"], ["address", "Event address"], ["delivery", "Delivery and pickup"]];
+  if (m.coupon) rows.splice(1, 0, ["coupon", "Discount code"], ["discount", "Discount"]);
+  const owner = [...rows, ...(m.sale && m.sale !== "-" ? [["sale", "Sale"]] : []), ["name", "Name"], ["phone", "Phone"], ["address", "Event address"], ["delivery", "Delivery and pickup"]];
   const head = (t) => `<div style='font-family:Arial,sans-serif;max-width:520px'><h2 style='margin:0 0 12px'>${t}</h2>`;
   const foot = "<p style='color:#666;font-size:13px'>Fortune Studio LLC · 570-309-5776 · fortunestudio14@gmail.com</p></div>";
   const brand = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;border:1px solid #e8e1d6;border-radius:14px;overflow:hidden;background:#fff"><div style="background:#171717;color:#f4e7cf;padding:24px;text-align:center"><div style="font-size:24px;letter-spacing:4px;font-weight:700">FORTUNE STUDIO</div><div style="font-size:10px;letter-spacing:3px;margin-top:6px;color:#d8c7a8">LLC · PHOTOGRAPHY & EVENTS</div></div><div style="padding:24px">`;
@@ -46,7 +54,7 @@ module.exports = async (req, res) => {
   try { ev = stripe().webhooks.constructEvent(await raw(req), req.headers["stripe-signature"], process.env.STRIPE_WEBHOOK_SECRET); }
   catch (e) { return res.status(400).send("Bad signature"); }
   if (["checkout.session.completed", "checkout.session.async_payment_succeeded"].includes(ev.type) && ev.data.object.payment_status === "paid") {
-    try { await notify(ev.data.object); } catch (e) { console.error(e); return res.status(500).send("retry"); }
+    try { await redeem(ev.data.object.metadata || {}); await notify(ev.data.object); } catch (e) { console.error(e); return res.status(500).send("retry"); }
   }
   res.status(200).json({ received: true });
 };
