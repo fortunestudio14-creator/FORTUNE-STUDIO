@@ -200,7 +200,11 @@ async function isOwner(req) {
     if (!r.ok) return false;
     let aal = "", amr = []; try { const p = JSON.parse(Buffer.from(tok.split(".")[1], "base64url").toString()); aal = p.aal; amr = p.amr || []; } catch (e) {}
     const emailCode = Array.isArray(amr) && amr.some((x) => x && x.method === "otp"); // signed in with a code sent to the owner's email
-    if (aal !== "aal2" && !emailCode) return false; // password alone is not enough: an app code or an email code is required
+    if (aal !== "aal2" && !emailCode) { // password alone is enough ONLY if the owner switched the backup code off in /admin
+      let off = false;
+      try { const f = await fetch(url.replace(/\/$/, "") + "/rest/v1/admin_security?id=eq.1&select=nocode", { headers: { apikey: key } }); const j = f.ok ? await f.json() : []; off = !!(j[0] && j[0].nocode === true); } catch (e) {}
+      if (!off) return false;
+    }
     const u = await r.json();
     return String(u.email || "").toLowerCase() === String(process.env.OWNER_EMAIL || "fortunestudio14@gmail.com").toLowerCase();
   } catch (e) { return false; }
