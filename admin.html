@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fortune Studio — Admin</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fortune Studio — Admin</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101114;color:#f7f4ef;font:15px system-ui}
 input,textarea,button,select{font:inherit;border-radius:9px;padding:10px;border:1px solid #454a55;background:#111318;color:#fff;width:100%;margin:5px 0 10px}
@@ -34,14 +34,18 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <button id="ns_add">Add to site</button><div class="hint">You can add as many as you want. Below, use the arrows to move each one up or down, and "Position" to put it after any section.</div><div id="ns_list"></div></details>
 <details><summary>Background and effects</summary><div id="fxp"></div></details>
 <details><summary>Add photo to gallery</summary><input id="ng_f" type="file" accept="image/*"><button id="ng_add">Upload and add</button><div id="ng_list"></div></details>
-<details><summary>Prices (real, also at checkout)</summary><div id="prices"></div></details>
+<details><summary>Rent for your event: title, text and button</summary><div id="rentp"></div></details>
+<details><summary>Rent for your event: prices and stock</summary><div id="prices"></div></details>
+<details><summary>Coupon codes (10% off, one use each)</summary><div id="cpp"></div></details>
+<details id="avd"><summary>Available dates and hours (re-open a booked date)</summary><div id="avp"></div></details>
+<details><summary>Black Friday sale (automatic)</summary><div id="bfp"></div></details>
 <details><summary>All texts (search and edit)</summary>
 <div class="row"><label>Language</label><select id="lg"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option></select></div>
 <div class="row"><button class="s" id="openbook">Open booking form</button><button class="s" id="closebook">Close it</button></div>
 <input id="q" placeholder="Search a word, like: delivery, tax, tables..."><div id="texts" class="hint">Type at least 2 letters.</div></details>
 <details><summary>My edits (see and undo)</summary><div id="edits"></div></details>
 <details><summary>Saved versions and reset</summary><div id="vers"></div><button id="reset" class="d">Reset whole site to default</button><div class="hint">Reset removes all your edits and saves right away. Your old versions stay in the list so you can bring them back.</div></details>
-<p class="hint">Text edits apply to the language selected on the site preview. Prices shown here are display text only; booking totals are calculated in the site code.</p>
+<p class="hint">Text edits apply to the language selected on the site preview. Prices, stock limits and the Black Friday sale are real: the site, the booking total and the Stripe payment all use them after you click Save and publish.</p>
 </div>
 <iframe id="view" src="/?cmsedit=1"></iframe></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -49,7 +53,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null,bypass=false;
 const say=(id,s)=>$(id).textContent=s;
 function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
-function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
+function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.cp=c.cp||{};c.av=c.av||{};c.av.freed=c.av.freed||[];c.av.win=c.av.win||{};c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
 async function init(){
   if(!window.supabase)throw Error('Supabase library did not load. Refresh the page.');
   const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();
@@ -78,9 +82,22 @@ function ready(injected){
   refresh();drawAll();dirty=false;
   if(injected)say('status','Editing works. IMPORTANT: upload the new index.html to GitHub, or the public site will not show your changes.');
 }
+const BFD={on:true,pct:10,start:'2026-11-27',end:'2026-11-30'};
+function drawBF(){const b=$('bfp');b.textContent='';C.bf=C.bf||{};
+  const on=el('input',{type:'checkbox',checked:C.bf.on!==false,style:'width:auto;margin:0 8px 0 0'});on.onchange=()=>{if(on.checked)delete C.bf.on;else C.bf.on=false;refresh()};
+  b.append(el('label',{style:'display:flex;align-items:center;margin:6px 0'},on,'Sale is ON (countdown and discount run by themselves)'));
+  const pct=el('input',{type:'number',min:1,max:90,step:'any',value:C.bf.pct??'',placeholder:'Now: '+BFD.pct});pct.oninput=()=>{if(pct.value==='')delete C.bf.pct;else C.bf.pct=pct.value;refresh()};
+  const st=el('input',{type:'date',value:C.bf.start||''});st.oninput=()=>{if(!st.value)delete C.bf.start;else C.bf.start=st.value;refresh()};
+  const en=el('input',{type:'date',value:C.bf.end||''});en.oninput=()=>{if(!en.value)delete C.bf.end;else C.bf.end=en.value;refresh()};
+  b.append(el('label',{textContent:'Discount (%)'}),pct,el('label',{textContent:'Starts (12:00 AM Scranton time). Empty = '+BFD.start}),st,el('label',{textContent:'Back to normal prices on (12:00 AM Scranton time). Empty = '+BFD.end}),en,
+   el('label',{style:'display:flex;align-items:center;margin:12px 0 4px'},Object.assign(el('input',{type:'checkbox',checked:C.bf.alert!==false,style:'width:auto;margin:0 8px 0 0'}),{onchange(){if(this.checked)delete C.bf.alert;else C.bf.alert=false;refresh()}}),'Show an alert when someone opens the site (once per visit)'),
+   el('div',{className:'hint',textContent:'The alert closes by itself after 12 seconds, then only a tiny, almost invisible reminder stays in the bottom-left corner (it becomes clear when touched and reopens the alert). The big banner no longer takes space on the page.'}),
+   el('button',{className:'s',textContent:'Preview the alert',onclick:()=>{try{if(!win.FS_BF.showAlert(true))say('status','The alert only shows while the sale is ON and before its end date.')}catch(e){say('status','Preview not available.')}}}),
+   el('div',{className:'hint',textContent:'Until the start date the site shows a countdown. From the start date every price on the site and at checkout is lowered automatically. On the end date everything returns to normal by itself, no action needed. Wedding deposit, tax and stock are not discounted. Empty box = original setting. Click Save and publish.'}),
+   el('button',{className:'s',textContent:'Reset Black Friday to default',onclick:()=>{delete C.bf;refresh();drawBF()}}))}
 let dirty=false;function refresh(){dirty=true;win.FS_CMS.content=C;win.FS_CMS.applyAll()}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-function drawAll(){drawFx();drawPrices();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
+function drawAll(){drawFx();drawRent();drawPrices();drawBF();drawCoupons();drawAvail();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
   const tx=t.closest('[data-cms]'),ln=t.closest('[data-cmsa]'),md=t.closest('[data-cmsm]'),bl=t.closest('[data-cmsx]');
@@ -110,7 +127,7 @@ function replaceRow(m,label){
   return w;
 }
 
-const PF=[['t','Table price, each ($)'],['c','Chair price, each ($)'],['a','Party package ($)'],['b','Celebration package ($)'],['wh','Wedding or event coverage, per hour ($)'],['wd','Wedding deposit ($)'],['sh','Space rental, per hour ($)'],['tax','Sales tax (%)'],['dep','Deposit share when paying a deposit (%)'],['xh','Extra hour adds (% of price)']];
+const PF=[['mt','Tables: most a customer can book (your stock)'],['mc','Chairs: most a customer can book (your stock)'],['t','Table price, each ($)'],['c','Chair price, each ($)'],['a','Party package ($)'],['b','Celebration package ($)'],['wh','Wedding or event coverage, per hour ($)'],['wd','Wedding deposit ($)'],['sh','Space rental, per hour ($)'],['tax','Sales tax (%)'],['dep','Deposit share when paying a deposit (%)'],['xh','Extra hour adds (% of price)']];
 const PT=[['ex','Extra edited photo ($) - shown on site only'],['dl','Delivery fee ($) - shown on site only'],['phr','Photography add-on, per hour ($) - shown on site only']];
 function drawPrices(){const b=$('prices');b.textContent='';const D=win.FS_CMS.DEF;C.prices=C.prices||{};
   const num=(k,l)=>{const i=el('input',{type:'number',min:0,step:'any',value:C.prices[k]!==undefined?C.prices[k]:'',placeholder:'Now: '+D[k]});i.oninput=()=>{if(i.value==='')delete C.prices[k];else C.prices[k]=i.value;refresh()};b.append(el('label',{textContent:l}),i)};
@@ -129,7 +146,7 @@ function drawTexts(){const b=$('texts'),q=$('q').value.trim().toLowerCase(),lg=w
   keys.forEach(k=>{const ta=el('textarea',{rows:2,value:D[lg][k]});ta.oninput=()=>{C.t[lg]=C.t[lg]||{};C.t[lg]['i:'+k]=ta.value;refresh()};
     b.append(el('div',{className:'hint',textContent:k}),ta)})}
 $('q').oninput=drawTexts;
-$('lg').onchange=()=>{const bt=doc.querySelector('[data-l="'+$('lg').value+'"]');if(bt){bypass=true;bt.click();bypass=false}setTimeout(()=>{refresh();drawTexts()},150)};
+$('lg').onchange=()=>{const bt=doc.querySelector('[data-l="'+$('lg').value+'"]');if(bt){bypass=true;bt.click();bypass=false}setTimeout(()=>{refresh();drawTexts();drawRent()},150)};
 $('openbook').onclick=()=>{try{win.openBook(1)}catch(e){say('status','Could not open the booking form.')}};
 $('closebook').onclick=()=>{try{doc.getElementById('book').close()}catch(e){}};
 
@@ -238,6 +255,9 @@ function drawEdits(){const b=$('edits');b.textContent='';let n=0;
   Object.keys(C.css).forEach(k=>add('Color changed: '+k,()=>delete C.css[k]));
   if(Object.keys(C.fx||{}).length)add('Background and effects changed',()=>C.fx={});
   Object.keys(C.ms||{}).forEach(k=>add('Media resized or restyled',()=>delete C.ms[k]));
+  if(C.bf&&Object.keys(C.bf).length)add('Black Friday settings changed',()=>delete C.bf);
+  if(C.cp&&C.cp.stack)add('Codes allowed together with the sale',()=>delete C.cp.stack);
+  if(C.av.freed.length||Object.keys(C.av.win).length)add('Re-opened dates/hours ('+(C.av.freed.length+Object.keys(C.av.win).length)+')',()=>{C.av.freed=[];C.av.win={}});
   if(C.prices&&(Object.keys(C.prices).some(k=>k!=='ph')||Object.keys(C.prices.ph||{}).length))add('Prices changed',()=>delete C.prices);
   Object.keys(C.h).forEach(k=>{const e=doc.querySelector('[data-cmsx="'+k+'"]');add('Hidden: '+((e&&e.textContent.trim().slice(0,30))||k),()=>delete C.h[k])});
   if(C.add.sections.length)add(C.add.sections.length+' added section(s)',()=>C.add.sections=[]);
@@ -250,4 +270,71 @@ async function drawVers(){const b=$('vers');b.textContent='';
   q.data.forEach(v=>b.append(el('div',{className:'row'},el('label',{textContent:new Date(v.created_at).toLocaleString()}),el('button',{className:'s',textContent:'Restore',onclick:()=>{if(!confirm('Bring back this version?'))return;C=norm(JSON.parse(JSON.stringify(v.content)));refresh();drawAll();say('status','Version restored in the preview. Click Save and publish to keep it.')}}))))}
 $('reset').onclick=async()=>{if(!confirm('Remove ALL your edits and return the site to its default?'))return;try{C=norm({});refresh();await doSave();drawAll();say('status','Done. The site is back to its default. Old versions are in Saved versions.')}catch(e){say('status','Error: '+e.message)}};
 $('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+/* ===== Rent for your event: title, text and button ===== */
+function drawRent(){const b=$('rentp');if(!b)return;b.textContent='';const lg=win.FS_CMS.lang(),D=Dobj();
+  b.append(el('div',{className:'hint',textContent:'Language you are editing: '+lg.toUpperCase()+' (change it with the language buttons on the site or the selector in "All texts"). You can also click the title directly on the site.'}));
+  [['t1','Title (default: Rent for your event)',2],['s1','Text under the title',3],['tbd','Tables card text',2],['chd','Chairs card text',2],['note','Note under the cards',3],['n3b','Button text',1]].forEach(([k,l,r])=>{
+    const ta=el('textarea',{rows:r,value:(D&&D[lg]&&D[lg][k])||''});ta.oninput=()=>{C.t[lg]=C.t[lg]||{};C.t[lg]['i:'+k]=ta.value;refresh()};b.append(fld(l,ta))});
+  const lk=(key,l)=>{const i=el('input',{value:C.l[key]||'',placeholder:'#book (booking form)'});i.oninput=()=>{if(i.value.trim())C.l[key]=i.value.trim();else delete C.l[key];refresh()};b.append(fld(l,i))};
+  lk('ai:t1@rent','Where the title goes when clicked (empty = booking form)');lk('ai:n3b@rent','Where the button goes (empty = booking form)');
+  b.append(el('div',{className:'hint',textContent:'Links: https://..., tel:+1570..., mailto:you@mail.com or #section. Prices of the cards are in "Rent for your event: prices and stock". Click Save and publish when done.'}),
+    el('div',{className:'row'},el('button',{className:'s',textContent:'Go to this section',onclick:()=>{const x=doc.getElementById('rent');if(x)x.scrollIntoView({behavior:'smooth'})}}),
+    el('button',{className:'s',textContent:'Reset these texts',onclick:()=>{['t1','s1','tbd','chd','note','n3b'].forEach(k=>{Object.keys(C.t).forEach(l=>{if(C.t[l])delete C.t[l]['i:'+k]})});delete C.l['ai:t1@rent'];delete C.l['ai:n3b@rent'];refresh();drawRent()}})))}
+
+/* ===== Owner-only server calls (coupons and bookings) ===== */
+async function srv(body){const s=(await sb.auth.getSession()).data.session;if(!s)throw Error('Please sign in again.');
+  const r=await fetch('/api/manage',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||('Server error '+r.status));return j}
+const copy=async(t,msg)=>{try{await navigator.clipboard.writeText(t);say('status',msg||'Copied.')}catch(e){prompt('Copy this:',t)}};
+
+/* ===== Coupon codes ===== */
+let CODES=null,NEWC=[];
+function drawCoupons(){const b=$('cpp');if(!b)return;b.textContent='';
+  b.append(el('div',{className:'hint',textContent:'Each code works for ONE booking, one time only. It takes the % off the price before tax. It is switched off automatically when the payment is confirmed. Give one code to each person.'}));
+  const pc=el('input',{type:'number',min:1,max:90,value:10}),ct=el('input',{type:'number',min:1,max:20,value:1}),nt=el('input',{placeholder:'For who? (optional, only you see it)',maxLength:80});
+  b.append(fld('Discount (%)',pc),fld('How many codes',ct),fld('Note',nt));
+  b.append(el('button',{textContent:'Create code(s)',onclick:async function(){this.disabled=true;try{say('status','Creating...');const j=await srv({action:'create',pct:+pc.value,count:+ct.value,note:nt.value});NEWC=j.made;say('status','✔ '+j.made.length+' code(s) created. Copy and send them.');await loadCodes()}catch(e){say('status','Error: '+e.message)}this.disabled=false}}));
+  const sk=el('input',{type:'checkbox',checked:!!C.cp.stack,style:'width:auto;margin:0 8px 0 0'});sk.onchange=()=>{if(sk.checked)C.cp.stack=true;else delete C.cp.stack;refresh()};
+  b.append(el('label',{style:'display:flex;align-items:center;margin:12px 0 4px'},sk,'Allow codes during the Black Friday sale too (both discounts add up). Click Save and publish after changing this.'));
+  const nb=el('div',{id:'cp_new'});b.append(nb);
+  const lb=el('div',{id:'cp_list',className:'hint',textContent:CODES?'':'Loading codes...'});b.append(el('button',{className:'s',textContent:'Refresh list',onclick:loadCodes}),lb);
+  paintCodes();if(!CODES)loadCodes()}
+async function loadCodes(){try{CODES=(await srv({action:'codes'})).codes}catch(e){CODES=CODES||[];const l=$('cp_list');if(l)l.textContent='Could not load codes: '+e.message;return}paintCodes()}
+function msgFor(c){return 'Your Fortune Studio discount code: '+c.code+' ('+c.pct+'% off, one use only). Enter it in the last step of the booking form at '+location.origin+'/#book'}
+function codeRow(c,fresh){const stc={ok:'Available',used:'USED',off:'Disabled'}[c.state]||c.state;
+  const d=el('div',{style:'border:1px solid #343840;border-radius:10px;padding:8px 10px;margin:8px 0;'+(fresh?'border-color:#7bd88f;background:#12241a':'')});
+  d.append(el('div',{className:'row'},el('b',{textContent:c.code,style:'font-family:ui-monospace,monospace;letter-spacing:.06em;flex:1'}),el('span',{className:'hint',textContent:c.pct+'% · '+stc})));
+  if(c.note)d.append(el('div',{className:'hint',textContent:'For: '+c.note}));
+  if(c.state==='used')d.append(el('div',{className:'hint',textContent:'Used'+(c.usedDate?' on '+c.usedDate:'')+(c.customer?' by '+c.customer:'')+(c.booking?' · booking '+c.booking:'')}));
+  if(c.state==='ok')d.append(el('div',{className:'row'},el('button',{className:'s',textContent:'Copy code',onclick:()=>copy(c.code,'Code copied.')}),el('button',{className:'s',textContent:'Copy message',onclick:()=>copy(msgFor(c),'Message copied. Paste it in WhatsApp, SMS or email.')}),
+    el('button',{className:'d',textContent:'Disable',onclick:async()=>{if(!confirm('Disable '+c.code+'? It will stop working.'))return;try{await srv({action:'off',id:c.id});await loadCodes()}catch(e){say('status','Error: '+e.message)}}})));
+  return d}
+function paintCodes(){const n=$('cp_new'),l=$('cp_list');if(!n||!l)return;n.textContent='';l.textContent='';
+  if(NEWC.length){n.append(el('b',{textContent:'New codes'}));NEWC.forEach(c=>n.append(codeRow(c,true)));n.append(el('button',{className:'s',textContent:'Copy all new codes',onclick:()=>copy(NEWC.map(c=>c.code).join('\n'),'All new codes copied.')}))}
+  if(!CODES)return;const old=CODES.filter(c=>!NEWC.some(x=>x.id===c.id)).sort((a,b)=>b.created-a.created);
+  if(!old.length&&!NEWC.length){l.textContent='No codes yet.';return}
+  if(old.length)l.append(el('b',{textContent:'All codes'}));old.forEach(c=>l.append(codeRow(c)))}
+
+/* ===== Available dates and hours ===== */
+let BK=null;
+const hrs=[...Array(25).keys()].map(i=>8+i/2),hl=v=>{const h=Math.floor(v),m=v%1?'30':'00';return (h%12||12)+':'+m+(h<12?' AM':' PM')};
+function drawAvail(){const b=$('avp');if(!b)return;b.textContent='';
+  b.append(el('div',{className:'hint',textContent:'Upcoming PAID bookings are listed here (a paid date is closed on the calendar). Use this when a customer cancels or you refunded, or when a date has room for another event at a different hour. This does NOT cancel or refund the payment (do that in Stripe). Click Save and publish after your changes; customers see it within about a minute.'}),
+    el('button',{className:'s',textContent:'Refresh bookings',onclick:loadBook}));
+  const lb=el('div',{id:'av_list',className:'hint',textContent:BK?'':'Click here to load...'});b.append(lb);paintAvail()}
+async function loadBook(){const l=$('av_list');if(l)l.textContent='Loading bookings...';try{BK=(await srv({action:'bookings'})).bookings}catch(e){if(l)l.textContent='Could not load bookings: '+e.message;return}paintAvail()}
+$('avd').addEventListener('toggle',()=>{if($('avd').open&&!BK)loadBook()});
+function paintAvail(){const l=$('av_list');if(!l)return;l.textContent='';if(!BK)return;if(!BK.length){l.textContent='No upcoming paid bookings.';return}
+  BK.forEach(k=>{const fr=C.av.freed.includes(k.id),w=C.av.win[k.id];
+    const d=el('div',{style:'border:1px solid #343840;border-radius:10px;padding:8px 10px;margin:8px 0'});
+    d.append(el('div',{style:'color:#fff;font-weight:700',textContent:(k.label||k.date)+' · '+(k.time||'')}),el('div',{className:'hint',textContent:[k.service,k.name,k.phone,k.paid&&('paid '+k.paid)].filter(Boolean).join(' · ')}));
+    if(fr){d.append(el('div',{className:'hint',style:'color:#7bd88f',textContent:'✔ This date is open again for customers.'}),el('button',{className:'s',textContent:'Close this date again',onclick:()=>{C.av.freed=C.av.freed.filter(x=>x!==k.id);refresh();paintAvail()}}))}
+    else if(w){d.append(el('div',{className:'hint',style:'color:#7bd88f',textContent:'✔ Open only for start times from '+hl(w[0])+' to '+hl(w[1])+'.'}),el('button',{className:'s',textContent:'Close this date again',onclick:()=>{delete C.av.win[k.id];refresh();paintAvail()}}))}
+    else{const f=el('select',{},...hrs.map(v=>el('option',{value:v,textContent:hl(v),selected:v===8}))),t=el('select',{},...hrs.map(v=>el('option',{value:v,textContent:hl(v),selected:v===20})));
+      d.append(el('button',{textContent:'Make this date available again',onclick:()=>{C.av.freed.push(k.id);refresh();paintAvail();say('status','Date re-opened. Click Save and publish.')}}),
+        el('div',{className:'hint',textContent:'Or open only some hours (customers can only choose a START time inside this window; the date stays marked for this booking):'}),
+        el('div',{className:'row'},el('label',{textContent:'From'}),f,el('label',{textContent:'To'}),t),
+        el('button',{className:'s',textContent:'Open only these hours',onclick:()=>{const a=+f.value,z=+t.value;if(z<a){say('status','The end hour must be after the start hour.');return}C.av.win[k.id]=[a,z];refresh();paintAvail();say('status','Hours opened. Click Save and publish.')}}))}
+    l.append(d)})}
+
 </script></body></html>
