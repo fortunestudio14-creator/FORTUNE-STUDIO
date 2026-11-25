@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fortune Studio — Visitors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b0e;--s1:rgba(255,255,255,.045);--s2:rgba(255,255,255,.08);--ln:rgba(255,255,255,.09);--tx:#f4efe6;--mu:#9b978e;--ac:#e8b99f;--ac2:#b98a70;--ok:#7bd88f;--bad:#ff7a7a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--tx);font:15px/1.5 Outfit,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(900px 500px at 85% -10%,rgba(232,185,159,.16),transparent 60%),radial-gradient(700px 480px at -10% 10%,rgba(108,140,255,.09),transparent 60%),var(--bg);background-attachment:fixed}
+.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px clamp(14px,3vw,34px);background:rgba(10,11,14,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+.brand{display:flex;align-items:baseline;gap:12px;flex:1;min-width:200px}.brand b{font:400 30px/1 Yellowtail,cursive;background:linear-gradient(180deg,#fff7ea,var(--ac) 70%,var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}.brand span{color:var(--mu);font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.seg{display:inline-flex;padding:4px;border-radius:12px;background:var(--s1);border:1px solid var(--ln)}.seg button{border:0;background:none;color:var(--mu);font:500 13px Outfit,system-ui;padding:8px 14px;border-radius:9px;cursor:pointer;transition:.2s}.seg button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#17110d;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--s1);color:var(--tx);font:500 13px Outfit,system-ui;padding:9px 14px;border-radius:11px;cursor:pointer;text-decoration:none;transition:.2s}.btn:hover{background:var(--s2)}.btn.p{background:linear-gradient(135deg,var(--ac),var(--ac2));border:0;color:#17110d;font-weight:600}.btn.d{color:var(--bad)}
+main{max-width:1180px;margin:0 auto;padding:clamp(16px,3vw,32px)}
+h1{margin:0 0 4px;font:600 clamp(24px,4vw,34px)/1.15 Outfit,system-ui}.sub{color:var(--mu);margin:0 0 22px}
+.grid{display:grid;gap:14px}.k4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.k4s{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:14px}
+.cols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.card{position:relative;background:linear-gradient(180deg,var(--s2),var(--s1));border:1px solid var(--ln);border-radius:18px;padding:18px 20px;overflow:hidden}
+.kpi .l{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:13px;letter-spacing:.04em}.kpi .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(232,185,159,.14);font-size:15px}
+.kpi .v{font:600 clamp(30px,4vw,40px)/1.1 Outfit,system-ui;margin:12px 0 2px}.kpi .h{color:var(--mu);font-size:12.5px}
+.mini{padding:13px 16px}.mini .v{font:600 22px Outfit,system-ui}.mini .l{color:var(--mu);font-size:12.5px}
+.live{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(123,216,143,.6);animation:pl 1.8s infinite;margin-right:6px}@keyframes pl{70%{box-shadow:0 0 0 9px rgba(123,216,143,0)}100%{box-shadow:0 0 0 0 rgba(123,216,143,0)}}
+.card h2{margin:0 0 14px;font:600 16px Outfit,system-ui;display:flex;justify-content:space-between;align-items:center;gap:10px}.card h2 small{color:var(--mu);font-weight:400;font-size:12.5px}
+.chartw{position:relative}.chartw svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;transform:translate(-50%,-110%);background:#16181d;border:1px solid var(--ln);border-radius:10px;padding:6px 10px;font-size:12.5px;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:3}.tip b{color:var(--ac)}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--ln)}.row:first-of-type{border-top:0}
+.fl{width:34px;height:34px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-size:19px}
+.rn{display:flex;justify-content:space-between;gap:8px;font-weight:500}.rn span:last-child{color:var(--mu);font-weight:400;font-size:13px;white-space:nowrap}
+.bar{height:6px;border-radius:6px;background:var(--s2);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--ac2),var(--ac))}
+.rv{text-align:right;font-weight:600}.rv small{display:block;color:var(--mu);font-weight:400;font-size:12px}
+.more{margin-top:8px;width:100%;justify-content:center}
+.donut{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.lg{display:grid;gap:8px;flex:1;min-width:130px}.lg div{display:flex;align-items:center;gap:8px;font-size:14px}.lg i{width:10px;height:10px;border-radius:3px}.lg b{margin-left:auto}
+.src{display:grid;gap:12px}.src .rn{font-size:14px}
+.tw{overflow:auto;margin:0 -6px}table{width:100%;border-collapse:collapse;font-size:14px}th{color:var(--mu);font:500 11.5px Outfit,system-ui;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:8px 10px;white-space:nowrap}td{padding:11px 10px;border-top:1px solid var(--ln);white-space:nowrap}tr:hover td{background:rgba(255,255,255,.025)}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;background:var(--s2)}.pill.y{background:rgba(123,216,143,.15);color:var(--ok)}
+.set{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}.set label{display:flex;gap:10px;align-items:center;cursor:pointer;color:var(--mu);font-size:14px}.set input{accent-color:#e8b99f;width:17px;height:17px}
+.empty{text-align:center;padding:46px 20px}.empty .big{font-size:44px}.empty h2{justify-content:center;font-size:20px}.empty p{color:var(--mu);max-width:520px;margin:6px auto 18px}
+.steps{text-align:left;max-width:540px;margin:0 auto 18px;padding-left:20px;color:var(--tx)}.steps li{margin:8px 0}
+.sk{height:120px;border-radius:18px;background:linear-gradient(100deg,var(--s1) 30%,var(--s2) 50%,var(--s1) 70%);background-size:300% 100%;animation:sh 1.3s infinite}@keyframes sh{to{background-position:-100% 0}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#16181d;border:1px solid var(--ln);padding:10px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:50}.toast.on{opacity:1;transform:translateX(-50%)}
+</style></head><body>
+<div class="top"><div class="brand"><b>Fortune Studio</b><span>Visitors</span></div>
+<div class="seg" id="seg"><button data-d="1">24 h</button><button data-d="7" class="on">7 days</button><button data-d="30">30 days</button><button data-d="90">90 days</button></div>
+<button class="btn" id="ref">↻ Refresh</button><a class="btn p" href="/admin">← Admin</a></div>
+<main><h1>Who visits your site</h1><p class="sub" id="sub">Countries, time on the site and what keeps people there.</p><div id="out"><div class="grid k4"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div><div class="toast" id="toast"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SQL="-- Visitor statistics (country + time on site). Run ONCE in Supabase > SQL Editor > New query.\n-- No IP address is stored. Only: random visit id, country, city, device, source, seconds on site, scroll depth.\n\ncreate table if not exists public.site_visits (\n  sid        text primary key check (char_length(sid) between 8 and 64),\n  started_at timestamptz not null default now(),\n  last_seen  timestamptz not null default now(),\n  seconds    integer not null default 0,\n  scroll     integer not null default 0,\n  book       boolean not null default false,\n  country    text not null default '',\n  city       text not null default '',\n  path       text not null default '/',\n  ref        text not null default '',\n  device     text not null default '',\n  lang       text not null default ''\n);\ncreate index if not exists site_visits_started_idx on public.site_visits (started_at desc);\n\nalter table public.site_visits enable row level security;\ndrop policy if exists \"Admins read visits\" on public.site_visits;\ncreate policy \"Admins read visits\" on public.site_visits for select to authenticated using (true);\ndrop policy if exists \"Admins delete visits\" on public.site_visits;\ncreate policy \"Admins delete visits\" on public.site_visits for delete to authenticated using (true);\nrevoke all on public.site_visits from anon;\ngrant select, delete on public.site_visits to authenticated;\n\n-- Visitors cannot read or write the table directly. The website sends data through this function only.\ncreate or replace function public.track_visit(\n  p_sid text, p_country text, p_city text, p_path text, p_ref text,\n  p_device text, p_lang text, p_seconds integer, p_scroll integer, p_book boolean\n) returns void language plpgsql security definer set search_path = public as $$\nbegin\n  if p_sid is null or char_length(p_sid) < 8 or char_length(p_sid) > 64 then return; end if;\n  insert into public.site_visits (sid, country, city, path, ref, device, lang, seconds, scroll, book)\n  values (\n    p_sid, left(coalesce(p_country, ''), 2), left(coalesce(p_city, ''), 60), left(coalesce(p_path, '/'), 120),\n    left(coalesce(p_ref, ''), 80), left(coalesce(p_device, ''), 12), left(coalesce(p_lang, ''), 8),\n    0, least(greatest(coalesce(p_scroll, 0), 0), 100), coalesce(p_book, false)\n  )\n  on conflict (sid) do update set\n    last_seen = now(),\n    -- time can never grow faster than the real clock (stops fake numbers)\n    seconds = greatest(public.site_visits.seconds, least(greatest(coalesce(p_seconds, 0), 0), extract(epoch from (now() - public.site_visits.started_at))::integer + 30, 14400)),\n    scroll  = greatest(public.site_visits.scroll, least(greatest(coalesce(p_scroll, 0), 0), 100)),\n    book    = public.site_visits.book or coalesce(p_book, false);\nend $$;\nrevoke all on function public.track_visit(text, text, text, text, text, text, text, integer, integer, boolean) from public;\ngrant execute on function public.track_visit(text, text, text, text, text, text, text, integer, integer, boolean) to anon, authenticated;\n";
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
+function sv(t,a,...k){const e=document.createElementNS(NS,t);for(const x in a||{})e.setAttribute(x,a[x]);k.forEach(c=>e.append(c));return e}
+const fmtT=s=>{s=Math.round(s||0);if(s<60)return s+'s';const m=Math.floor(s/60);if(m<60)return m+'m '+(s%60)+'s';return Math.floor(m/60)+'h '+(m%60)+'m'};
+let RN=null;try{RN=new Intl.DisplayNames(['en'],{type:'region'})}catch(e){}
+const cName=c=>{if(!c)return 'Unknown';try{return (RN&&RN.of(c))||c}catch(e){return c}};
+const flag=c=>/^[A-Z]{2}$/.test(c||'')?String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0))):'🌐';
+const pc=(a,b)=>b?Math.round(a/b*100)+'%':'0%';
+const toast=t=>{const x=$('toast');x.textContent=t;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2400)};
+let sb=null,DAYS=7,LIM=5000,ALL=false,TIMER=0,AUTO=true;
+function put(...k){const o=$('out');o.textContent='';k.forEach(x=>o.append(x))}
+function notice(icon,title,text,...extra){return el('div',{className:'card empty'},el('div',{className:'big',textContent:icon}),el('h2',{textContent:title}),el('p',{textContent:text}),...extra)}
+async function boot(){
+  try{
+    if(!window.supabase)throw Error('The Supabase library did not load. Refresh the page.');
+    const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();if(!r.ok)throw Error(cfg.error||'Configuration error');
+    sb=window.supabase.createClient(cfg.url,cfg.key);
+    const s=(await sb.auth.getSession()).data.session;
+    if(!s){put(notice('🔒','Please sign in first','This page opens after you sign in to the admin on this same browser.',el('a',{className:'btn p',href:'/admin',textContent:'Go to /admin and sign in'})));return}
+    await load();TIMER=setInterval(()=>{if(AUTO&&!document.hidden)load(true)},30000);
+  }catch(e){put(notice('⚠️','Something went wrong',e.message))}
+}
+async function load(quiet){
+  if(!quiet)put(el('div',{className:'grid k4'},...[1,2,3,4].map(()=>el('div',{className:'sk'}))));
+  const since=new Date(Date.now()-DAYS*864e5).toISOString();
+  const{data,error}=await sb.from('site_visits').select('sid,started_at,last_seen,seconds,scroll,book,country,city,ref,device').gte('started_at',since).order('started_at',{ascending:false}).limit(LIM);
+  if(error){
+    if(/relation|does not exist|schema cache|find the table/i.test(error.message)){
+      put(notice('🛠️','One-time setup needed','The visitors table does not exist in Supabase yet. It takes 1 minute:',
+        el('ol',{className:'steps'},el('li',{textContent:'Press the button below to copy the setup code.'}),el('li',{textContent:'Open Supabase > SQL Editor > New query and paste it.'}),el('li',{textContent:'Press Run, wait for "Success", then come back and press Refresh.'})),
+        el('div',{style:'display:flex;gap:10px;justify-content:center;flex-wrap:wrap'},el('button',{className:'btn p',textContent:'Copy the setup code',onclick:async()=>{try{await navigator.clipboard.writeText(SQL);toast('Copied. Paste it in Supabase SQL Editor.')}catch(e){prompt('Copy this:',SQL)}}}),el('button',{className:'btn',textContent:'↻ I ran it, refresh',onclick:()=>load()}))));return}
+    put(notice('⚠️','Could not load visitors',error.message));return}
+  paint(data||[])}
+function kpi(ic,t,v,h,live){return el('div',{className:'card kpi'},el('div',{className:'l'},el('span',{className:'ic',textContent:ic}),t),el('div',{className:'v'},live?el('span',{className:'live'}):'',String(v)),el('div',{className:'h',textContent:h||''}))}
+function mini(t,v){return el('div',{className:'card mini'},el('div',{className:'v',textContent:v}),el('div',{className:'l',textContent:t}))}
+function areaChart(V){
+  const hourly=DAYS===1,N=hourly?24:DAYS,slots=[],now=new Date();
+  const key=d=>hourly?d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()+'-'+d.getHours():d.toLocaleDateString('en-CA');
+  for(let i=N-1;i>=0;i--){const d=new Date(now.getTime()-i*(hourly?36e5:864e5));slots.push({k:key(d),d,n:0})}
+  const ix={};slots.forEach(s=>ix[s.k]=s);V.forEach(v=>{const s=ix[key(new Date(v.started_at))];if(s)s.n++});
+  const W=800,H=250,pl=34,pr=10,pt=14,pb=28,mx=Math.max(3,...slots.map(s=>s.n)),iw=W-pl-pr,ih=H-pt-pb;
+  const X=i=>pl+(N===1?iw/2:i*iw/(N-1)),Y=v=>pt+ih-(v/mx)*ih,svg=sv('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Visits over time'});
+  svg.append(sv('defs',{},(()=>{const g=sv('linearGradient',{id:'ag',x1:0,y1:0,x2:0,y2:1});g.append(sv('stop',{offset:'0%','stop-color':'#e8b99f','stop-opacity':.45}),sv('stop',{offset:'100%','stop-color':'#e8b99f','stop-opacity':0}));return g})()));
+  [0,.5,1].forEach(f=>{const y=Y(mx*f);svg.append(sv('line',{x1:pl,x2:W-pr,y1:y,y2:y,stroke:'rgba(255,255,255,.08)','stroke-dasharray':f?'4 5':'0'}),Object.assign(sv('text',{x:pl-8,y:y+4,'text-anchor':'end',fill:'#9b978e','font-size':11}),{textContent:Math.round(mx*f)}))});
+  let d='M'+X(0)+' '+Y(slots[0].n);for(let i=1;i<N;i++){const x0=X(i-1),x1=X(i),m=(x0+x1)/2;d+=' C'+m+' '+Y(slots[i-1].n)+' '+m+' '+Y(slots[i].n)+' '+x1+' '+Y(slots[i].n)}
+  svg.append(sv('path',{d:d+' L'+X(N-1)+' '+(pt+ih)+' L'+X(0)+' '+(pt+ih)+' Z',fill:'url(#ag)'}),sv('path',{d,fill:'none',stroke:'#e8b99f','stroke-width':2.5,'stroke-linecap':'round'}));
+  const step=Math.max(1,Math.ceil(N/6));slots.forEach((s,i)=>{if(i%step===0||i===N-1)svg.append(Object.assign(sv('text',{x:X(i),y:H-6,'text-anchor':'middle',fill:'#9b978e','font-size':11}),{textContent:hourly?s.d.getHours()+':00':s.d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}))});
+  const w=el('div',{className:'chartw'},svg),tip=el('div',{className:'tip'});w.append(tip);
+  const dot=sv('circle',{r:5,fill:'#e8b99f',stroke:'#0a0b0e','stroke-width':2,opacity:0});svg.append(dot);
+  slots.forEach((s,i)=>{const hw=N===1?iw:iw/(N-1),r=sv('rect',{x:X(i)-hw/2,y:0,width:hw,height:H,fill:'transparent'});
+    r.addEventListener('mouseenter',()=>{dot.setAttribute('cx',X(i));dot.setAttribute('cy',Y(s.n));dot.setAttribute('opacity',1);tip.textContent='';tip.append(el('b',{textContent:s.n}),' visit'+(s.n===1?'':'s')+' · '+(hourly?s.d.getHours()+':00':s.d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})));tip.style.left=(X(i)/W*100)+'%';tip.style.top=(Y(s.n)/H*100)+'%';tip.style.opacity=1});
+    r.addEventListener('mouseleave',()=>{dot.setAttribute('opacity',0);tip.style.opacity=0});svg.append(r)});
+  return w}
+function donut(rows,total){
+  const C=['#e8b99f','#b98a70','#6c8cff','#7bd88f','#c78bff'],R=42,L=2*Math.PI*R,svg=sv('svg',{viewBox:'0 0 100 100',width:130,height:130});
+  svg.append(sv('circle',{cx:50,cy:50,r:R,fill:'none',stroke:'rgba(255,255,255,.07)','stroke-width':13}));let off=0;
+  rows.forEach(([k,n],i)=>{const len=n/total*L;svg.append(sv('circle',{cx:50,cy:50,r:R,fill:'none',stroke:C[i%C.length],'stroke-width':13,'stroke-dasharray':Math.max(0,len-1.5)+' '+L,'stroke-dashoffset':-off,transform:'rotate(-90 50 50)'}));off+=len});
+  svg.append(Object.assign(sv('text',{x:50,y:55,'text-anchor':'middle',fill:'#f4efe6','font-size':16,'font-weight':600}),{textContent:total}));
+  return el('div',{className:'donut'},svg,el('div',{className:'lg'},...rows.map(([k,n],i)=>el('div',{},el('i',{style:'background:'+C[i%C.length]}),k.charAt(0).toUpperCase()+k.slice(1),el('b',{textContent:pc(n,total)})))))}
+function paint(V){
+  $('sub').textContent=V.length?'Showing the last '+(DAYS===1?'24 hours':DAYS+' days')+' · updates every 30 seconds':'Countries, time on the site and what keeps people there.';
+  if(!V.length){put(notice('🌍','No visits yet in this period','Open your site on a phone, stay 30 seconds and scroll. Then press Refresh. Your own visits do not count if the option at the bottom is on.'),settings());return}
+  const n=V.length,sec=V.map(v=>v.seconds||0),tot=sec.reduce((a,c)=>a+c,0),srt=[...sec].sort((a,c)=>a-c),med=srt[Math.floor(n/2)]||0,cnt=(f)=>{const m={};V.forEach(v=>{const k=f(v);m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,c)=>c[1]-a[1])};
+  const online=V.filter(v=>Date.now()-new Date(v.last_seen).getTime()<45000).length,cm={};
+  V.forEach(v=>{const k=v.country||'';const o=cm[k]=cm[k]||{n:0,s:0};o.n++;o.s+=v.seconds||0});
+  const cl=Object.entries(cm).sort((a,c)=>c[1].n-a[1].n),mxn=cl[0][1].n;
+  const list=el('div',{});const draw=()=>{list.textContent='';(ALL?cl:cl.slice(0,8)).forEach(([k,o])=>list.append(el('div',{className:'row'},el('div',{className:'fl',textContent:flag(k)}),el('div',{},el('div',{className:'rn'},el('span',{textContent:cName(k)}),el('span',{textContent:pc(o.n,n)+' of visits'})),el('div',{className:'bar'},el('i',{style:'width:'+Math.max(3,Math.round(o.n/mxn*100))+'%'}))),el('div',{className:'rv'},String(o.n),el('small',{textContent:'avg '+fmtT(o.s/o.n)})))));
+    if(cl.length>8)list.append(el('button',{className:'btn more',textContent:ALL?'Show less':'Show all '+cl.length+' countries',onclick:()=>{ALL=!ALL;draw()}}))};draw();
+  const srcs=cnt(v=>v.ref||'Direct').slice(0,6),cities=cnt(v=>v.city?(flag(v.country)+' '+v.city):'Unknown').slice(0,6);
+  const bl=(rows)=>el('div',{className:'src'},...rows.map(([k,c])=>el('div',{},el('div',{className:'rn'},el('span',{textContent:k}),el('span',{textContent:c+' · '+pc(c,n)})),el('div',{className:'bar'},el('i',{style:'width:'+Math.max(3,Math.round(c/rows[0][1]*100))+'%'})))));
+  const rows=V.slice(0,40).map(v=>el('tr',{},el('td',{textContent:new Date(v.started_at).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}),el('td',{textContent:flag(v.country)+' '+cName(v.country)}),el('td',{textContent:v.city||'—'}),el('td',{textContent:fmtT(v.seconds)}),el('td',{textContent:(v.scroll||0)+'%'}),el('td',{},el('span',{className:'pill',textContent:v.device||'?'})),el('td',{textContent:v.ref||'Direct'}),el('td',{},el('span',{className:'pill'+(v.book?' y':''),textContent:v.book?'Yes':'No'}))));
+  put(
+    el('div',{className:'grid k4'},kpi('👥','Visits',n+(n>=LIM?'+':''),'in this period'),kpi('⚡','Online now',online,'active in the last 45 s',true),kpi('⏱️','Average time',fmtT(tot/n),'typical (median): '+fmtT(med)),kpi('🛎️','Reached booking',pc(V.filter(v=>v.book).length,n),'saw the booking form')),
+    el('div',{className:'grid k4 k4s'},mini('Stayed 30 s or more',pc(sec.filter(x=>x>=30).length,n)),mini('Stayed 2 min or more',pc(sec.filter(x=>x>=120).length,n)),mini('Average scroll depth',Math.round(V.reduce((a,v)=>a+(v.scroll||0),0)/n)+'%'),mini('Countries',cl.length)),
+    el('div',{style:'height:14px'}),
+    el('div',{className:'grid cols'},
+      el('div',{className:'grid',style:'align-content:start'},el('div',{className:'card'},el('h2',{},DAYS===1?'Visits per hour':'Visits per day',el('small',{textContent:'hover the chart for details'})),areaChart(V)),el('div',{className:'card'},el('h2',{},'Countries',el('small',{textContent:'visits and time on the site'})),list)),
+      el('div',{className:'grid',style:'align-content:start'},el('div',{className:'card'},el('h2',{textContent:'Devices'}),donut(cnt(v=>v.device||'unknown').slice(0,5),n)),el('div',{className:'card'},el('h2',{textContent:'Where they came from'}),bl(srcs)),el('div',{className:'card'},el('h2',{textContent:'Top cities'}),bl(cities)))),
+    el('div',{style:'height:14px'}),
+    el('div',{className:'card'},el('h2',{},'Latest visits',el('small',{textContent:'last '+Math.min(40,n)})),el('div',{className:'tw'},el('table',{},el('thead',{},el('tr',{},...['When','Country','City','Time on site','Scrolled','Device','Source','Saw booking'].map(h=>el('th',{textContent:h})))),el('tbody',{},...rows)))),
+    el('div',{style:'height:14px'}),settings())}
+function settings(){
+  let mine=false;try{mine=localStorage.getItem('fs_notrack')==='1'}catch(e){}
+  const nt=el('input',{type:'checkbox',checked:mine,onchange(){try{if(this.checked)localStorage.setItem('fs_notrack','1');else localStorage.removeItem('fs_notrack');toast(this.checked?'Your visits from this device are not counted.':'Your visits are counted again.')}catch(e){toast('Could not save this setting.')}}});
+  const au=el('input',{type:'checkbox',checked:AUTO,onchange(){AUTO=this.checked}});
+  return el('div',{className:'card'},el('h2',{textContent:'Settings'}),el('div',{className:'set'},el('div',{style:'display:grid;gap:10px'},el('label',{},nt,'Do not count my own visits on this device'),el('label',{},au,'Refresh automatically every 30 seconds')),
+    el('button',{className:'btn d',textContent:'Delete all visitor data',onclick:async()=>{if(!confirm('Delete ALL saved visitor statistics? This cannot be undone.'))return;try{const{error}=await sb.from('site_visits').delete().gte('started_at','1970-01-01T00:00:00Z');if(error)throw error;toast('Visitor data deleted.');load()}catch(e){toast('Error: '+e.message)}}})),
+    el('p',{className:'sub',style:'margin:12px 0 0;font-size:13px',textContent:'No IP address is saved. The country comes from the visitor\'s connection. Time only counts while the tab is open and the person moves or scrolls.'}))}
+$('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;DAYS=+b.dataset.d;[...$('seg').children].forEach(x=>x.classList.toggle('on',x===b));load()});
+$('ref').onclick=()=>load();boot();
+</script></body></html>
