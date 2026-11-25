@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/35432963/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35069034/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/34992208/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/34986220/SETUP.md)
@@ -66,3 +67,16 @@ In `/admin` > Coupon codes you now pick the type of discount and the exact numbe
 - **Percent off**: 0.01 to 100 (100 = free, but the customer still pays the small card minimum, about $1 before tax / $0.50 charged).
 - **Dollars off**: $0.50 to $10,000, taken from the price before tax.
 Changed files: `api/_lib.js`, `api/manage.js`, `api/coupon.js`, `api/checkout.js`, `coupon.js`, `index.html`, `admin.html`. Upload all of them together, then redeploy.
+
+
+## New: visitor statistics (country + time on site) and "keep visitors on the site"
+New files: `track.js`, `retain.js`, `api/track.js`, `supabase-analytics.sql`. Changed: `index.html` (loads the two scripts), `admin.html` (two new panels). No new environment variables.
+
+1. Supabase > SQL Editor > New query > paste `supabase-analytics.sql` > Run (once).
+2. Upload all files to GitHub and redeploy on Vercel.
+3. `/admin` > **Visitors: country and time on the site**: visits, online now, average and typical time, % who stayed 30 s / 2 min, % who reached the booking form, countries, sources, devices and the latest visits. Pick 24 hours / 7 / 30 / 90 days. Tick "Do not count my own visits on this device" on your own phone and computer.
+   - The country comes from Vercel's `x-vercel-ip-country` header (works on Vercel, no extra service). No IP address is stored.
+   - Time only counts while the tab is open and the person moved or scrolled in the last minute.
+   - Bots and the admin editor preview are not counted. "Delete all visitor data" is in the same panel.
+   - If you collect visitor data, mention it in your privacy policy.
+4. `/admin` > **Keep visitors on the site**: progress bar (on), floating Book now button (on), friendly help message after 45 s with a chat button (on), "Before you go" message when a computer visitor leaves (off). Change texts, seconds, then **Save and publish**.
