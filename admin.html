@@ -18,7 +18,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 </style></head><body>
 <section id="login"><h2>Admin sign in</h2><label>Email</label><input id="email" type="email" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="remember" type="checkbox" checked style="width:auto;margin:0"> Keep me signed in on this device (next time Face ID, fingerprint or your laptop password opens it)</label><button id="signIn">Sign in</button><div id="mfaBox" style="display:none"><h3 id="mfaTitle" style="margin:14px 0 6px">Verify it is you</h3><div id="mfaEnroll" class="hint" style="display:none"><p>First time on this account: open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy), scan this QR code or type the key, then enter the Backup code.</p><img id="mfaQr" alt="QR code" style="width:180px;height:180px;background:#fff;padding:6px;border-radius:8px"><p>Key: <code id="mfaKey" style="user-select:all"></code></p></div><button id="mfaPk" type="button" style="display:none">🔐 Open with Face ID / fingerprint / laptop password</button><button id="mfaMore" class="s" type="button" style="display:none">Face ID not working? Use the Backup code</button><div id="mfaBack"><label id="mfaLbl">Backup code</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button id="mfaGo">Verify</button><button id="mfaOut" class="s" type="button">Use another account</button></div></div><div class="status" id="loginStatus">Loading...</div></section>
 <div id="app">
-<div id="top"><button id="save">Save and publish</button><button id="pkBtn" class="s" style="display:none"></button><button id="ncBtn" class="s" title="Choose if the backup code is asked when you sign in"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
+<div id="top"><button id="save">Save and publish</button><button id="vsBtn" class="s" title="Open the full visitors page in a new tab" onclick="window.open('/visitors','_blank')">📊 Visitors</button><button id="pkBtn" class="s" style="display:none"></button><button id="ncBtn" class="s" title="Choose if the backup code is asked when you sign in"></button><button id="exitEd" class="s" title="Leave the editor and open the live website">← Exit editor</button><button id="logout" class="s">Sign out</button><div class="status" id="status">Click any text, link or button on the site (right side) to edit it.</div></div>
 <div id="side">
 <details open><summary>Selected item</summary><div id="sel" class="hint">Click something on the site preview.</div></details>
 <details><summary>Photos, logo and videos</summary><div id="media"></div></details>
@@ -38,7 +38,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <details><summary>Rent for your event: prices and stock</summary><div id="prices"></div></details>
 <details><summary>Coupon codes (choose % or $ off, one use each)</summary><div id="cpp"></div></details>
 <details id="avd"><summary>Available dates and hours (re-open a booked date)</summary><div id="avp"></div></details>
-<details id="vsd"><summary>Visitors: country and time on the site</summary><div id="vsp"></div></details>
+<a id="vsLink" href="/visitors" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#e8b99f,#b88963);color:#111;font-weight:700;padding:14px;border-radius:12px;margin-bottom:10px">📊 Visitors: countries and time on the site →</a>
 <details><summary>Keep visitors on the site (button, bar, help message)</summary><div id="rtp"></div></details>
 <details><summary>Black Friday sale (automatic)</summary><div id="bfp"></div></details>
 <details><summary>All texts (search and edit)</summary>
@@ -182,7 +182,7 @@ function drawBF(){const b=$('bfp');b.textContent='';C.bf=C.bf||{};
    el('button',{className:'s',textContent:'Reset Black Friday to default',onclick:()=>{delete C.bf;refresh();drawBF()}}))}
 let dirty=false;function refresh(){dirty=true;win.FS_CMS.content=C;win.FS_CMS.applyAll()}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-function drawAll(){drawVisits();drawRetain();drawFx();drawRent();drawPrices();drawBF();drawCoupons();drawAvail();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
+function drawAll(){drawRetain();drawFx();drawRent();drawPrices();drawBF();drawCoupons();drawAvail();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
   const tx=t.closest('[data-cms]'),ln=t.closest('[data-cmsa]'),md=t.closest('[data-cmsm]'),bl=t.closest('[data-cmsx]');
@@ -426,53 +426,6 @@ function paintAvail(){const l=$('av_list');if(!l)return;l.textContent='';if(!BK)
         el('div',{className:'row'},el('label',{textContent:'From'}),f,el('label',{textContent:'To'}),t),
         el('button',{className:'s',textContent:'Open only these hours',onclick:()=>{const a=+f.value,z=+t.value;if(z<a){say('status','The end hour must be after the start hour.');return}C.av.win[k.id]=[a,z];refresh();paintAvail();say('status','Hours opened. Click Save and publish.')}}))}
     l.append(d)})}
-
-/* ===== Visitors: country and time on the site (data comes from /track.js -> /api/track -> Supabase table site_visits) ===== */
-let VS=null,VDAYS=7,VLIM=5000;
-const fmtT=s=>{s=Math.round(s||0);if(s<60)return s+'s';const m=Math.floor(s/60);if(m<60)return m+'m '+(s%60)+'s';return Math.floor(m/60)+'h '+(m%60)+'m'};
-let RN=null;try{RN=new Intl.DisplayNames(['en'],{type:'region'})}catch(e){}
-const cName=c=>{if(!c)return 'Unknown';try{return (RN&&RN.of(c))||c}catch(e){return c}};
-const flag=c=>/^[A-Z]{2}$/.test(c||'')?String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0))):'🌐';
-const pc=(a,b)=>b?Math.round(a/b*100)+'%':'0%';
-function drawVisits(){const b=$('vsp');if(!b)return;b.textContent='';
-  b.append(el('div',{className:'hint',textContent:'Shows where visitors come from and how long they stay (only time with the tab open and moving/scrolling, so a forgotten tab does not count). No IP address is saved. The country comes from the visitor\'s connection.'}));
-  const per=el('select',{},...[[1,'Last 24 hours'],[7,'Last 7 days'],[30,'Last 30 days'],[90,'Last 90 days']].map(([v,t])=>el('option',{value:v,textContent:t,selected:v===VDAYS})));
-  per.onchange=()=>{VDAYS=+per.value;loadVisits()};
-  b.append(el('div',{className:'row'},per,el('button',{className:'s',textContent:'Refresh',onclick:loadVisits})));
-  let mine=false;try{mine=localStorage.getItem('fs_notrack')==='1'}catch(e){}
-  const nt=el('input',{type:'checkbox',checked:mine,style:'width:auto;margin:0 8px 0 0'});
-  nt.onchange=()=>{try{if(nt.checked)localStorage.setItem('fs_notrack','1');else localStorage.removeItem('fs_notrack');say('status',nt.checked?'Your visits from this device will not be counted.':'Your visits from this device will be counted again.')}catch(e){say('status','Could not save this setting in your browser.')}};
-  b.append(el('label',{style:'display:flex;align-items:center;margin:8px 0'},nt,'Do not count my own visits on this device'));
-  b.append(el('div',{id:'vs_body',className:'hint',textContent:VS?'':'Opening this panel loads the numbers...'}));
-  b.append(el('button',{className:'d',textContent:'Delete all visitor data',onclick:async()=>{if(!confirm('Delete ALL saved visitor statistics? This cannot be undone.'))return;try{const{error}=await sb.from('site_visits').delete().gte('started_at','1970-01-01T00:00:00Z');if(error)throw error;VS=[];paintVisits();say('status','Visitor data deleted.')}catch(e){say('status','Error: '+e.message)}}}));
-  paintVisits()}
-async function loadVisits(){const bd=$('vs_body');if(bd&&!VS)bd.textContent='Loading...';
-  try{const since=new Date(Date.now()-VDAYS*864e5).toISOString();
-    const{data,error}=await sb.from('site_visits').select('sid,started_at,last_seen,seconds,scroll,book,country,city,ref,device').gte('started_at',since).order('started_at',{ascending:false}).limit(VLIM);
-    if(error)throw error;VS=data||[]}
-  catch(e){const x=$('vs_body');if(x)x.textContent='Could not load visitors: '+e.message+(/relation|does not exist|schema cache/i.test(e.message)?'\nRun supabase-analytics.sql in Supabase > SQL Editor first (see SETUP.md).':'');return}
-  paintVisits()}
-function bars(rows,total,label){const w=el('div',{});rows.forEach(([k,n,extra])=>{
-  w.append(el('div',{style:'margin:7px 0'},el('div',{className:'row',style:'justify-content:space-between;color:#fff'},el('span',{textContent:k,style:'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'}),el('span',{className:'hint',textContent:extra||'',style:'flex:none'}),el('b',{textContent:n+' · '+pc(n,total),style:'flex:none;min-width:70px;text-align:right'})),
-    el('div',{style:'height:6px;border-radius:4px;background:#2a2e36;overflow:hidden'},el('div',{style:'height:100%;border-radius:4px;background:#b88963;width:'+Math.max(2,Math.round(n/(rows[0][1]||1)*100))+'%'}))))});return w}
-function paintVisits(){const b=$('vs_body');if(!b)return;b.textContent='';b.className='';
-  if(!VS)return;if(!VS.length){b.className='hint';b.textContent='No visits recorded in this period yet. Visits appear after you publish the site with track.js and the SQL is installed.';return}
-  const n=VS.length,sec=VS.map(v=>v.seconds||0),tot=sec.reduce((a,c)=>a+c,0),sorted=[...sec].sort((a,c)=>a-c),med=sorted[Math.floor(n/2)]||0;
-  const online=VS.filter(v=>Date.now()-new Date(v.last_seen).getTime()<45000).length;
-  const stat=(t,v,h)=>el('div',{style:'flex:1;min-width:96px;background:#111318;border:1px solid #343840;border-radius:10px;padding:9px 10px'},el('div',{style:'font-size:20px;font-weight:700;color:#fff',textContent:v}),el('div',{className:'hint',textContent:t+(h?' · '+h:'')}));
-  b.append(el('div',{className:'row',style:'flex-wrap:wrap'},stat('Visits',n+(n>=VLIM?'+':'')),stat('Online now',online),stat('Average time',fmtT(tot/n)),stat('Typical time (median)',fmtT(med))));
-  b.append(el('div',{className:'row',style:'flex-wrap:wrap'},stat('Stayed 30 s or more',pc(sec.filter(x=>x>=30).length,n)),stat('Stayed 2 min or more',pc(sec.filter(x=>x>=120).length,n)),stat('Reached the booking form',pc(VS.filter(v=>v.book).length,n)),stat('Average scroll',Math.round(VS.reduce((a,v)=>a+(v.scroll||0),0)/n)+'%')));
-  const cm={};VS.forEach(v=>{const k=v.country||'';(cm[k]=cm[k]||{n:0,s:0}).n++;cm[k].s+=v.seconds||0});
-  const cl=Object.entries(cm).sort((a,c)=>c[1].n-a[1].n);
-  b.append(el('b',{textContent:'Countries ('+cl.length+')',style:'display:block;margin:14px 0 4px'}),bars(cl.slice(0,15).map(([k,o])=>[flag(k)+' '+cName(k),o.n,'avg '+fmtT(o.s/o.n)]),n));
-  const sm={};VS.forEach(v=>{const k=v.ref||'Direct / unknown';sm[k]=(sm[k]||0)+1});
-  b.append(el('b',{textContent:'Where they came from',style:'display:block;margin:14px 0 4px'}),bars(Object.entries(sm).sort((a,c)=>c[1]-a[1]).slice(0,8),n));
-  const dm={};VS.forEach(v=>{const k=v.device||'unknown';dm[k]=(dm[k]||0)+1});
-  b.append(el('b',{textContent:'Devices',style:'display:block;margin:14px 0 4px'}),bars(Object.entries(dm).sort((a,c)=>c[1]-a[1]),n));
-  b.append(el('b',{textContent:'Latest visits',style:'display:block;margin:14px 0 4px'}));
-  VS.slice(0,25).forEach(v=>b.append(el('div',{style:'border-top:1px solid #343840;padding:6px 0;font-size:13px'},el('div',{style:'color:#fff',textContent:flag(v.country)+' '+cName(v.country)+(v.city?', '+v.city:'')+' · '+fmtT(v.seconds)}),el('div',{className:'hint',textContent:new Date(v.started_at).toLocaleString()+' · '+(v.device||'?')+' · '+(v.ref||'direct')+' · scrolled '+(v.scroll||0)+'%'+(v.book?' · saw booking':'')}))));
-  if(n>=VLIM)b.append(el('div',{className:'hint',textContent:'Showing the latest '+VLIM+' visits of this period.'}))}
-$('vsd').addEventListener('toggle',()=>{if($('vsd').open)loadVisits()});
 
 /* ===== Keep visitors on the site (settings saved in C.rt, used by /retain.js) ===== */
 function drawRetain(){const b=$('rtp');if(!b)return;b.textContent='';C.rt=C.rt||{};
