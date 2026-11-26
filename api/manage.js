@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
             for (const row of await r.json()) {
               const m = row.booking || {};
               if (m.app !== "fortune") continue;
-              if (live === null) live = process.env.PAYPAL_ENV === "live";
+              if (live === null) live = (String(process.env.PAYPAL_ENV||process.env.PAYPAL_MODE||"").toLowerCase()==="live");
               const ts = Math.floor(new Date(row.status === "paid" ? (row.updated_at || row.created_at) : row.created_at).getTime() / 1000);
               const base = { id: row.order_id, created: ts, name: m.name || "", email: m.email || "", phone: m.phone || "", address: m.address || "", date: m.date || "", dateLabel: m.date_label || "", time: m.time || "", service: m.service || "", lang: m.lang || "", method: "PayPal" };
               const amount = rd(mv(m.amount != null ? m.amount : m.paid_now));
