@@ -110,7 +110,7 @@ function pair(k,v){return el('div',{},el('small',{textContent:k}),el('span',{tex
 function item(p){
   const full=!p.deposit,bal=p.balanceNum>0.005;
   const sum=el('summary',{},
-    el('div',{},el('div',{className:'pn',textContent:p.name||p.email||'Customer'}),el('div',{className:'ps',textContent:p.service})),
+    el('div',{},el('div',{className:'pn',textContent:p.name||p.email||'Customer'}),el('div',{className:'ps',textContent:p.service+' · '+(p.method||'Stripe')})),
     el('div',{className:'pd'},el('div',{className:'pn',textContent:p.dateLabel||p.date}),el('div',{className:'ps',textContent:(p.time?p.time+' · ':'')+'paid '+short(p.created)})),
     el('div',{className:'pa'},usd(p.paid),el('small',{},el('span',{className:'badge '+(p.refunded>=p.paid?'bad':full?'ok':'dep'),textContent:p.refunded>=p.paid?'Refunded':full?'Paid in full':'Deposit'}))));
   const g=el('div',{className:'dg'},
@@ -118,13 +118,13 @@ function item(p){
     pair('Subtotal',p.subtotal?usd(p.subtotal):'—'),pair('Sales tax',p.tax?usd(p.tax):'—'),pair('Total price',p.totalNum?usd(p.totalNum):p.total),pair('Paid now',usd(p.paid)),
     pair('Balance still due',p.balance&&p.balanceNum===0&&!/quote/i.test(p.balance)?'$0.00 (paid)':(p.balanceNum?usd(p.balanceNum):p.balance)),
     pair('Discount code',p.coupon?p.coupon+(p.discount?' · '+p.discount:''):''),pair('Black Friday',p.sale),pair('Delivery and pickup',p.delivery?'Yes':'No'),
-    pair('Paid on',when(p.created)),pair('Refunded',p.refunded?usd(p.refunded):''),pair('Booking ID',p.id.slice(-12)));
+    pair('Payment method',p.method||'Stripe'),pair('Paid on',when(p.created)),pair('Refunded',p.refunded?usd(p.refunded):''),pair('Booking ID',p.id.slice(-12)));
   if(p.receipt){const a=el('a',{href:p.receipt,target:'_blank',rel:'noopener',textContent:'Open Stripe receipt',style:'color:var(--ac)'});g.append(el('div',{},el('small',{textContent:'Receipt'}),a))}
   return el('details',{className:'pay'},sum,g);
 }
 function csv(){
-  const rows=[['Paid on','Customer','Email','Phone','Event date','Time','Service','Subtotal','Tax','Total','Paid now','Balance due','Refunded','Code','Address']];
-  DATA.payments.forEach(p=>rows.push([new Date(p.created*1000).toISOString(),p.name,p.email,p.phone,p.dateLabel,p.time,p.service,p.subtotal,p.tax,p.totalNum||p.total,p.paid,p.balanceNum,p.refunded,p.coupon,p.address]));
+  const rows=[['Method','Paid on','Customer','Email','Phone','Event date','Time','Service','Subtotal','Tax','Total','Paid now','Balance due','Refunded','Code','Address']];
+  DATA.payments.forEach(p=>rows.push([p.method||'Stripe',new Date(p.created*1000).toISOString(),p.name,p.email,p.phone,p.dateLabel,p.time,p.service,p.subtotal,p.tax,p.totalNum||p.total,p.paid,p.balanceNum,p.refunded,p.coupon,p.address]));
   const t=rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=el('a',{href:URL.createObjectURL(new Blob([t],{type:'text/csv'})),download:'fortune-studio-payments.csv'});document.body.append(a);a.click();a.remove();
 }
@@ -134,6 +134,8 @@ function paint(){
   if(!d.payments.length&&!d.unpaid.length){put(...out,notice('💳','No payments yet','Nothing in the last '+d.days+' days. When a customer pays on the site it shows up here within seconds.'));return}
   out.push(el('div',{className:'grid k4'},kpi('💵','Money received',usd(s.net),s.refunded?'after '+usd(s.refunded)+' refunded':'from '+s.count+' paid booking'+(s.count===1?'':'s')),kpi('🧾','Paid bookings',s.count,s.deposits+' deposit'+(s.deposits===1?'':'s')+', '+(s.count-s.deposits)+' paid in full'),kpi('⏳','Still to collect',usd(s.balanceDue),'balance owed before the events'),kpi('🛒','Not finished',s.unpaid,'opened checkout, did not pay')));
   out.push(el('div',{className:'grid k4s'},mini('Sales tax in these payments',usd(s.tax)),mini('Average booking',usd(s.count?s.gross/s.count:0)),mini('Collected before refunds',usd(s.gross))));
+  const bm=d.byMethod||{stripe:{count:0,gross:0,balanceDue:0},paypal:{count:0,gross:0,balanceDue:0}};
+  out.push(el('div',{style:'height:12px'}),el('div',{className:'grid k4s'},mini('Card (Stripe) received · '+bm.stripe.count+' booking'+(bm.stripe.count===1?'':'s'),usd(bm.stripe.gross)),mini('Card (Stripe) still to collect',usd(bm.stripe.balanceDue)),mini('PayPal received · '+bm.paypal.count+' booking'+(bm.paypal.count===1?'':'s'),usd(bm.paypal.gross)),mini('PayPal still to collect',usd(bm.paypal.balanceDue))));
   out.push(el('div',{style:'height:14px'}),chart(d),el('div',{style:'height:14px'}));
   const list=el('div',{className:'pays',id:'plist'});
   const draw=()=>{list.textContent='';const q=Q.toLowerCase();const arr=d.payments.filter(p=>!q||[p.name,p.email,p.phone,p.service,p.dateLabel,p.address,p.coupon].join(' ').toLowerCase().includes(q));
