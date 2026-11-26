@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fortune Studio — Payments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b0e;--s1:rgba(255,255,255,.045);--s2:rgba(255,255,255,.08);--ln:rgba(255,255,255,.09);--tx:#f4efe6;--mu:#9b978e;--ac:#e8b99f;--ac2:#b98a70;--ok:#7bd88f;--bad:#ff7a7a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--tx);font:15px/1.5 Outfit,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(900px 500px at 85% -10%,rgba(232,185,159,.16),transparent 60%),radial-gradient(700px 480px at -10% 10%,rgba(108,140,255,.09),transparent 60%),var(--bg);background-attachment:fixed}
+.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px clamp(14px,3vw,34px);background:rgba(10,11,14,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+.brand{display:flex;align-items:baseline;gap:12px;flex:1;min-width:200px}.brand b{font:400 30px/1 Yellowtail,cursive;background:linear-gradient(180deg,#fff7ea,var(--ac) 70%,var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}.brand span{color:var(--mu);font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.seg{display:inline-flex;padding:4px;border-radius:12px;background:var(--s1);border:1px solid var(--ln)}.seg button{border:0;background:none;color:var(--mu);font:500 13px Outfit,system-ui;padding:8px 14px;border-radius:9px;cursor:pointer;transition:.2s}.seg button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#17110d;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--s1);color:var(--tx);font:500 13px Outfit,system-ui;padding:9px 14px;border-radius:11px;cursor:pointer;text-decoration:none;transition:.2s}.btn:hover{background:var(--s2)}.btn.p{background:linear-gradient(135deg,var(--ac),var(--ac2));border:0;color:#17110d;font-weight:600}.btn.d{color:var(--bad)}
+main{max-width:1180px;margin:0 auto;padding:clamp(16px,3vw,32px)}
+h1{margin:0 0 4px;font:600 clamp(24px,4vw,34px)/1.15 Outfit,system-ui}.sub{color:var(--mu);margin:0 0 22px}
+.grid{display:grid;gap:14px}.k4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.k4s{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:14px}
+.cols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.card{position:relative;background:linear-gradient(180deg,var(--s2),var(--s1));border:1px solid var(--ln);border-radius:18px;padding:18px 20px;overflow:hidden}
+.kpi .l{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:13px;letter-spacing:.04em}.kpi .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(232,185,159,.14);font-size:15px}
+.kpi .v{font:600 clamp(30px,4vw,40px)/1.1 Outfit,system-ui;margin:12px 0 2px}.kpi .h{color:var(--mu);font-size:12.5px}
+.mini{padding:13px 16px}.mini .v{font:600 22px Outfit,system-ui}.mini .l{color:var(--mu);font-size:12.5px}
+.live{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(123,216,143,.6);animation:pl 1.8s infinite;margin-right:6px}@keyframes pl{70%{box-shadow:0 0 0 9px rgba(123,216,143,0)}100%{box-shadow:0 0 0 0 rgba(123,216,143,0)}}
+.card h2{margin:0 0 14px;font:600 16px Outfit,system-ui;display:flex;justify-content:space-between;align-items:center;gap:10px}.card h2 small{color:var(--mu);font-weight:400;font-size:12.5px}
+.chartw{position:relative}.chartw svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;transform:translate(-50%,-110%);background:#16181d;border:1px solid var(--ln);border-radius:10px;padding:6px 10px;font-size:12.5px;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:3}.tip b{color:var(--ac)}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--ln)}.row:first-of-type{border-top:0}
+.fl{width:34px;height:34px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-size:19px}
+.rn{display:flex;justify-content:space-between;gap:8px;font-weight:500}.rn span:last-child{color:var(--mu);font-weight:400;font-size:13px;white-space:nowrap}
+.bar{height:6px;border-radius:6px;background:var(--s2);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--ac2),var(--ac))}
+.rv{text-align:right;font-weight:600}.rv small{display:block;color:var(--mu);font-weight:400;font-size:12px}
+.more{margin-top:8px;width:100%;justify-content:center}
+.donut{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.lg{display:grid;gap:8px;flex:1;min-width:130px}.lg div{display:flex;align-items:center;gap:8px;font-size:14px}.lg i{width:10px;height:10px;border-radius:3px}.lg b{margin-left:auto}
+.src{display:grid;gap:12px}.src .rn{font-size:14px}
+.tw{overflow:auto;margin:0 -6px}table{width:100%;border-collapse:collapse;font-size:14px}th{color:var(--mu);font:500 11.5px Outfit,system-ui;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:8px 10px;white-space:nowrap}td{padding:11px 10px;border-top:1px solid var(--ln);white-space:nowrap}tr:hover td{background:rgba(255,255,255,.025)}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;background:var(--s2)}.pill.y{background:rgba(123,216,143,.15);color:var(--ok)}
+.set{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}.set label{display:flex;gap:10px;align-items:center;cursor:pointer;color:var(--mu);font-size:14px}.set input{accent-color:#e8b99f;width:17px;height:17px}
+.empty{text-align:center;padding:46px 20px}.empty .big{font-size:44px}.empty h2{justify-content:center;font-size:20px}.empty p{color:var(--mu);max-width:520px;margin:6px auto 18px}
+.steps{text-align:left;max-width:540px;margin:0 auto 18px;padding-left:20px;color:var(--tx)}.steps li{margin:8px 0}
+.sk{height:120px;border-radius:18px;background:linear-gradient(100deg,var(--s1) 30%,var(--s2) 50%,var(--s1) 70%);background-size:300% 100%;animation:sh 1.3s infinite}@keyframes sh{to{background-position:-100% 0}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#16181d;border:1px solid var(--ln);padding:10px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:50}.toast.on{opacity:1;transform:translateX(-50%)}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--s2);color:var(--mu)}.badge.ok{background:rgba(123,216,143,.15);color:var(--ok)}.badge.dep{background:rgba(232,185,159,.18);color:var(--ac)}.badge.bad{background:rgba(255,122,122,.14);color:var(--bad)}.badge.warn{background:rgba(255,200,87,.14);color:#ffc857}
+.banner{margin:0 0 14px;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,200,87,.4);background:rgba(255,200,87,.1);color:#ffd987;font-size:14px}
+.pays{display:grid;gap:10px}
+details.pay{border:1px solid var(--ln);border-radius:14px;background:var(--s1);overflow:hidden}
+details.pay summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px}
+details.pay summary::-webkit-details-marker{display:none}
+details.pay[open] summary{border-bottom:1px solid var(--ln);background:var(--s2)}
+.pn{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ps{color:var(--mu);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pa{text-align:right;font-weight:700;font-size:17px}.pa small{display:block;margin-top:2px}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px 22px;padding:16px}
+.dg div small{display:block;color:var(--mu);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}.dg div span{word-break:break-word}
+.srch{width:100%;max-width:320px;background:var(--s1);border:1px solid var(--ln);color:var(--tx);border-radius:11px;padding:9px 12px;font:14px Outfit,system-ui}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chk{display:grid;gap:10px}.chk .it{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--ln)}.chk .it:first-child{border-top:0}
+.dot{width:12px;height:12px;border-radius:50%;margin-top:5px;background:var(--ok)}.dot.warn{background:#ffc857}.dot.fail{background:var(--bad)}
+.chk b{font-weight:600}.chk p{margin:2px 0 0;color:var(--mu);font-size:13.5px}.chk .fx{color:var(--tx);background:var(--s2);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13.5px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:150px;padding-top:8px}.bars i{flex:1;min-width:2px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--ac),var(--ac2));position:relative}.bars i:hover{filter:brightness(1.2)}
+.axis{display:flex;justify-content:space-between;color:var(--mu);font-size:12px;margin-top:6px}
+@media(max-width:640px){details.pay summary{grid-template-columns:minmax(0,1fr) auto}.pd{display:none}}
+</style></head><body>
+<div class="top"><div class="brand"><b>Fortune Studio</b><span>Payments</span></div>
+<div class="seg" id="seg"><button data-d="7">7 days</button><button data-d="30" class="on">30 days</button><button data-d="90">90 days</button><button data-d="365">1 year</button></div>
+<button class="btn" id="ref">↻ Refresh</button><a class="btn" href="/visitors">📊 Visitors</a><a class="btn p" href="/admin">← Admin</a></div>
+<main><h1>Money and bookings</h1><p class="sub" id="sub">Every payment made on your site, who paid, how much, and what is still to collect.</p>
+<div id="sys"></div><div id="out"><div class="grid k4"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div><div class="toast" id="toast"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const $=id=>document.getElementById(id);
+function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
+const usd=n=>'$'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const ET='America/New_York';
+const when=t=>new Date(t*1000).toLocaleString('en-US',{timeZone:ET,month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+const short=t=>new Date(t*1000).toLocaleDateString('en-US',{timeZone:ET,month:'short',day:'numeric'});
+const ago=t=>{const s=Math.max(1,Math.round(Date.now()/1000-t));if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return Math.round(s/86400)+' days ago'};
+const toast=t=>{const x=$('toast');x.textContent=t;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2400)};
+let sb=null,DAYS=30,DATA=null,Q='',TIMER=0;
+function put(...k){const o=$('out');o.textContent='';k.forEach(x=>o.append(x))}
+function notice(icon,title,text,...extra){return el('div',{className:'card empty'},el('div',{className:'big',textContent:icon}),el('h2',{textContent:title}),el('p',{textContent:text}),...extra)}
+async function token(){const s=(await sb.auth.getSession()).data.session;return s?s.access_token:''}
+async function api(path,body){const t=await token();if(!t)throw Error('Please sign in again at /admin.');const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||('Error '+r.status));return j}
+async function boot(){
+  try{
+    if(!window.supabase)throw Error('The Supabase library did not load. Refresh the page.');
+    const r=await fetch('/api/supabase-config',{cache:'no-store'});const cfg=await r.json();if(!r.ok)throw Error(cfg.error||'Configuration error');
+    sb=window.supabase.createClient(cfg.url,cfg.key);
+    if(!(await token())){put(notice('🔒','Please sign in first','This page opens after you sign in to the admin on this same browser.',el('a',{className:'btn p',href:'/admin',textContent:'Go to /admin and sign in'})));return}
+    check();await load();TIMER=setInterval(()=>{if(!document.hidden)load(true)},60000);
+  }catch(e){put(notice('⚠️','Something went wrong',e.message))}
+}
+async function load(quiet){
+  if(!quiet)put(el('div',{className:'grid k4'},...[1,2,3,4].map(()=>el('div',{className:'sk'}))));
+  try{DATA=await api('/api/manage',{action:'payments',days:DAYS});paint()}
+  catch(e){if(!quiet)put(notice('⚠️','Could not load payments',e.message,el('button',{className:'btn p',textContent:'↻ Try again',onclick:()=>load()})))}
+}
+function kpi(ic,t,v,h){return el('div',{className:'card kpi'},el('div',{className:'l'},el('span',{className:'ic',textContent:ic}),t),el('div',{className:'v',textContent:String(v)}),el('div',{className:'h',textContent:h||''}))}
+function mini(t,v){return el('div',{className:'card mini'},el('div',{className:'v',textContent:v}),el('div',{className:'l',textContent:t}))}
+function chart(d){
+  const monthly=DAYS>90,map={};
+  Object.keys(d.daily||{}).forEach(k=>{const key=monthly?k.slice(0,7):k;map[key]=(map[key]||0)+d.daily[k]});
+  const slots=[],now=new Date(),N=monthly?12:Math.min(DAYS,90);
+  for(let i=N-1;i>=0;i--){let key,label;
+    if(monthly){const x=new Date(now.getFullYear(),now.getMonth()-i,1);key=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');label=x.toLocaleDateString('en-US',{month:'short'})}
+    else{const x=new Date(now.getTime()-i*864e5);key=x.toLocaleDateString('en-CA',{timeZone:ET});label=x.toLocaleDateString('en-US',{timeZone:ET,month:'short',day:'numeric'})}
+    slots.push({key,label,v:map[key]||0})}
+  const mx=Math.max(1,...slots.map(s=>s.v));
+  const bars=el('div',{className:'bars'});
+  slots.forEach(s=>bars.append(el('i',{style:'height:'+Math.max(s.v?4:1,s.v/mx*100)+'%;'+(s.v?'':'opacity:.25'),title:s.label+': '+usd(s.v)})));
+  return el('div',{className:'card'},el('h2',{},'Money received',el('small',{textContent:monthly?'per month':'per day'})),bars,el('div',{className:'axis'},el('span',{textContent:slots[0].label}),el('span',{textContent:'Best: '+usd(mx>1?mx:0)}),el('span',{textContent:slots[slots.length-1].label})));
+}
+function pair(k,v){return el('div',{},el('small',{textContent:k}),el('span',{textContent:v||'—'}))}
+function item(p){
+  const full=!p.deposit,bal=p.balanceNum>0.005;
+  const sum=el('summary',{},
+    el('div',{},el('div',{className:'pn',textContent:p.name||p.email||'Customer'}),el('div',{className:'ps',textContent:p.service})),
+    el('div',{className:'pd'},el('div',{className:'pn',textContent:p.dateLabel||p.date}),el('div',{className:'ps',textContent:(p.time?p.time+' · ':'')+'paid '+short(p.created)})),
+    el('div',{className:'pa'},usd(p.paid),el('small',{},el('span',{className:'badge '+(p.refunded>=p.paid?'bad':full?'ok':'dep'),textContent:p.refunded>=p.paid?'Refunded':full?'Paid in full':'Deposit'}))));
+  const g=el('div',{className:'dg'},
+    pair('Event date',(p.dateLabel||p.date)+(p.time?' at '+p.time:'')),pair('Service',p.service),pair('Customer email',p.email),pair('Phone',p.phone),pair('Event address',p.address),
+    pair('Subtotal',p.subtotal?usd(p.subtotal):'—'),pair('Sales tax',p.tax?usd(p.tax):'—'),pair('Total price',p.totalNum?usd(p.totalNum):p.total),pair('Paid now',usd(p.paid)),
+    pair('Balance still due',p.balance&&p.balanceNum===0&&!/quote/i.test(p.balance)?'$0.00 (paid)':(p.balanceNum?usd(p.balanceNum):p.balance)),
+    pair('Discount code',p.coupon?p.coupon+(p.discount?' · '+p.discount:''):''),pair('Black Friday',p.sale),pair('Delivery and pickup',p.delivery?'Yes':'No'),
+    pair('Paid on',when(p.created)),pair('Refunded',p.refunded?usd(p.refunded):''),pair('Booking ID',p.id.slice(-12)));
+  if(p.receipt){const a=el('a',{href:p.receipt,target:'_blank',rel:'noopener',textContent:'Open Stripe receipt',style:'color:var(--ac)'});g.append(el('div',{},el('small',{textContent:'Receipt'}),a))}
+  return el('details',{className:'pay'},sum,g);
+}
+function csv(){
+  const rows=[['Paid on','Customer','Email','Phone','Event date','Time','Service','Subtotal','Tax','Total','Paid now','Balance due','Refunded','Code','Address']];
+  DATA.payments.forEach(p=>rows.push([new Date(p.created*1000).toISOString(),p.name,p.email,p.phone,p.dateLabel,p.time,p.service,p.subtotal,p.tax,p.totalNum||p.total,p.paid,p.balanceNum,p.refunded,p.coupon,p.address]));
+  const t=rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=el('a',{href:URL.createObjectURL(new Blob([t],{type:'text/csv'})),download:'fortune-studio-payments.csv'});document.body.append(a);a.click();a.remove();
+}
+function paint(){
+  const d=DATA,s=d.summary,out=[];
+  if(d.live===false)out.push(el('div',{className:'banner',textContent:'TEST MODE: these are test payments. No real money moved. Real payments appear when the live Stripe keys are in Vercel.'}));
+  if(!d.payments.length&&!d.unpaid.length){put(...out,notice('💳','No payments yet','Nothing in the last '+d.days+' days. When a customer pays on the site it shows up here within seconds.'));return}
+  out.push(el('div',{className:'grid k4'},kpi('💵','Money received',usd(s.net),s.refunded?'after '+usd(s.refunded)+' refunded':'from '+s.count+' paid booking'+(s.count===1?'':'s')),kpi('🧾','Paid bookings',s.count,s.deposits+' deposit'+(s.deposits===1?'':'s')+', '+(s.count-s.deposits)+' paid in full'),kpi('⏳','Still to collect',usd(s.balanceDue),'balance owed before the events'),kpi('🛒','Not finished',s.unpaid,'opened checkout, did not pay')));
+  out.push(el('div',{className:'grid k4s'},mini('Sales tax in these payments',usd(s.tax)),mini('Average booking',usd(s.count?s.gross/s.count:0)),mini('Collected before refunds',usd(s.gross))));
+  out.push(el('div',{style:'height:14px'}),chart(d),el('div',{style:'height:14px'}));
+  const list=el('div',{className:'pays',id:'plist'});
+  const draw=()=>{list.textContent='';const q=Q.toLowerCase();const arr=d.payments.filter(p=>!q||[p.name,p.email,p.phone,p.service,p.dateLabel,p.address,p.coupon].join(' ').toLowerCase().includes(q));
+    if(!arr.length)list.append(el('p',{className:'sub',textContent:'No payment matches your search.'}));arr.forEach(p=>list.append(item(p)))};
+  const srch=el('input',{className:'srch',type:'search',placeholder:'Search name, phone, date, service…',value:Q,oninput:e=>{Q=e.target.value;draw()}});
+  out.push(el('div',{className:'card'},el('h2',{},'Who paid',el('small',{textContent:'tap a booking for every detail'})),el('div',{className:'tools'},srch,el('button',{className:'btn',textContent:'⬇ Download as spreadsheet',onclick:csv})),list));
+  draw();
+  if(d.unpaid.length){const u=el('div',{className:'pays'});d.unpaid.forEach(p=>u.append(el('details',{className:'pay'},
+    el('summary',{},el('div',{},el('div',{className:'pn',textContent:p.name||p.email||'Customer'}),el('div',{className:'ps',textContent:p.service})),el('div',{className:'pd'},el('div',{className:'pn',textContent:p.dateLabel||p.date}),el('div',{className:'ps',textContent:'started '+ago(p.created)})),el('div',{className:'pa'},usd(p.amount),el('small',{},el('span',{className:'badge warn',textContent:p.state==='open'?'Still open':'Expired'})))),
+    el('div',{className:'dg'},pair('Phone',p.phone),pair('Email',p.email),pair('Event address',p.address),pair('Started',when(p.created))))));
+    out.push(el('div',{style:'height:14px'}),el('div',{className:'card'},el('h2',{},'Started but not paid',el('small',{textContent:'good people to call or text'})),u))}
+  put(...out);
+}
+/* ---- System check: tells you exactly what to fix if payments, emails or the chat stop working ---- */
+async function check(){
+  const box=$('sys');box.textContent='';
+  box.append(el('div',{className:'card mini',style:'margin-bottom:14px',textContent:'Checking Stripe, emails, chat and database…'}));
+  try{
+    const h=await api('/api/health',{}),bad=h.checks.filter(c=>c.status==='fail'),warn=h.checks.filter(c=>c.status==='warn');
+    box.textContent='';
+    const all=el('div',{className:'chk'});
+    [...bad,...warn,...h.checks.filter(c=>c.status==='ok')].forEach(c=>{const it=el('div',{className:'it'},el('i',{className:'dot '+c.status}),el('div',{},el('b',{textContent:c.label}),el('p',{textContent:c.detail})));if(c.fix&&c.status!=='ok')it.lastChild.append(el('div',{className:'fx',textContent:'How to fix: '+c.fix}));all.append(it)});
+    const title=bad.length?'⚠️ '+bad.length+' thing'+(bad.length===1?'':'s')+' to fix':warn.length?'👍 Working, '+warn.length+' tip'+(warn.length===1?'':'s'):'✅ Everything is connected and working';
+    const card=el('div',{className:'card',style:'margin-bottom:14px'},el('h2',{},title,el('small',{textContent:(h.mode?h.mode.toUpperCase()+' mode · ':'')+h.host})));
+    if(bad.length||warn.length)card.append(all);else{const d=el('details',{},el('summary',{textContent:'Show details',style:'cursor:pointer;color:var(--mu)'}),all);card.append(d)}
+    card.append(el('button',{className:'btn',style:'margin-top:12px',textContent:'↻ Run the check again',onclick:check}));
+    box.append(card);
+  }catch(e){box.textContent='';box.append(el('div',{className:'card mini',style:'margin-bottom:14px;color:var(--bad)',textContent:'System check unavailable: '+e.message}))}
+}
+$('seg').onclick=e=>{const b=e.target.closest('button');if(!b)return;DAYS=+b.dataset.d;[...$('seg').children].forEach(x=>x.classList.toggle('on',x===b));load()};
+$('ref').onclick=()=>{load();toast('Updated')};
+boot();
+</script></body></html>
