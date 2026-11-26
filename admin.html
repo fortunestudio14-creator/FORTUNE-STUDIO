@@ -55,7 +55,7 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 const $=id=>document.getElementById(id);let sb,C,win,doc,sel=null,bypass=false;
 const say=(id,s)=>$(id).textContent=s;
 function el(t,p,...k){const e=document.createElement(t);Object.assign(e,p||{});k.forEach(x=>e.append(x));return e}
-function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.cp=c.cp||{};c.rt=c.rt||{};c.av=c.av||{};c.av.freed=c.av.freed||[];c.av.win=c.av.win||{};c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
+function norm(c){c=c||{};['css','t','l','m','h'].forEach(k=>c[k]=c[k]||{});c.ms=c.ms||{};c.fx=c.fx||{};c.cp=c.cp||{};c.rt=c.rt||{};c.av=c.av||{};c.av.freed=c.av.freed||[];c.av.win=c.av.win||{};c.av.off=c.av.off||[];c.add=c.add||{};c.add.sections=c.add.sections||[];c.add.gallery=c.add.gallery||[];return c}
 const fromLink=/access_token=/.test(location.hash);
 async function init(){
   if(!window.supabase)throw Error('Supabase library did not load. Refresh the page.');
@@ -411,7 +411,25 @@ const hrs=[...Array(25).keys()].map(i=>8+i/2),hl=v=>{const h=Math.floor(v),m=v%1
 function drawAvail(){const b=$('avp');if(!b)return;b.textContent='';
   b.append(el('div',{className:'hint',textContent:'Upcoming PAID bookings are listed here (a paid date is closed on the calendar). Use this when a customer cancels or you refunded, or when a date has room for another event at a different hour. This does NOT cancel or refund the payment (do that in Stripe). Click Save and publish after your changes; customers see it within about a minute.'}),
     el('button',{className:'s',textContent:'Refresh bookings',onclick:loadBook}));
+  b.prepend(el('div',{id:'av_off'}));paintOff();
   const lb=el('div',{id:'av_list',className:'hint',textContent:BK?'':'Click here to load...'});b.append(lb);paintAvail()}
+let OFFVM=null;
+function paintOff(){const h=$('av_off');if(!h)return;h.textContent='';C.av.off=C.av.off||[];const off=C.av.off;
+  const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),today=ymd(new Date());
+  if(!OFFVM){const n=new Date();OFFVM=new Date(n.getFullYear(),n.getMonth(),1)}
+  const y=OFFVM.getFullYear(),m=OFFVM.getMonth(),n=new Date(y,m+1,0).getDate();
+  const set=(keys,close)=>{let a=off.filter(k=>!keys.includes(k));if(close)a=a.concat(keys.filter(k=>k>=today));C.av.off=a.sort();refresh();paintOff();say('status','Days off changed. Click Save and publish.')};
+  h.append(el('div',{style:'color:#fff;font-weight:700;margin-top:6px',textContent:'Days off: close dates for customers'}),el('div',{className:'hint',textContent:'Tap a day to close it, tap again to open it. Closed days are red and customers cannot book them. Use the arrows to move to next months. Mondays are already closed. Then click Save and publish.'}));
+  const nav=el('div',{style:'display:flex;align-items:center;justify-content:space-between;margin:8px 0'},el('button',{className:'s',textContent:'‹',onclick:()=>{OFFVM=new Date(y,m-1,1);paintOff()}}),el('b',{style:'color:#fff',textContent:OFFVM.toLocaleDateString('en-US',{month:'long',year:'numeric'})}),el('button',{className:'s',textContent:'›',onclick:()=>{OFFVM=new Date(y,m+1,1);paintOff()}}));
+  const g=el('div',{style:'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0'});
+  'SMTWTFS'.split('').forEach(x=>g.append(el('div',{className:'hint',style:'text-align:center',textContent:x})));
+  for(let i=0;i<OFFVM.getDay();i++)g.append(el('span'));
+  const keys=[];
+  for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d)),past=k<today,is=off.includes(k);keys.push(k);
+    g.append(el('button',{textContent:String(d),disabled:past,style:'padding:9px 0;border-radius:8px;cursor:pointer;border:1px solid '+(is?'#e5604f':'#343840')+';background:'+(is?'#5a2420':'#1c1f24')+';color:'+(is?'#ffb4a8':'#fff')+';opacity:'+(past?.35:1),onclick:()=>set([k],!is)}))}
+  const up=off.filter(k=>k>=today).length;
+  h.append(nav,g,el('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},el('button',{className:'s',textContent:'Close this whole month',onclick:()=>set(keys,true)}),el('button',{className:'s',textContent:'Open this whole month',onclick:()=>set(keys,false)})),el('div',{className:'hint',textContent:up+' upcoming day'+(up===1?'':'s')+' closed by you.'}),el('hr',{style:'border:0;border-top:1px solid #343840;margin:14px 0'}))}
+
 async function loadBook(){const l=$('av_list');if(l)l.textContent='Loading bookings...';try{BK=(await srv({action:'bookings'})).bookings}catch(e){if(l)l.textContent='Could not load bookings: '+e.message;return}paintAvail()}
 $('avd').addEventListener('toggle',()=>{if($('avd').open&&!BK)loadBook()});
 function paintAvail(){const l=$('av_list');if(!l)return;l.textContent='';if(!BK)return;if(!BK.length){l.textContent='No upcoming paid bookings.';return}
