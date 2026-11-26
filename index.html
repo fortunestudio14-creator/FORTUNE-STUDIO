@@ -281,7 +281,33 @@ input,select,textarea{background:#151515;border-color:#3a3a3a}
 #space.js-rv .sp-t.in:hover{transform:translateY(-4px)!important}
 @media(prefers-reduced-motion:reduce){.rv,#space.js-rv .sp-t{transform:none!important;transition:none!important}}
 </style>
-</head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="fc"><circle cx="12" cy="12" r="12"/></clipPath></defs><symbol id="f-us" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="2.4"/><rect y="4.8" width="24" height="2.4"/><rect y="9.6" width="24" height="2.4"/><rect y="14.4" width="24" height="2.4"/><rect y="19.2" width="24" height="2.4"/></g><rect width="12" height="12.2" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="2.2" r=".55"/><circle cx="2" cy="5" r=".55"/><circle cx="2" cy="7.8" r=".55"/><circle cx="2" cy="10.6" r=".55"/><circle cx="4.6" cy="2.2" r=".55"/><circle cx="4.6" cy="5" r=".55"/><circle cx="4.6" cy="7.8" r=".55"/><circle cx="4.6" cy="10.6" r=".55"/><circle cx="7.2" cy="2.2" r=".55"/><circle cx="7.2" cy="5" r=".55"/><circle cx="7.2" cy="7.8" r=".55"/><circle cx="7.2" cy="10.6" r=".55"/><circle cx="9.8" cy="2.2" r=".55"/><circle cx="9.8" cy="5" r=".55"/><circle cx="9.8" cy="7.8" r=".55"/><circle cx="9.8" cy="10.6" r=".55"/></g></g></symbol><symbol id="f-es" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#c60b1e"/><rect y="6" width="24" height="12" fill="#ffc400"/></g></symbol><symbol id="f-fr" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="8" height="24" fill="#0055a4"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#ef4135"/></g></symbol></svg>
+<style id="fs-dock">
+/* Floating buttons live in one tidy dock: Back to top (left), Book (center), Chat (right), Black Friday above. Nothing sits on top of anything else. */
+html body #bfpill{z-index:28}
+body #fs-top{bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+body:has(#bfpill.on) #fs-top{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+html body #fsnudge{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+body:has(#bfpill.on) #fsnudge{bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudge,body:has(#cw.open) #fs-top{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+/* Chat window */
+@media(min-width:561px){#cw{width:min(390px,calc(100vw - 36px));height:min(560px,calc(100dvh - 120px))}}
+#cm{padding:16px 14px;gap:10px}
+#cm p{white-space:pre-wrap;font-size:.95rem}
+#cm .b{background:#1f1f1f;border:1px solid #2c2c2c}
+#cq{display:flex;gap:8px;overflow-x:auto;padding:2px 14px 12px;flex:none;scrollbar-width:none}
+#cq::-webkit-scrollbar{display:none}#cq[hidden]{display:none}
+#cq button{flex:none;border:1px solid #3a3a3a;background:#1b1b1b;color:var(--tx);border-radius:999px;padding:9px 15px;font:500 .84rem Outfit,system-ui,sans-serif;cursor:pointer;white-space:nowrap;transition:border-color .2s,color .2s}
+#cq button:hover,#cq button:active{border-color:var(--ac);color:var(--ac)}
+@media(max-width:820px){
+ html body #cb{right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:56px;height:56px}
+ body #fs-top,body:has(#bfpill.on) #fs-top{left:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:44px;height:44px}
+ html body #fsbook{bottom:calc(20px + env(safe-area-inset-bottom,0px));padding:12px 22px;font-size:.92rem}
+ html body #bfpill{left:0;right:0;margin:0 auto;width:fit-content;max-width:calc(100vw - 28px);bottom:calc(82px + env(safe-area-inset-bottom,0px));white-space:nowrap}
+ body #fsnudge,body:has(#bfpill.on) #fsnudge{left:14px;right:14px;width:auto;bottom:calc(142px + env(safe-area-inset-bottom,0px))}
+ body:has(#cw.open) #fsck{display:none}
+ body:has(#fsck) #cb,body:has(#fsck) #fsbook,body:has(#fsck) #bfpill,body:has(#fsck) #fs-top,body:has(#fsck) #fsnudge{visibility:hidden}
+}
+</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="fc"><circle cx="12" cy="12" r="12"/></clipPath></defs><symbol id="f-us" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="2.4"/><rect y="4.8" width="24" height="2.4"/><rect y="9.6" width="24" height="2.4"/><rect y="14.4" width="24" height="2.4"/><rect y="19.2" width="24" height="2.4"/></g><rect width="12" height="12.2" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="2.2" r=".55"/><circle cx="2" cy="5" r=".55"/><circle cx="2" cy="7.8" r=".55"/><circle cx="2" cy="10.6" r=".55"/><circle cx="4.6" cy="2.2" r=".55"/><circle cx="4.6" cy="5" r=".55"/><circle cx="4.6" cy="7.8" r=".55"/><circle cx="4.6" cy="10.6" r=".55"/><circle cx="7.2" cy="2.2" r=".55"/><circle cx="7.2" cy="5" r=".55"/><circle cx="7.2" cy="7.8" r=".55"/><circle cx="7.2" cy="10.6" r=".55"/><circle cx="9.8" cy="2.2" r=".55"/><circle cx="9.8" cy="5" r=".55"/><circle cx="9.8" cy="7.8" r=".55"/><circle cx="9.8" cy="10.6" r=".55"/></g></g></symbol><symbol id="f-es" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#c60b1e"/><rect y="6" width="24" height="12" fill="#ffc400"/></g></symbol><symbol id="f-fr" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="8" height="24" fill="#0055a4"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#ef4135"/></g></symbol></svg>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQVKXHB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TB3MPP25" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -499,9 +525,10 @@ $("#tl").oninput=e=>{let v=e.target.value.replace(/\D/g,"");if(v.length>10&&v[0]
 function note(x){const m=$("#mg");m.style.display="block";m.className="msg err";m.textContent=x}
 const nmv=()=>($("#fn").value.trim()+" "+$("#ln").value.trim()).trim(),adv=()=>[$("#ad").value.trim(),$("#ad2").value.trim(),$("#cy").value.trim(),$("#sa").value+" "+$("#zp").value.trim()].filter(Boolean).join(", ");
 $("#zp").oninput=e=>e.target.value=e.target.value.replace(/\D/g,"").slice(0,5);
-async function checkout(d,nm,m){try{const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||""})});
+async function checkout(d,nm,m,hosted){try{const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||"",hosted:!!hosted})});
 const j=await r.json().catch(()=>({}));
-if(r.ok&&j.clientSecret){m.className="msg";m.textContent=t("pwait");await openPay(j);m.style.display="none";$("#go").disabled=false;return 1}
+if(!r.ok)console.error("Checkout API:",r.status,j.stage||"",j.detail||j.error||"");
+if(r.ok&&j.clientSecret){m.className="msg";m.textContent=t("pwait");try{await openPay(j)}catch(e){console.error("Payment form could not open, using the Stripe payment page instead:",e);if(!hosted)return await checkout(d,nm,m,true);throw e}m.style.display="none";$("#go").disabled=false;return 1}
 if(r.ok&&j.url){m.className="msg";m.textContent=t("pwait");location.href=j.url;return 1}
 if(r.status==409){m.textContent=(j.error=="coupon"&&window.fsCpnErr)?fsCpnErr(j.reason):(j.error=="time"&&window.fsTimeErr)?fsTimeErr():t("ptk");if(j.error=="coupon"&&window.fsCpnReset)fsCpnReset();window.FS_ERR2=(j.error=="coupon"||j.error=="time")?1:0;loadBooked();return 2}}catch(e){}return 0}
 $("#go").onclick=async()=>{const m=$("#mg"),g=$("#go");m.style.display="block";m.className="msg err";
@@ -529,7 +556,7 @@ const hv=$(".hero video");addEventListener("scroll",()=>{const y=Math.min(scroll
 // ---- Chat ----
 const cm=$("#cm");function add(c,x){const p=document.createElement("p");p.className=c;p.textContent=x;cm.appendChild(p);cm.scrollTop=1e9}
 const bot=x=>add("b",x);
-$("#cb").onclick=()=>{$("#cw").classList.toggle("open");if(!cm.children.length)bot(t("hi"))};
+$("#cb").onclick=()=>{$("#cw").classList.toggle("open");if(!cm.children.length)bot(t("hi"));chips()};
 function rb(q){const s=q.toLowerCase();let r;
 if(/human|person|agent|someone|persona|humano|alguien|humain|quelqu|talk|hablar|parler/.test(s))r="bh";
 else if(/space|venue|\bhall\b|espacio|espace|salle|sal[oó]n/.test(s))r="bsp";
@@ -541,10 +568,12 @@ else if(/call|phone|tel|contact|email|llam|appel/.test(s))r="bc";
 else if(/date|fecha|free|avail|dispon|libre|when|cuando|quand|book|reserv/.test(s)){const f=[];for(let i=0;f.length<3&&i<120;i++){const d=new Date(now.getTime()+i*864e5);if(!taken().includes(iso(d))&&d.getDay()!=1)f.push(iso(d))}return t("bdt").replace("{d}",f.map(fd).join(", "))}
 else if(/chair|table|silla|mesa|chaise|stock|have|tien|avez/.test(s))r="bs";else r="bx";return t(r)}
 const hist=[];
-$("#cf").onsubmit=async e=>{e.preventDefault();const q=$("#ci").value.trim();if(!q)return;$("#ci").value="";add("u",q);hist.push({role:"user",content:q});const ty=document.createElement("p");ty.className="b ty";ty.innerHTML="<span></span><span></span><span></span>";cm.appendChild(ty);cm.scrollTop=1e9;let r=null;
+const CQ={en:[["Prices","What are your prices?"],["Delivery","Do you offer delivery and pickup?"],["Free dates","Which dates are available?"],["Photo sessions","How do photo sessions work?"]],es:[["Precios","¿Cuáles son sus precios?"],["Entrega","¿Ofrecen entrega y recogida?"],["Fechas libres","¿Qué fechas están disponibles?"],["Sesiones de foto","¿Cómo funcionan las sesiones de fotos?"]],fr:[["Prix","Quels sont vos prix ?"],["Livraison","Proposez-vous la livraison et la reprise ?"],["Dates libres","Quelles dates sont disponibles ?"],["Séances photo","Comment fonctionnent les séances photo ?"]]};
+function chips(){let q=$("#cq");if(!q){q=document.createElement("div");q.id="cq";cm.after(q)}q.hidden=hist.length>0;q.textContent="";(CQ[L]||CQ.en).forEach(a=>{const x=document.createElement("button");x.type="button";x.textContent=a[0];x.onclick=()=>{$("#ci").value=a[1];$("#cf").dispatchEvent(new Event("submit",{cancelable:true,bubbles:true}))};q.appendChild(x)})}
+$("#cf").onsubmit=async e=>{e.preventDefault();const q=$("#ci").value.trim();if(!q)return;$("#ci").value="";const cq0=$("#cq");if(cq0)cq0.hidden=true;add("u",q);hist.push({role:"user",content:q});const ty=document.createElement("p");ty.className="b ty";ty.innerHTML="<span></span><span></span><span></span>";cm.appendChild(ty);cm.scrollTop=1e9;let r=null;
 let errMsg=L==="fr"?"Je n'arrive pas à joindre l'assistant pour le moment. Veuillez réessayer ou laisser un message à notre équipe." : L==="es"?"No puedo conectar con el asistente ahora. Inténtelo de nuevo o deje un mensaje a nuestro equipo." : "I can't connect to the AI assistant right now. Please try again or leave a message for our team.";
 try{const x=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:hist.slice(-12),lang:L,booked:taken().slice(0,60)})});const data=await x.json().catch(()=>({}));if(x.ok&&data.reply)r=data.reply;else if(data.error)console.error("Chat API:",data.error)}catch(e){console.error("Chat request failed",e)}
-ty.remove();if(!r)r=errMsg;hist.push({role:"assistant",content:r});bot(r)};
+ty.remove();if(!r)r=rb(q);r=String(r).replace(/\*\*(.+?)\*\*/g,"$1").replace(/^#{1,6}\s*/gm,"");hist.push({role:"assistant",content:r});bot(r)};
 $("#lm").onclick=()=>{const f=$("#lf");f.hidden=!f.hidden;$("#cf").hidden=!f.hidden;if(!f.hidden)$("#lfn").focus()};
 $("#lf").onsubmit=async e=>{e.preventDefault();const n=$("#lfn").value.trim(),c=$("#lfc").value.trim(),m=$("#lfm").value.trim();if(!n||!c||!m){bot(t("lme"));return}
 const b=$("#lf button");b.disabled=true;let ok=false;try{const r=await fetch("https://formsubmit.co/ajax/fortunestudio14@gmail.com",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({_subject:"Website message - "+n,_template:"table",_captcha:"false",Name:n,Contact:c,Message:m,Chat:hist.map(x=>x.role+": "+x.content).join("\n")})});const j=await r.json();ok=r.ok&&String(j.success)==="true"}catch(e){}
@@ -553,7 +582,7 @@ $("#lf").reset();$("#lf").hidden=true;$("#cf").hidden=false;bot(ok?t("lmo"):t("m
 if(/^https?:/.test(location.protocol)){const u=location.origin+location.pathname;[["link","rel","canonical","href"],["meta","property","og:url","content"]].forEach(a=>{const e=document.createElement(a[0]);e[a[1]]=a[2];e.setAttribute(a[1],a[2]);e.setAttribute(a[3],u);document.head.appendChild(e)})}
 {const n=(navigator.language||"en").slice(0,2).toLowerCase();if(D[n])L=n}
 // ---- Extras: chat link, section flash, reveal, background sparks ----
-document.addEventListener("click",e=>{const a=e.target.closest('a[href="#chat"]');if(a){e.preventDefault();$("#cw").classList.add("open");if(!cm.children.length)bot(t("hi"));$("#ci").focus()}});
+document.addEventListener("click",e=>{const a=e.target.closest('a[href="#chat"]');if(a){e.preventDefault();$("#cw").classList.add("open");if(!cm.children.length)bot(t("hi"));chips();$("#ci").focus()}});
 document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const s=document.getElementById(a.getAttribute("href").slice(1));if(s&&s.tagName=="SECTION"){s.classList.remove("fl");void s.offsetWidth;s.classList.add("fl");setTimeout(()=>s.classList.remove("fl"),1700)}});
 document.querySelectorAll("[name=pp]").forEach(i=>i.addEventListener("input",tot));
 const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");rio.unobserve(e.target)}}),{threshold:0,rootMargin:"0px 0px 700px 0px"});document.querySelectorAll("section").forEach(x=>{x.classList.add("rv");rio.observe(x)});
@@ -754,6 +783,7 @@ var SUCCESS={
 function finishPaymentDialog(){return new Promise(function(resolve){var dlg=document.getElementById("stp");if(!dlg||!dlg.open){resolve();return}dlg.classList.add("pay-leaving");setTimeout(function(){close();dlg.classList.remove("pay-leaving");resolve()},300)})}
 window.fsPaid=function(){
 var panel=document.getElementById("fs-success"),copy=SUCCESS[lang()]||SUCCESS.en,info={};
+if(panel.classList.contains("show"))return;
 try{info=JSON.parse(sessionStorage.getItem("fs_pending_booking")||"{}")}catch(e){}
 var set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v||"—"};
 set("fs-success-tag","✓  "+copy.tag);set("fs-success-title",copy.title);set("fs-success-sub",copy.sub);set("fs-label-date",copy.date);set("fs-label-time",copy.time);set("fs-label-service",copy.service);set("fs-label-paid",copy.paid);set("fs-value-date",info.date||"—");set("fs-value-time",info.time||"—");set("fs-value-service",info.service||"—");set("fs-value-paid",info.paid||info.total||"—");set("fs-success-note",copy.note+(info.email?"  "+info.email:""));set("fs-success-close",copy.close);
