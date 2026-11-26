@@ -3,7 +3,7 @@ const { paypal, saveBooking } = require("./_paypal");
 const cut=(v,n=200)=>String(v??"").slice(0,n);
 module.exports=async(req,res)=>{
  // GET = public PayPal Client ID (safe to expose, it is meant for the browser) so the PayPal button can load inside the site.
- if(req.method==="GET"){const id=process.env.PAYPAL_CLIENT_ID;if(!id)return res.status(503).json({error:"not_configured"});res.setHeader("Cache-Control","no-store");return res.status(200).json({clientId:id,env:process.env.PAYPAL_ENV==="live"?"live":"sandbox"});}
+ if(req.method==="GET"){const id=process.env.PAYPAL_CLIENT_ID;if(!id)return res.status(503).json({error:"not_configured"});res.setHeader("Cache-Control","no-store");return res.status(200).json({clientId:id,env:(String(process.env.PAYPAL_ENV||process.env.PAYPAL_MODE||"").toLowerCase()==="live")?"live":"sandbox"});}
  if(req.method!=="POST")return res.status(405).end();
  if(badOrigin(req))return res.status(403).json({error:"forbidden"});
  if(limited(req,"paypal-create",25,10*60*1000))return res.status(429).json({error:"too_many_requests"});
