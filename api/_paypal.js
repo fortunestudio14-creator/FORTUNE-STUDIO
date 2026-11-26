@@ -2,7 +2,7 @@ const API = (String(process.env.PAYPAL_ENV||process.env.PAYPAL_MODE||"").toLower
 async function accessToken() {
   const id = process.env.PAYPAL_CLIENT_ID, secret = process.env.PAYPAL_CLIENT_SECRET;
   if (!id || !secret) throw new Error("PayPal is not configured. Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Vercel.");
-  const r = await fetch(API + "/v1/oauth2/token", { method:"POST", headers:{ Authorization:"Basic "+Buffer.from(id+":"+secret).toString("base64"), "Content-Type":"application/x-www-form-urlencoded" }, body:"grant_type=client_credentials" });
+  const r = await fetch(API + "/v1/oauth2/token", { signal: AbortSignal.timeout(8000), method:"POST", headers:{ Authorization:"Basic "+Buffer.from(id+":"+secret).toString("base64"), "Content-Type":"application/x-www-form-urlencoded" }, body:"grant_type=client_credentials" });
   const j = await r.json().catch(()=>({}));
   if (!r.ok || !j.access_token) throw new Error("PayPal authentication failed: "+(j.error_description||j.error||r.status));
   return j.access_token;
