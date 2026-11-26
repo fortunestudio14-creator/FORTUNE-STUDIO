@@ -438,16 +438,17 @@ const $=s=>document.querySelector(s),t=k=>{const v=D[L][k];return typeof v=="str
 const BOOKED=[]; // dates you block by hand. Saturdays and Sundays are open. Mondays are always closed (see cal()).
 let mine=[];try{mine=JSON.parse(localStorage.getItem("fs_b")||"[]")}catch(e){}
 let remote=[];const taken=()=>BOOKED.concat(mine,remote);
-var WIN={};async function loadBooked(){try{const r=await fetch("/api/booked");if(r.ok){const j=await r.json();remote=j.dates||[];WIN=j.windows||{};cal();fillT()}}catch(e){}}
+var WIN={};async function loadBooked(){try{const r=await fetch("/api/booked");if(r.ok){const j=await r.json();remote=j.dates||[];WIN=j.windows||{};if(!sel)vm=openMonth();cal();fillT()}}catch(e){}}
 const LC={en:"en-US",es:"es-US",fr:"fr-FR"},fd=k=>new Date(k+"T12:00:00").toLocaleDateString(LC[L],{month:"short",day:"numeric",year:"numeric"});
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-const now=new Date();now.setHours(0,0,0,0);let vm=new Date(now.getFullYear(),now.getMonth(),1),sel=null;
+const MAXM=12;const now=new Date();now.setHours(0,0,0,0);let vm=new Date(now.getFullYear(),now.getMonth(),1),sel=null;
 function cal(){const M=t("cal").split(","),W=t("dw").split(",");$("#mo").textContent=M[vm.getMonth()]+" "+vm.getFullYear();let h=W.map(x=>"<b>"+x+"</b>").join("");
 for(let i=0;i<vm.getDay();i++)h+="<span></span>";const n=new Date(vm.getFullYear(),vm.getMonth()+1,0).getDate();
 for(let d=1;d<=n;d++){const x=new Date(vm.getFullYear(),vm.getMonth(),d),k=iso(x),past=x<now,bk=taken().includes(k),cl=x.getDay()==1;
-h+=`<button data-d="${k}" ${past||bk||cl?"disabled":""} class="${past?"past":cl?"cl":""}${sel===k?" sel":""}">${d}</button>`}$("#cal").innerHTML=h}
+h+=`<button data-d="${k}" ${past||bk||cl?"disabled":""} class="${past?"past":cl?"cl":""}${sel===k?" sel":""}">${d}</button>`}$("#cal").innerHTML=h;const m0=vm.getFullYear()*12+vm.getMonth(),c0=now.getFullYear()*12+now.getMonth();$("#pv").disabled=m0<=c0;$("#nx").disabled=m0>=c0+MAXM;$("#pv").style.opacity=$("#pv").disabled?".3":"";$("#nx").style.opacity=$("#nx").disabled?".3":""}
+function openMonth(){for(let i=0;i<=MAXM;i++){const f=new Date(now.getFullYear(),now.getMonth()+i,1),n=new Date(f.getFullYear(),f.getMonth()+1,0).getDate();for(let d=1;d<=n;d++){const x=new Date(f.getFullYear(),f.getMonth(),d);if(x>=now&&x.getDay()!=1&&!taken().includes(iso(x)))return f}}return new Date(now.getFullYear(),now.getMonth(),1)}
 $("#cal").onclick=e=>{const b=e.target.closest("button");if(b&&!b.disabled){sel=b.dataset.d;cal()}};
-$("#pv").onclick=()=>{vm.setMonth(vm.getMonth()-1);cal()};$("#nx").onclick=()=>{vm.setMonth(vm.getMonth()+1);cal()};
+$("#pv").onclick=()=>{if($("#pv").disabled)return;vm=new Date(vm.getFullYear(),vm.getMonth()-1,1);cal()};$("#nx").onclick=()=>{if($("#nx").disabled)return;vm=new Date(vm.getFullYear(),vm.getMonth()+1,1);cal()};
 function tr(){document.documentElement.lang=L=="en"?"en-US":L;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
 document.querySelectorAll("[data-l]").forEach(b=>b.classList.toggle("on",b.dataset.l===L));$("#ci").placeholder=t("cph");document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));$("#mq").innerHTML=mqh();document.querySelectorAll("[data-n]").forEach(e=>{const a=P.find(x=>x[0]==e.dataset.n);e.textContent=e.dataset.k=="h"?a[0]+" "+t("min"):a[2]+" "+t("pic")});$("#txl").textContent=t("tax").replace("{p}",Math.round(FSP.tax*100));fillT();$("#hn").textContent=t("hn").replace("{h}",BASE_H).replace("{p}",Math.round(FSP.xh*100));$("#pdl").textContent=t("pdep").replace("{p}",Math.round(FSP.dep*100));cal();upd()}
 document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{L=b.dataset.l;tr();cm.innerHTML="";bot(t("hi"))});
