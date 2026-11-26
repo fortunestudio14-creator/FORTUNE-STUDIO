@@ -55,21 +55,14 @@ module.exports = async (req, res) => {
       },
     };
 
-    // 1) Payment form inside the site (needs STRIPE_PUBLISHABLE_KEY). 2) If that is not possible for any reason,
-    // fall back to Stripe's own secure payment page, so a customer can ALWAYS pay.
-    let session = null, embedded = false;
-    if (pub && b.hosted !== true) {
-      stage = "stripe_embedded";
-      try {
-        session = await stripe().checkout.sessions.create({ ...base, ui_mode: "embedded", redirect_on_completion: "never" });
-        embedded = true;
-      } catch (e) { console.error("embedded checkout failed, using Stripe page instead:", e.type, e.code, e.message); }
-    } else if (!pub) console.error("STRIPE_PUBLISHABLE_KEY is missing: using Stripe's hosted payment page");
-    if (!session) {
-      stage = "stripe_hosted";
-      session = await stripe().checkout.sessions.create({ ...base, success_url: origin + "/?paid=1", cancel_url: origin + "/?canceled=1" });
-    }
-    res.status(200).json(embedded ? { clientSecret: session.client_secret, publishableKey: pub } : { url: session.url });
+    // Always send customers to Stripe's own secure hosted Checkout page.
+    stage = "stripe_hosted";
+    const session = await stripe().checkout.sessions.create({
+      ...base,
+      success_url: origin + "/?paid=1",
+      cancel_url: origin + "/?canceled=1"
+    });
+    res.status(200).json({ url: session.url });
   } catch (e) {
     console.error("checkout failed at", stage, e.type || "", e.code || "", e.message);
     res.status(400).json({ error: "bad_request", stage, detail: safe(e.message) });
