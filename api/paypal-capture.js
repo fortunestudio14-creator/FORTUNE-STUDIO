@@ -1,5 +1,5 @@
 const { paypal, getBooking, setBooking } = require("./_paypal");
-const { stripe } = require("./_lib");
+const { stripe, limited, badOrigin } = require("./_lib");
 const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const OWNER=process.env.OWNER_EMAIL||"fortunestudio14@gmail.com";
 async function mail(to,subject,html,replyTo){
@@ -11,6 +11,8 @@ const labels=[["date_label","Date"],["time","Start time"],["service","Service"],
 function table(m){return "<table cellpadding='7' style='border-collapse:collapse'>"+labels.map(([k,l])=>"<tr><td style='color:#666'>"+l+"</td><td><b>"+esc(m[k])+"</b></td></tr>").join("")+"</table>";}
 module.exports=async(req,res)=>{
  if(req.method!=="POST")return res.status(405).end();
+ if(badOrigin(req))return res.status(403).json({error:"forbidden"});
+ if(limited(req,"paypal-capture",30,10*60*1000))return res.status(429).json({error:"too_many_requests"});
  try{
   const b=typeof req.body==="string"?JSON.parse(req.body):req.body||{},id=String(b.orderId||"");
   if(!/^[A-Z0-9-]{10,40}$/i.test(id))return res.status(400).json({error:"invalid_order"});
