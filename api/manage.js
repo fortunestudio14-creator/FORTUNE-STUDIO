@@ -14,6 +14,48 @@ module.exports = async (req, res) => {
 
     if (b.action === "bookings") return res.status(200).json({ bookings: (await availability()).list });
 
+    if (b.action === "payments") {
+      // Every payment made on the site (and every checkout that was started but not finished) for the last N days, straight from Stripe.
+      const days = Math.min(365, Math.max(1, Math.round(Number(b.days) || 30)));
+      const since = Math.floor(Date.now() / 1000) - days * 86400;
+      const mv = (v) => { const n = parseFloat(String(v == null ? "" : v).replace(/[^0-9.\-]/g, "")); return Number.isFinite(n) ? n : 0; };
+      const ymd = (t) => new Date(t * 1000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+      const rd = (n) => Math.round(n * 100) / 100;
+      const run = async (expand) => {
+        const rows = []; let n = 0;
+        const args = { limit: 100, created: { gte: since } }; if (expand) args.expand = ["data.payment_intent.latest_charge"];
+        for await (const x of S.checkout.sessions.list(args)) { rows.push(x); if (++n >= 500) break; }
+        return rows;
+      };
+      let list; try { list = await run(true); } catch (e) { console.error("payments expand failed", e.message); list = await run(false); }
+      const paid = [], unpaid = [], daily = {};
+      let live = null;
+      for (const x of list) {
+        const m = x.metadata || {};
+        if (m.app !== "fortune") continue;
+        live = x.livemode;
+        const base = { id: x.id, created: x.created, name: m.name || "", email: (x.customer_details && x.customer_details.email) || x.customer_email || "", phone: m.phone || "", address: m.address || "", date: m.date || "", dateLabel: m.date_label || "", time: m.time || "", service: m.service || "", lang: m.lang || "" };
+        if (x.payment_status === "paid") {
+          const pi = x.payment_intent && typeof x.payment_intent === "object" ? x.payment_intent : null;
+          const ch = pi && pi.latest_charge && typeof pi.latest_charge === "object" ? pi.latest_charge : null;
+          const amount = rd((x.amount_total || 0) / 100), refunded = ch ? rd((ch.amount_refunded || 0) / 100) : 0;
+          const totalNum = mv(m.total), tax = mv(m.tax);
+          paid.push({ ...base, paid: amount, refunded, subtotal: mv(m.subtotal), tax, taxPaid: totalNum > 0 ? rd(tax * Math.min(1, amount / totalNum)) : 0, total: m.total || "", totalNum, balance: m.balance || "", balanceNum: mv(m.balance), deposit: /deposit/i.test(m.service || "") || (totalNum > 0 && amount < totalNum - 0.01), coupon: m.coupon || "", discount: m.discount || "", sale: m.sale && m.sale !== "-" ? m.sale : "", delivery: m.delivery === "yes", receipt: ch && ch.receipt_url ? ch.receipt_url : "" });
+          const k = ymd(x.created); daily[k] = rd((daily[k] || 0) + amount - refunded);
+        } else if (x.status === "open" || x.status === "expired") {
+          unpaid.push({ ...base, amount: rd((x.amount_total || 0) / 100), state: x.status });
+        }
+      }
+      paid.sort((a, b2) => b2.created - a.created); unpaid.sort((a, b2) => b2.created - a.created);
+      const sum = (arr, f) => rd(arr.reduce((t, r) => t + f(r), 0));
+      const gross = sum(paid, (r) => r.paid), refunded = sum(paid, (r) => r.refunded);
+      return res.status(200).json({
+        days, live, daily,
+        summary: { count: paid.length, gross, refunded, net: rd(gross - refunded), tax: sum(paid, (r) => r.taxPaid), balanceDue: sum(paid.filter((r) => r.refunded < r.paid), (r) => r.balanceNum), deposits: paid.filter((r) => r.deposit).length, unpaid: unpaid.length },
+        payments: paid, unpaid: unpaid.slice(0, 100),
+      });
+    }
+
     if (b.action === "codes") {
       const out = []; let n = 0;
       for await (const x of S.promotionCodes.list({ limit: 100 })) {
