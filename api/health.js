@@ -79,5 +79,31 @@ module.exports = async (req, res) => {
       add("db", "Database (Supabase)", r.ok ? "ok" : "warn", r.ok ? "Connected." : "Supabase answered with status " + r.status + ".");
     } catch (e) { add("db", "Database (Supabase)", "warn", "Could not reach Supabase."); }
   }
+  // ---- PayPal (keys, live/sandbox match, and the Supabase table that stores PayPal orders)
+  {
+    const pid = process.env.PAYPAL_CLIENT_ID || "", psec = process.env.PAYPAL_CLIENT_SECRET || "";
+    const pmode = String(process.env.PAYPAL_ENV || process.env.PAYPAL_MODE || "").toLowerCase() === "live" ? "live" : "sandbox";
+    if (!pid || !psec) add("pp", "PayPal keys", "fail", "PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET is missing in Vercel.", "Add both in Vercel (PayPal Developer > Apps & Credentials), then redeploy.");
+    else {
+      const tok = async (m) => { const r = await T(8000, fetch((m === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com") + "/v1/oauth2/token", { method: "POST", headers: { Authorization: "Basic " + Buffer.from(pid + ":" + psec).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=client_credentials" })); const j = await r.json().catch(() => ({})); return r.ok && j.access_token; };
+      try {
+        if (await tok(pmode)) add("pp", "PayPal keys", "ok", "Works (" + pmode + " mode).");
+        else {
+          const other = pmode === "live" ? "sandbox" : "live";
+          let otherOk = false; try { otherOk = await tok(other); } catch (e) {}
+          add("pp", "PayPal keys", "fail", otherOk ? "These keys are " + other.toUpperCase() + " keys but the site is in " + pmode.toUpperCase() + " mode." : "PayPal refused the Client ID / Secret.", otherOk ? "In Vercel set PAYPAL_MODE=" + other + " (or use the " + pmode + " keys), then redeploy." : "Copy the Client ID and Secret again from the same PayPal app (no spaces), paste them in Vercel, redeploy.");
+        }
+      } catch (e) { add("pp", "PayPal keys", "warn", "Could not reach PayPal: " + String(e.message).slice(0, 80)); }
+    }
+    const pu = process.env.FORTUNE_SUPABASE_URL || "", pkey = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY || "";
+    if (!pu || !pkey) add("ppdb", "PayPal orders table", "fail", (!pu ? "FORTUNE_SUPABASE_URL" : "FORTUNE_SUPABASE_SERVICE_ROLE_KEY") + " is missing in Vercel.", "Add it in Vercel (Supabase > Project Settings > API), then redeploy.");
+    else {
+      try {
+        const r = await T(8000, fetch(pu.replace(/\/$/, "") + "/rest/v1/paypal_bookings?select=order_id&limit=1", { headers: { apikey: pkey, Authorization: "Bearer " + pkey } }));
+        if (r.ok) add("ppdb", "PayPal orders table", "ok", "paypal_bookings table is ready.");
+        else add("ppdb", "PayPal orders table", "fail", r.status === 404 ? "The paypal_bookings table does not exist." : "Supabase answered with status " + r.status + " (check the service role key).", "Supabase > SQL Editor > run the file supabase-paypal.sql once.");
+      } catch (e) { add("ppdb", "PayPal orders table", "warn", "Could not reach Supabase."); }
+    }
+  }
   res.status(200).json({ host, mode, checks: out });
 };
