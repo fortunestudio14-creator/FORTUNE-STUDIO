@@ -1,4 +1,4 @@
-const API = process.env.PAYPAL_ENV === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+const API = (String(process.env.PAYPAL_ENV||process.env.PAYPAL_MODE||"").toLowerCase()==="live") ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
 async function accessToken() {
   const id = process.env.PAYPAL_CLIENT_ID, secret = process.env.PAYPAL_CLIENT_SECRET;
   if (!id || !secret) throw new Error("PayPal is not configured. Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Vercel.");
