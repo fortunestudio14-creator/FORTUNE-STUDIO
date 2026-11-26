@@ -46,11 +46,37 @@ module.exports = async (req, res) => {
           unpaid.push({ ...base, amount: rd((x.amount_total || 0) / 100), state: x.status });
         }
       }
+      // PayPal payments (saved in Supabase by /api/paypal-create and /api/paypal-capture)
+      try {
+        const url = process.env.FORTUNE_SUPABASE_URL, key = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY;
+        if (url && key) {
+          const r = await fetch(url.replace(/\/$/, "") + "/rest/v1/paypal_bookings?created_at=gte." + encodeURIComponent(new Date(since * 1000).toISOString()) + "&select=*&order=created_at.desc&limit=500", { headers: { apikey: key, Authorization: "Bearer " + key } });
+          if (r.ok) {
+            for (const row of await r.json()) {
+              const m = row.booking || {};
+              if (m.app !== "fortune") continue;
+              if (live === null) live = process.env.PAYPAL_ENV === "live";
+              const ts = Math.floor(new Date(row.status === "paid" ? (row.updated_at || row.created_at) : row.created_at).getTime() / 1000);
+              const base = { id: row.order_id, created: ts, name: m.name || "", email: m.email || "", phone: m.phone || "", address: m.address || "", date: m.date || "", dateLabel: m.date_label || "", time: m.time || "", service: m.service || "", lang: m.lang || "", method: "PayPal" };
+              const amount = rd(mv(m.amount != null ? m.amount : m.paid_now));
+              if (row.status === "paid") {
+                const totalNum = mv(m.total), tax = mv(m.tax);
+                paid.push({ ...base, paid: amount, refunded: 0, subtotal: mv(m.subtotal), tax, taxPaid: totalNum > 0 ? rd(tax * Math.min(1, amount / totalNum)) : 0, total: m.total || "", totalNum, balance: m.balance || "", balanceNum: mv(m.balance), deposit: /deposit/i.test(m.service || "") || (totalNum > 0 && amount < totalNum - 0.01), coupon: m.coupon || "", discount: m.discount || "", sale: m.sale && m.sale !== "-" ? m.sale : "", delivery: m.delivery === "yes", receipt: "" });
+                const k = ymd(ts); daily[k] = rd((daily[k] || 0) + amount);
+              } else if (row.status === "pending") {
+                unpaid.push({ ...base, amount, state: "open" });
+              }
+            }
+          } else console.error("paypal payments lookup failed", r.status);
+        }
+      } catch (e) { console.error("paypal payments failed", e.message); }
+      paid.forEach((p) => { if (!p.method) p.method = "Stripe"; }); unpaid.forEach((p) => { if (!p.method) p.method = "Stripe"; });
       paid.sort((a, b2) => b2.created - a.created); unpaid.sort((a, b2) => b2.created - a.created);
       const sum = (arr, f) => rd(arr.reduce((t, r) => t + f(r), 0));
       const gross = sum(paid, (r) => r.paid), refunded = sum(paid, (r) => r.refunded);
+      const by = (mth) => { const a = paid.filter((r) => r.method === mth); return { count: a.length, gross: sum(a, (r) => r.paid), balanceDue: sum(a, (r) => r.balanceNum), unpaid: unpaid.filter((r) => r.method === mth).length }; };
       return res.status(200).json({
-        days, live, daily,
+        days, live, daily, byMethod: { stripe: by("Stripe"), paypal: by("PayPal") },
         summary: { count: paid.length, gross, refunded, net: rd(gross - refunded), tax: sum(paid, (r) => r.taxPaid), balanceDue: sum(paid.filter((r) => r.refunded < r.paid), (r) => r.balanceNum), deposits: paid.filter((r) => r.deposit).length, unpaid: unpaid.length },
         payments: paid, unpaid: unpaid.slice(0, 100),
       });
