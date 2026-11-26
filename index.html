@@ -314,7 +314,7 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 .phw #tl{border:0;background:transparent;border-radius:0 12px 12px 0;flex:1;min-width:0;outline:none}
 .phc{display:flex;align-items:center;gap:7px;flex:none;background:transparent;border:0;border-right:1px solid #3a3a3a;border-radius:12px 0 0 12px;color:var(--tx);padding:0 10px;cursor:pointer;font:inherit}
 .phc img{border-radius:3px;object-fit:cover;display:block}
-.phc svg{opacity:.6}
+.phc svg{opacity:.6}.ph-fixed{cursor:default;min-width:76px;justify-content:center}.ph-fixed img{width:22px;height:16px}.phone-help{display:block;color:var(--mu);font-size:.78rem;line-height:1.4;padding:7px 2px 0}
 .phl{position:absolute;z-index:30;left:0;top:calc(100% + 6px);width:min(300px,calc(100vw - 48px));background:#151515;border:1px solid #3a3a3a;border-radius:14px;box-shadow:0 18px 44px #000a;padding:8px}
 .phl[hidden]{display:none}
 .phl #phs{border-radius:10px;padding:9px 11px;margin-bottom:6px}
@@ -381,7 +381,7 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 <button class="btn" id="n2" disabled data-i="ct" style="margin-top:14px"></button></div></div>
 <div id="s3" class="pane" hidden><button class="bk" id="b3" data-i="bk2"></button><div class="sum" data-sm></div><div style="max-width:520px">
 
-<div class="row"><div><label for="fn" data-i="fn"></label><input id="fn" autocomplete="given-name"></div><div><label for="ln" data-i="ln"></label><input id="ln" autocomplete="family-name"></div></div><div class="row"><div><label for="tl" data-i="tel"></label><div class="phw" id="phw"><button type="button" class="phc" id="phc" aria-haspopup="listbox" aria-expanded="false" aria-label="Country code"><img id="phf" alt="" width="22" height="16"><span id="phd">+1</span><svg viewBox="0 0 10 6" width="9" height="6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><input id="tl" type="tel" inputmode="tel" placeholder="570-000-0000" autocomplete="tel-national" maxlength="24"><div class="phl" id="phl" hidden><input id="phs" type="search" placeholder="Search country / code" autocomplete="off"><ul id="phu" role="listbox"></ul></div></div></div><div><label for="em" data-i="eml"></label><input id="em" type="email" autocomplete="email"></div></div><label for="ad" data-i="ad"></label><input id="ad" data-ph="sad" autocomplete="address-line1"><input id="ad2" data-ph="ap" autocomplete="address-line2" style="margin-top:8px"><div class="row" style="margin-top:8px"><div><label for="cy" data-i="cy"></label><input id="cy" autocomplete="address-level2"></div><div><label for="sa" data-i="sa"></label><select id="sa" autocomplete="address-level1"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option selected>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div><label for="zp" data-i="zp"></label><input id="zp" inputmode="numeric" maxlength="5" autocomplete="postal-code" style="max-width:200px"><label data-i="pwhen"></label><div class="pw"><label><input type="radio" name="pp" value="full" checked><span data-i="pfull"></span><small id="pfa"></small></label><label><input type="radio" name="pp" value="dep"><span id="pdl"></span><small id="pda"></small></label></div>
+<div class="row"><div><label for="fn" data-i="fn"></label><input id="fn" autocomplete="given-name"></div><div><label for="ln" data-i="ln"></label><input id="ln" autocomplete="family-name"></div></div><div class="row"><div><label for="tl" data-i="tel"></label><div class="phw" id="phw"><span class="phc ph-fixed" aria-label="United States phone code"><img src="https://flagcdn.com/w40/us.png" alt="United States" width="22" height="16"><span>+1</span></span><input id="tl" type="tel" inputmode="numeric" placeholder="(570) 309-5776" autocomplete="tel-national" maxlength="14" aria-describedby="phone-help"></div><small id="phone-help" class="phone-help">U.S. phone numbers only · Service available in the United States</small></div><div><label for="em" data-i="eml"></label><input id="em" type="email" autocomplete="email"></div></div><label for="ad" data-i="ad"></label><input id="ad" data-ph="sad" autocomplete="address-line1"><input id="ad2" data-ph="ap" autocomplete="address-line2" style="margin-top:8px"><div class="row" style="margin-top:8px"><div><label for="cy" data-i="cy"></label><input id="cy" autocomplete="address-level2"></div><div><label for="sa" data-i="sa"></label><select id="sa" autocomplete="address-level1"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option selected>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div><label for="zp" data-i="zp"></label><input id="zp" inputmode="numeric" maxlength="5" autocomplete="postal-code" style="max-width:200px"><label data-i="pwhen"></label><div class="pw"><label><input type="radio" name="pp" value="full" checked><span data-i="pfull"></span><small id="pfa"></small></label><label><input type="radio" name="pp" value="dep"><span id="pdl"></span><small id="pda"></small></label></div>
 <div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:16px 0 0;padding:0"><span data-i="sub"></span><span id="sb">$0</span></div><div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span id="txl"></span><span id="tx">$0</span></div><div class="tot"><span data-i="tt"></span><b id="tv">$0</b></div><div class="tot" style="font-size:1rem;border:0;margin:6px 0 0;padding:0"><span data-i="due"></span><b id="due">$0</b></div><div class="tot" id="blr" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span data-i="bal"></span><b id="bl">$0</b></div>
 <div style="margin-top:20px"><label style="display:block;font-weight:650;margin-bottom:10px">Payment method</label>
 <div class="pw pm">
@@ -425,87 +425,30 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 <dialog id="sd"><h3 data-i="sp"></h3><details open><summary data-i="q1"></summary><p data-i="a1"></p></details><details><summary data-i="q2"></summary><p data-i="a2"></p></details><details><summary data-i="q3"></summary><p data-i="a3"></p></details><details><summary data-i="q4"></summary><p data-i="a4"></p></details><details><summary data-i="q6"></summary><p data-i="a6"></p></details><details><summary data-i="q5"></summary><p><a href="tel:+15703095776">570-309-5776</a><br><a href="mailto:fortunestudio14@gmail.com">fortunestudio14@gmail.com</a><br>Scranton, PA</p></details><button class="btn" id="sx" style="margin-top:16px" data-i="cl"></button></dialog><dialog id="pd"><h3 data-i="pdt"></h3><p id="pdm" style="color:var(--mu)"></p><button class="btn" id="pdx" data-i="cl"></button></dialog><dialog id="lb"><img alt=""></dialog>
 <script>
 (function(){
-var C=[["US","United States","1","n"],["CA","Canada","1","n"],["PR","Puerto Rico","1","n"],["DO","Dominican Republic","1","n"],["HT","Haiti","509","h"],["JM","Jamaica","1","n"],["MX","Mexico","52"],["CU","Cuba","53"],["CO","Colombia","57"],["VE","Venezuela","58"],["BR","Brazil","55"],["AR","Argentina","54"],["CL","Chile","56"],["PE","Peru","51"],["EC","Ecuador","593"],["PA","Panama","507"],["CR","Costa Rica","506"],["GT","Guatemala","502"],["HN","Honduras","504"],["SV","El Salvador","503"],["NI","Nicaragua","505"],["FR","France","33"],["ES","Spain","34"],["PT","Portugal","351"],["IT","Italy","39"],["DE","Germany","49"],["GB","United Kingdom","44"],["IE","Ireland","353"],["NL","Netherlands","31"],["BE","Belgium","32"],["CH","Switzerland","41"],["PL","Poland","48"],["UA","Ukraine","380"],["TR","Turkey","90"],["IL","Israel","972"],["IN","India","91"],["PK","Pakistan","92"],["CN","China","86"],["JP","Japan","81"],["KR","South Korea","82"],["PH","Philippines","63"],["NG","Nigeria","234"],["GH","Ghana","233"],["ZA","South Africa","27"],["EG","Egypt","20"],["AU","Australia","61"],["NZ","New Zealand","64"]];
-var cur=C[0],$=function(i){return document.getElementById(i)};
-var tl=$("tl"),btn=$("phc"),box=$("phl"),ul=$("phu"),srch=$("phs"),wrap=$("phw");
-if(!tl||!btn)return;
-function nanp(c){return c[3]==="n"}
-function lens(c){return nanp(c)?[10,10]:c[3]==="h"?[8,8]:[6,13]}
-function fmt(c,d){
-  if(nanp(c)){d=d.slice(0,10);return d.length>6?d.slice(0,3)+"-"+d.slice(3,6)+"-"+d.slice(6):d.length>3?d.slice(0,3)+"-"+d.slice(3):d}
-  if(c[3]==="h"){d=d.slice(0,8);return d.length>4?d.slice(0,4)+" "+d.slice(4):d}
-  d=d.slice(0,13);var o=[];if(d.length>3){o.push(d.slice(0,3));d=d.slice(3)}if(d.length>3){o.push(d.slice(0,3));d=d.slice(3)}if(d)o.push(d);return o.join(" ")}
-function ph(c){return nanp(c)?"570-000-0000":c[3]==="h"?"0000 0000":"000 000 0000"}
-function flag(img,c){img.onerror=function(){img.style.visibility="hidden"};img.style.visibility="visible";img.src="https://flagcdn.com/w40/"+c[0].toLowerCase()+".png";img.alt=c[0]}
-function setC(c,keep){
-  cur=c;flag($("phf"),c);$("phd").textContent="+"+c[2];tl.placeholder=ph(c);
-  var d=tl.value.replace(/\D/g,"");if(nanp(c)&&d.length>10&&d[0]==="1")d=d.slice(1);tl.value=fmt(c,d)}
-function build(q){
-  q=(q||"").toLowerCase().replace(/^\+/,"");ul.innerHTML="";
-  C.filter(function(c){return !q||c[1].toLowerCase().indexOf(q)>-1||c[0].toLowerCase()===q||c[2].indexOf(q)===0}).forEach(function(c){
-    var li=document.createElement("li");li.setAttribute("role","option");if(c===cur)li.className="on";
-    var im=document.createElement("img");im.width=22;im.height=16;flag(im,c);
-    var n=document.createElement("span");n.textContent=c[1];var e=document.createElement("em");e.textContent="+"+c[2];
-    li.appendChild(im);li.appendChild(n);li.appendChild(e);
-    li.onmousedown=function(ev){ev.preventDefault()};
-    li.onclick=function(){setC(c);close();tl.focus();unbad(wrap)};
-    ul.appendChild(li)})}
-function open(){build("");srch.value="";box.hidden=false;btn.setAttribute("aria-expanded","true");setTimeout(function(){srch.focus()},0)}
-function close(){box.hidden=true;btn.setAttribute("aria-expanded","false")}
-btn.onclick=function(){box.hidden?open():close()};
-srch.oninput=function(){build(srch.value)};
-srch.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();var f=ul.querySelector("li");if(f)f.click()}else if(e.key==="Escape"){e.stopPropagation();close();btn.focus()}};
-document.addEventListener("click",function(e){if(!box.hidden&&!e.target.closest("#phw"))close()});
-// auto-detect country when the person types +code (or 00code) / pastes a full number
-tl.addEventListener("input",function(){
-  var raw=tl.value,t=raw.trim(),intl=/^(\+|00)/.test(t),d=raw.replace(/\D/g,"");
-  if(intl){
-    if(/^00/.test(t))d=d.slice(2);
-    var hit=null,l=0;
-    for(var k=3;k>=1&&!hit;k--){var p=d.slice(0,k);if(p.length<k)continue;
-      var m=C.filter(function(c){return c[2]===p});
-      if(m.length){hit=(p==="1"&&cur[2]==="1")?cur:m[0];l=k}}
-    if(!hit){tl.value=(t[0]==="+"?"+":"+")+d;return}
-    cur=hit;flag($("phf"),hit);$("phd").textContent="+"+hit[2];tl.placeholder=ph(hit);d=d.slice(l)}
-  else if(nanp(cur)&&d.length>10&&d[0]==="1")d=d.slice(1);
-  // NANP area-code hints: Puerto Rico / Dominican Republic
-  if(nanp(cur)&&d.length>=3){var a=d.slice(0,3),g=cur[0]==="US"||cur[0]==="PR"||cur[0]==="DO";
-    if(g){var h=(a==="787"||a==="939")?"PR":(a==="809"||a==="829"||a==="849")?"DO":null;
-      if(h&&h!==cur[0]){cur=C.filter(function(c){return c[0]===h})[0];flag($("phf"),cur);}}}
-  tl.value=fmt(cur,d);unbad(wrap)});
-// Never lose what the person typed: just clear the red state while they edit
-function unbad(el){if(el)el.classList.remove("fs-bad")}
-["fn","ln","em","ad","cy","zp"].forEach(function(i){var e=$(i);if(e)e.addEventListener("input",function(){unbad(e)})});
-var sa=$("sa");if(sa)sa.addEventListener("change",function(){unbad(sa)});
-// guess the starting country from the browser (language region, then time zone)
-try{
-  var reg=((navigator.language||"").split("-")[1]||"").toUpperCase(),tz=(Intl.DateTimeFormat().resolvedOptions().timeZone||""),
-  byTz={"America/Port-au-Prince":"HT","America/Santo_Domingo":"DO","America/Puerto_Rico":"PR","America/Mexico_City":"MX","America/Toronto":"CA","America/Vancouver":"CA","Europe/Paris":"FR","America/Bogota":"CO","America/Jamaica":"JM","America/Havana":"CU"};
-  var iso=(reg&&C.filter(function(c){return c[0]===reg}).length)?reg:(byTz[tz]||"US");
-  if(iso!=="US")cur=C.filter(function(c){return c[0]===iso})[0]
-}catch(e){}
-setC(cur);
-window.fsPhone=function(){var d=tl.value.replace(/\D/g,"");if(!d)return "";return cur[0]==="US"?fmt(cur,d):"+"+cur[2]+" "+fmt(cur,d)};
-function digitsOk(){var d=tl.value.replace(/\D/g,""),r=lens(cur);return d.length>=r[0]&&d.length<=r[1]}
+var $=function(i){return document.getElementById(i)},tl=$("tl"),wrap=$("phw");
+if(!tl)return;
+function format(d){d=(d||"").replace(/\D/g,"").slice(0,10);if(d.length>6)return "("+d.slice(0,3)+") "+d.slice(3,6)+"-"+d.slice(6);if(d.length>3)return "("+d.slice(0,3)+") "+d.slice(3);return d}
+function unbad(){if(wrap)wrap.classList.remove("fs-bad")}
+tl.addEventListener("input",function(){tl.value=format(tl.value);unbad()});
+tl.addEventListener("paste",function(){setTimeout(function(){tl.value=format(tl.value);unbad()},0)});
+["fn","ln","em","ad","cy","zp"].forEach(function(i){var e=$(i);if(e)e.addEventListener("input",function(){e.classList.remove("fs-bad")})});
+var sa=$("sa");if(sa)sa.addEventListener("change",function(){sa.classList.remove("fs-bad")});
+window.fsPhone=function(){var d=tl.value.replace(/\D/g,"");return d.length===10?format(d):""};
 window.fsValidate=function(){
-  var f=function(i){return $(i)},v=function(i){return f(i).value.trim()},bad=[],k=null;
-  function mark(el,key){var t=(el.id==="tl")?wrap:el;t.classList.add("fs-bad");bad.push(el);if(!k)k=key}
-  [wrap,f("fn"),f("ln"),f("em"),f("ad"),f("cy"),f("zp"),f("sa")].forEach(function(e){if(e)e.classList.remove("fs-bad")});
-  var nameBlank=!v("fn")&&!v("ln");
-  if(nameBlank){mark(f("fn"),"e2");mark(f("ln"),"e2")}
-  if(!digitsOk())mark(tl,"e2");
-  if(!/^\S+@\S+\.\S+$/.test(f("em").value.trim()))mark(f("em"),"e2");
-  if(!v("fn")&&!nameBlank)mark(f("fn"),"e3");if(!v("ln")&&!nameBlank)mark(f("ln"),"e3");
-  if(!v("ad"))mark(f("ad"),"e3");if(!v("cy"))mark(f("cy"),"e3");if(!/^\d{5}$/.test(v("zp")))mark(f("zp"),"e3");
-  if(!bad.length)return null;
-  // first bad field in page order (nothing is cleared)
-  bad.sort(function(a,b){return (a.compareDocumentPosition(b)&4)?-1:1});
-  return {k:k,el:bad[0],all:bad}};
-window.fsFocusBad=function(el){
-  var d=document.getElementById("book"),t=(el.id==="tl")?wrap:el;
-  try{t.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){t.scrollIntoView()}
-  t.classList.remove("fs-shake");void t.offsetWidth;t.classList.add("fs-shake");
-  setTimeout(function(){try{el.focus({preventScroll:true})}catch(e){}},300)};
+var f=function(i){return $(i)},v=function(i){return f(i).value.trim()},bad=[],k=null;
+function mark(el,key){var t=(el.id==="tl")?wrap:el;t.classList.add("fs-bad");bad.push(el);if(!k)k=key}
+[wrap,f("fn"),f("ln"),f("em"),f("ad"),f("cy"),f("zp"),f("sa")].forEach(function(e){if(e)e.classList.remove("fs-bad")});
+var nameBlank=!v("fn")&&!v("ln");
+if(nameBlank){mark(f("fn"),"e2");mark(f("ln"),"e2")}
+if(v("tl").replace(/\D/g,"").length!==10)mark(tl,"e2");
+if(!/^\S+@\S+\.\S+$/.test(f("em").value.trim()))mark(f("em"),"e2");
+if(!v("fn")&&!nameBlank)mark(f("fn"),"e3");if(!v("ln")&&!nameBlank)mark(f("ln"),"e3");
+if(!v("ad"))mark(f("ad"),"e3");if(!v("cy"))mark(f("cy"),"e3");if(!/^\d{5}$/.test(v("zp")))mark(f("zp"),"e3");
+if(!bad.length)return null;
+bad.sort(function(a,b){return (a.compareDocumentPosition(b)&4)?-1:1});
+return {k:k,el:bad[0],all:bad};
+};
+window.fsFocusBad=function(el){var t=(el.id==="tl")?wrap:el;if(t)t.scrollIntoView({behavior:"smooth",block:"center"});if(el&&el.focus)el.focus({preventScroll:true})};
 })();
 </script>
 <script>
