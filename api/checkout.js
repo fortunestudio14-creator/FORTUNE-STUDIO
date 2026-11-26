@@ -9,6 +9,7 @@ module.exports = async (req, res) => {
   if (limited(req, "checkout", 40, 10 * 60 * 1000)) return res.status(429).json({ error: "too_many_requests" });
   if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: "not_configured", detail: "STRIPE_SECRET_KEY is missing in Vercel" });
   const pub = process.env.STRIPE_PUBLISHABLE_KEY;
+  if (!pub) return res.status(503).json({ error: "not_configured", detail: "STRIPE_PUBLISHABLE_KEY is missing in Vercel" });
   let stage = "start";
   try {
     const b = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
@@ -40,7 +41,7 @@ module.exports = async (req, res) => {
       mode: "payment",
       customer_email: cut(b.email),
       locale: ["en", "es", "fr"].includes(b.lang) ? b.lang : "auto",
-      payment_method_types: ["card"], // card + Apple Pay + Google Pay (PayPal and others off)
+      payment_method_types: ["card"], // card + Apple Pay + Google Pay + Link (PayPal is its own button on the site)
       line_items: [{ quantity: 1, price_data: {
         currency: "usd", unit_amount: Math.round(q.due * 100),
         product_data: {
@@ -55,14 +56,15 @@ module.exports = async (req, res) => {
       },
     };
 
-    // Always send customers to Stripe's own secure hosted Checkout page.
-    stage = "stripe_hosted";
+    // Embedded Checkout: the whole payment form (card, Apple Pay, Google Pay, Link) is drawn INSIDE our own page.
+    // The customer never leaves the website. "never" = no redirect, the browser gets an onComplete event instead.
+    stage = "stripe_embedded";
     const session = await stripe().checkout.sessions.create({
       ...base,
-      success_url: origin + "/?paid=1",
-      cancel_url: origin + "/?canceled=1"
+      ui_mode: "embedded",
+      redirect_on_completion: "never",
     });
-    res.status(200).json({ url: session.url });
+    res.status(200).json({ clientSecret: session.client_secret, publishableKey: pub });
   } catch (e) {
     console.error("checkout failed at", stage, e.type || "", e.code || "", e.message);
     res.status(400).json({ error: "bad_request", stage, detail: safe(e.message) });
