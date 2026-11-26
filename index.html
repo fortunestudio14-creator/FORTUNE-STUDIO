@@ -307,7 +307,29 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
  body:has(#cw.open) #fsck{display:none}
  body:has(#fsck) #cb,body:has(#fsck) #fsbook,body:has(#fsck) #bfpill,body:has(#fsck) #fs-top,body:has(#fsck) #fsnudge{visibility:hidden}
 }
-</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="fc"><circle cx="12" cy="12" r="12"/></clipPath></defs><symbol id="f-us" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="2.4"/><rect y="4.8" width="24" height="2.4"/><rect y="9.6" width="24" height="2.4"/><rect y="14.4" width="24" height="2.4"/><rect y="19.2" width="24" height="2.4"/></g><rect width="12" height="12.2" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="2.2" r=".55"/><circle cx="2" cy="5" r=".55"/><circle cx="2" cy="7.8" r=".55"/><circle cx="2" cy="10.6" r=".55"/><circle cx="4.6" cy="2.2" r=".55"/><circle cx="4.6" cy="5" r=".55"/><circle cx="4.6" cy="7.8" r=".55"/><circle cx="4.6" cy="10.6" r=".55"/><circle cx="7.2" cy="2.2" r=".55"/><circle cx="7.2" cy="5" r=".55"/><circle cx="7.2" cy="7.8" r=".55"/><circle cx="7.2" cy="10.6" r=".55"/><circle cx="9.8" cy="2.2" r=".55"/><circle cx="9.8" cy="5" r=".55"/><circle cx="9.8" cy="7.8" r=".55"/><circle cx="9.8" cy="10.6" r=".55"/></g></g></symbol><symbol id="f-es" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#c60b1e"/><rect y="6" width="24" height="12" fill="#ffc400"/></g></symbol><symbol id="f-fr" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="8" height="24" fill="#0055a4"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#ef4135"/></g></symbol></svg>
+</style><style id="fs-phone-css">
+.phw{position:relative;display:flex;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:border-color .2s,box-shadow .2s}
+#book .phw,.phw{background:#151515;border-color:#3a3a3a}
+.phw:focus-within{outline:2px solid var(--ac);outline-offset:2px}
+.phw #tl{border:0;background:transparent;border-radius:0 12px 12px 0;flex:1;min-width:0;outline:none}
+.phc{display:flex;align-items:center;gap:7px;flex:none;background:transparent;border:0;border-right:1px solid #3a3a3a;border-radius:12px 0 0 12px;color:var(--tx);padding:0 10px;cursor:pointer;font:inherit}
+.phc img{border-radius:3px;object-fit:cover;display:block}
+.phc svg{opacity:.6}
+.phl{position:absolute;z-index:30;left:0;top:calc(100% + 6px);width:min(300px,calc(100vw - 48px));background:#151515;border:1px solid #3a3a3a;border-radius:14px;box-shadow:0 18px 44px #000a;padding:8px}
+.phl[hidden]{display:none}
+.phl #phs{border-radius:10px;padding:9px 11px;margin-bottom:6px}
+.phl ul{list-style:none;margin:0;padding:0;max-height:232px;overflow:auto}
+.phl li{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:9px;cursor:pointer;color:var(--tx)}
+.phl li:hover,.phl li.on{background:#2a2420}
+.phl li img{border-radius:3px;flex:none}
+.phl li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phl li em{font-style:normal;color:var(--mu)}
+.fs-bad,.phw.fs-bad{border-color:#e07a7a!important;box-shadow:0 0 0 1px #e07a7a55}
+.fs-shake{animation:fsShake .35s}
+@keyframes fsShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.fs-shake{animation:none}}
+</style>
+</head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="fc"><circle cx="12" cy="12" r="12"/></clipPath></defs><symbol id="f-us" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#fff"/><g fill="#b22234"><rect width="24" height="2.4"/><rect y="4.8" width="24" height="2.4"/><rect y="9.6" width="24" height="2.4"/><rect y="14.4" width="24" height="2.4"/><rect y="19.2" width="24" height="2.4"/></g><rect width="12" height="12.2" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="2.2" r=".55"/><circle cx="2" cy="5" r=".55"/><circle cx="2" cy="7.8" r=".55"/><circle cx="2" cy="10.6" r=".55"/><circle cx="4.6" cy="2.2" r=".55"/><circle cx="4.6" cy="5" r=".55"/><circle cx="4.6" cy="7.8" r=".55"/><circle cx="4.6" cy="10.6" r=".55"/><circle cx="7.2" cy="2.2" r=".55"/><circle cx="7.2" cy="5" r=".55"/><circle cx="7.2" cy="7.8" r=".55"/><circle cx="7.2" cy="10.6" r=".55"/><circle cx="9.8" cy="2.2" r=".55"/><circle cx="9.8" cy="5" r=".55"/><circle cx="9.8" cy="7.8" r=".55"/><circle cx="9.8" cy="10.6" r=".55"/></g></g></symbol><symbol id="f-es" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="24" height="24" fill="#c60b1e"/><rect y="6" width="24" height="12" fill="#ffc400"/></g></symbol><symbol id="f-fr" viewBox="0 0 24 24"><g clip-path="url(#fc)"><rect width="8" height="24" fill="#0055a4"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#ef4135"/></g></symbol></svg>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQVKXHB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TB3MPP25" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -359,7 +381,7 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 <button class="btn" id="n2" disabled data-i="ct" style="margin-top:14px"></button></div></div>
 <div id="s3" class="pane" hidden><button class="bk" id="b3" data-i="bk2"></button><div class="sum" data-sm></div><div style="max-width:520px">
 
-<div class="row"><div><label for="fn" data-i="fn"></label><input id="fn" autocomplete="given-name"></div><div><label for="ln" data-i="ln"></label><input id="ln" autocomplete="family-name"></div></div><div class="row"><div><label for="tl" data-i="tel"></label><input id="tl" type="tel" inputmode="tel" placeholder="570-000-0000" autocomplete="tel"></div><div><label for="em" data-i="eml"></label><input id="em" type="email" autocomplete="email"></div></div><label for="ad" data-i="ad"></label><input id="ad" data-ph="sad" autocomplete="address-line1"><input id="ad2" data-ph="ap" autocomplete="address-line2" style="margin-top:8px"><div class="row" style="margin-top:8px"><div><label for="cy" data-i="cy"></label><input id="cy" autocomplete="address-level2"></div><div><label for="sa" data-i="sa"></label><select id="sa" autocomplete="address-level1"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option selected>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div><label for="zp" data-i="zp"></label><input id="zp" inputmode="numeric" maxlength="5" autocomplete="postal-code" style="max-width:200px"><label data-i="pwhen"></label><div class="pw"><label><input type="radio" name="pp" value="full" checked><span data-i="pfull"></span><small id="pfa"></small></label><label><input type="radio" name="pp" value="dep"><span id="pdl"></span><small id="pda"></small></label></div>
+<div class="row"><div><label for="fn" data-i="fn"></label><input id="fn" autocomplete="given-name"></div><div><label for="ln" data-i="ln"></label><input id="ln" autocomplete="family-name"></div></div><div class="row"><div><label for="tl" data-i="tel"></label><div class="phw" id="phw"><button type="button" class="phc" id="phc" aria-haspopup="listbox" aria-expanded="false" aria-label="Country code"><img id="phf" alt="" width="22" height="16"><span id="phd">+1</span><svg viewBox="0 0 10 6" width="9" height="6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><input id="tl" type="tel" inputmode="tel" placeholder="570-000-0000" autocomplete="tel-national" maxlength="24"><div class="phl" id="phl" hidden><input id="phs" type="search" placeholder="Search country / code" autocomplete="off"><ul id="phu" role="listbox"></ul></div></div></div><div><label for="em" data-i="eml"></label><input id="em" type="email" autocomplete="email"></div></div><label for="ad" data-i="ad"></label><input id="ad" data-ph="sad" autocomplete="address-line1"><input id="ad2" data-ph="ap" autocomplete="address-line2" style="margin-top:8px"><div class="row" style="margin-top:8px"><div><label for="cy" data-i="cy"></label><input id="cy" autocomplete="address-level2"></div><div><label for="sa" data-i="sa"></label><select id="sa" autocomplete="address-level1"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option selected>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div><label for="zp" data-i="zp"></label><input id="zp" inputmode="numeric" maxlength="5" autocomplete="postal-code" style="max-width:200px"><label data-i="pwhen"></label><div class="pw"><label><input type="radio" name="pp" value="full" checked><span data-i="pfull"></span><small id="pfa"></small></label><label><input type="radio" name="pp" value="dep"><span id="pdl"></span><small id="pda"></small></label></div>
 <div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:16px 0 0;padding:0"><span data-i="sub"></span><span id="sb">$0</span></div><div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span id="txl"></span><span id="tx">$0</span></div><div class="tot"><span data-i="tt"></span><b id="tv">$0</b></div><div class="tot" style="font-size:1rem;border:0;margin:6px 0 0;padding:0"><span data-i="due"></span><b id="due">$0</b></div><div class="tot" id="blr" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span data-i="bal"></span><b id="bl">$0</b></div>
 <div style="margin-top:20px"><label style="display:block;font-weight:650;margin-bottom:10px">Payment method</label>
 <div class="pw pm">
@@ -396,11 +418,96 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 <a href="https://youtube.com/@fortunestudiollc?si=ehLqBzeY_3DbyX7F" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor"/><path d="M10 9l5 3-5 3z" fill="#0a0a0a"/></svg></a></div></div>
 <div class="lc"><h4 data-i="fq"></h4><a href="#about" data-i="abt"></a><a href="#rent" data-i="n1"></a><a href="#gal" data-i="n2"></a><a href="#wed" data-i="nwd"></a><a href="#vid" data-i="n4"></a><a href="#book" data-i="n3"></a></div>
 <div class="lc"><h4 data-i="fs"></h4><span data-i="ab1"></span><span data-i="fs2"></span><span data-i="fs3"></span><span data-i="fs4"></span></div>
-<div class="lc"><h4 data-i="fc"></h4><a href="tel:+15703095776">570-309-5776</a><a href="#chat"><em style="font-style:normal" data-i="cbt"></em></a><a class="ci" href="mailto:fortunestudio14@gmail.com"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></i>fortunestudio14@gmail.com</a><span class="ci"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></i><em style="font-style:normal">Scranton, PA <em style="font-style:normal" data-i="ar"></em></em></span></div>
+<div class="lc"><h4 data-i="fc"></h4><a href="tel:+15703095776">570-309-5776</a><a href="#chat"><em style="font-style:normal" data-i="cbt"></em></a><a class="ci" href="mailto:fortunestudio14@gmail.com"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></i>fortunestudio14@gmail.com</a><a class="ci" href="https://www.google.com/maps/search/?api=1&query=Fortune+Studio+Scranton+PA" target="_blank" rel="noopener" aria-label="Fortune Studio, Scranton, PA - open in Maps"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></i><em style="font-style:normal">Scranton, PA <em style="font-style:normal" data-i="ar"></em></em></a></div>
 </div><div class="fbot"><span>© 2026 Fortune Studio LLC – <em style="font-style:normal" data-i="mk"></em></span><a href="#top" data-i="up"></a></div></footer>
 
 <button id="cb" aria-label="Chat">💬</button><div id="cw" role="dialog" aria-label="Chat"><div id="ch"><span class="av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2a1.5 1.5 0 0 0 1.2-.6l.7-1A1.5 1.5 0 0 1 10.8 4h2.4c.5 0 .9.2 1.2.6l.7 1c.3.4.7.6 1.2.6h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.4"/><circle cx="17" cy="9" r=".6" fill="currentColor"/></svg></span><div class="ct"><b data-i="cht"></b><small><i></i><span data-i="chs"></span></small></div><button id="cc" type="button" aria-label="Close">✕</button></div><div id="cm"></div><div id="cx"><button class="supb" id="lm" data-i="lmb"></button><a class="supb" href="tel:+15703095776" data-i="k1"></a></div><form id="lf" hidden><input id="lfn" data-ph="lmn" autocomplete="name"><input id="lfc" data-ph="lmc"><textarea id="lfm" data-ph="lmm"></textarea><button class="btn" data-i="lms"></button></form><form id="cf"><input id="ci" autocomplete="off" aria-label="Chat"><button data-i="sd"></button></form></div>
 <dialog id="sd"><h3 data-i="sp"></h3><details open><summary data-i="q1"></summary><p data-i="a1"></p></details><details><summary data-i="q2"></summary><p data-i="a2"></p></details><details><summary data-i="q3"></summary><p data-i="a3"></p></details><details><summary data-i="q4"></summary><p data-i="a4"></p></details><details><summary data-i="q6"></summary><p data-i="a6"></p></details><details><summary data-i="q5"></summary><p><a href="tel:+15703095776">570-309-5776</a><br><a href="mailto:fortunestudio14@gmail.com">fortunestudio14@gmail.com</a><br>Scranton, PA</p></details><button class="btn" id="sx" style="margin-top:16px" data-i="cl"></button></dialog><dialog id="pd"><h3 data-i="pdt"></h3><p id="pdm" style="color:var(--mu)"></p><button class="btn" id="pdx" data-i="cl"></button></dialog><dialog id="lb"><img alt=""></dialog>
+<script>
+(function(){
+var C=[["US","United States","1","n"],["CA","Canada","1","n"],["PR","Puerto Rico","1","n"],["DO","Dominican Republic","1","n"],["HT","Haiti","509","h"],["JM","Jamaica","1","n"],["MX","Mexico","52"],["CU","Cuba","53"],["CO","Colombia","57"],["VE","Venezuela","58"],["BR","Brazil","55"],["AR","Argentina","54"],["CL","Chile","56"],["PE","Peru","51"],["EC","Ecuador","593"],["PA","Panama","507"],["CR","Costa Rica","506"],["GT","Guatemala","502"],["HN","Honduras","504"],["SV","El Salvador","503"],["NI","Nicaragua","505"],["FR","France","33"],["ES","Spain","34"],["PT","Portugal","351"],["IT","Italy","39"],["DE","Germany","49"],["GB","United Kingdom","44"],["IE","Ireland","353"],["NL","Netherlands","31"],["BE","Belgium","32"],["CH","Switzerland","41"],["PL","Poland","48"],["UA","Ukraine","380"],["TR","Turkey","90"],["IL","Israel","972"],["IN","India","91"],["PK","Pakistan","92"],["CN","China","86"],["JP","Japan","81"],["KR","South Korea","82"],["PH","Philippines","63"],["NG","Nigeria","234"],["GH","Ghana","233"],["ZA","South Africa","27"],["EG","Egypt","20"],["AU","Australia","61"],["NZ","New Zealand","64"]];
+var cur=C[0],$=function(i){return document.getElementById(i)};
+var tl=$("tl"),btn=$("phc"),box=$("phl"),ul=$("phu"),srch=$("phs"),wrap=$("phw");
+if(!tl||!btn)return;
+function nanp(c){return c[3]==="n"}
+function lens(c){return nanp(c)?[10,10]:c[3]==="h"?[8,8]:[6,13]}
+function fmt(c,d){
+  if(nanp(c)){d=d.slice(0,10);return d.length>6?d.slice(0,3)+"-"+d.slice(3,6)+"-"+d.slice(6):d.length>3?d.slice(0,3)+"-"+d.slice(3):d}
+  if(c[3]==="h"){d=d.slice(0,8);return d.length>4?d.slice(0,4)+" "+d.slice(4):d}
+  d=d.slice(0,13);var o=[];if(d.length>3){o.push(d.slice(0,3));d=d.slice(3)}if(d.length>3){o.push(d.slice(0,3));d=d.slice(3)}if(d)o.push(d);return o.join(" ")}
+function ph(c){return nanp(c)?"570-000-0000":c[3]==="h"?"0000 0000":"000 000 0000"}
+function flag(img,c){img.onerror=function(){img.style.visibility="hidden"};img.style.visibility="visible";img.src="https://flagcdn.com/w40/"+c[0].toLowerCase()+".png";img.alt=c[0]}
+function setC(c,keep){
+  cur=c;flag($("phf"),c);$("phd").textContent="+"+c[2];tl.placeholder=ph(c);
+  var d=tl.value.replace(/\D/g,"");if(nanp(c)&&d.length>10&&d[0]==="1")d=d.slice(1);tl.value=fmt(c,d)}
+function build(q){
+  q=(q||"").toLowerCase().replace(/^\+/,"");ul.innerHTML="";
+  C.filter(function(c){return !q||c[1].toLowerCase().indexOf(q)>-1||c[0].toLowerCase()===q||c[2].indexOf(q)===0}).forEach(function(c){
+    var li=document.createElement("li");li.setAttribute("role","option");if(c===cur)li.className="on";
+    var im=document.createElement("img");im.width=22;im.height=16;flag(im,c);
+    var n=document.createElement("span");n.textContent=c[1];var e=document.createElement("em");e.textContent="+"+c[2];
+    li.appendChild(im);li.appendChild(n);li.appendChild(e);
+    li.onmousedown=function(ev){ev.preventDefault()};
+    li.onclick=function(){setC(c);close();tl.focus();unbad(wrap)};
+    ul.appendChild(li)})}
+function open(){build("");srch.value="";box.hidden=false;btn.setAttribute("aria-expanded","true");setTimeout(function(){srch.focus()},0)}
+function close(){box.hidden=true;btn.setAttribute("aria-expanded","false")}
+btn.onclick=function(){box.hidden?open():close()};
+srch.oninput=function(){build(srch.value)};
+srch.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();var f=ul.querySelector("li");if(f)f.click()}else if(e.key==="Escape"){e.stopPropagation();close();btn.focus()}};
+document.addEventListener("click",function(e){if(!box.hidden&&!e.target.closest("#phw"))close()});
+// auto-detect country when the person types +code (or 00code) / pastes a full number
+tl.addEventListener("input",function(){
+  var raw=tl.value,t=raw.trim(),intl=/^(\+|00)/.test(t),d=raw.replace(/\D/g,"");
+  if(intl){
+    if(/^00/.test(t))d=d.slice(2);
+    var hit=null,l=0;
+    for(var k=3;k>=1&&!hit;k--){var p=d.slice(0,k);if(p.length<k)continue;
+      var m=C.filter(function(c){return c[2]===p});
+      if(m.length){hit=(p==="1"&&cur[2]==="1")?cur:m[0];l=k}}
+    if(!hit){tl.value=(t[0]==="+"?"+":"+")+d;return}
+    cur=hit;flag($("phf"),hit);$("phd").textContent="+"+hit[2];tl.placeholder=ph(hit);d=d.slice(l)}
+  else if(nanp(cur)&&d.length>10&&d[0]==="1")d=d.slice(1);
+  // NANP area-code hints: Puerto Rico / Dominican Republic
+  if(nanp(cur)&&d.length>=3){var a=d.slice(0,3),g=cur[0]==="US"||cur[0]==="PR"||cur[0]==="DO";
+    if(g){var h=(a==="787"||a==="939")?"PR":(a==="809"||a==="829"||a==="849")?"DO":null;
+      if(h&&h!==cur[0]){cur=C.filter(function(c){return c[0]===h})[0];flag($("phf"),cur);}}}
+  tl.value=fmt(cur,d);unbad(wrap)});
+// Never lose what the person typed: just clear the red state while they edit
+function unbad(el){if(el)el.classList.remove("fs-bad")}
+["fn","ln","em","ad","cy","zp"].forEach(function(i){var e=$(i);if(e)e.addEventListener("input",function(){unbad(e)})});
+var sa=$("sa");if(sa)sa.addEventListener("change",function(){unbad(sa)});
+// guess the starting country from the browser (language region, then time zone)
+try{
+  var reg=((navigator.language||"").split("-")[1]||"").toUpperCase(),tz=(Intl.DateTimeFormat().resolvedOptions().timeZone||""),
+  byTz={"America/Port-au-Prince":"HT","America/Santo_Domingo":"DO","America/Puerto_Rico":"PR","America/Mexico_City":"MX","America/Toronto":"CA","America/Vancouver":"CA","Europe/Paris":"FR","America/Bogota":"CO","America/Jamaica":"JM","America/Havana":"CU"};
+  var iso=(reg&&C.filter(function(c){return c[0]===reg}).length)?reg:(byTz[tz]||"US");
+  if(iso!=="US")cur=C.filter(function(c){return c[0]===iso})[0]
+}catch(e){}
+setC(cur);
+window.fsPhone=function(){var d=tl.value.replace(/\D/g,"");if(!d)return "";return cur[0]==="US"?fmt(cur,d):"+"+cur[2]+" "+fmt(cur,d)};
+function digitsOk(){var d=tl.value.replace(/\D/g,""),r=lens(cur);return d.length>=r[0]&&d.length<=r[1]}
+window.fsValidate=function(){
+  var f=function(i){return $(i)},v=function(i){return f(i).value.trim()},bad=[],k=null;
+  function mark(el,key){var t=(el.id==="tl")?wrap:el;t.classList.add("fs-bad");bad.push(el);if(!k)k=key}
+  [wrap,f("fn"),f("ln"),f("em"),f("ad"),f("cy"),f("zp"),f("sa")].forEach(function(e){if(e)e.classList.remove("fs-bad")});
+  var nameBlank=!v("fn")&&!v("ln");
+  if(nameBlank){mark(f("fn"),"e2");mark(f("ln"),"e2")}
+  if(!digitsOk())mark(tl,"e2");
+  if(!/^\S+@\S+\.\S+$/.test(f("em").value.trim()))mark(f("em"),"e2");
+  if(!v("fn")&&!nameBlank)mark(f("fn"),"e3");if(!v("ln")&&!nameBlank)mark(f("ln"),"e3");
+  if(!v("ad"))mark(f("ad"),"e3");if(!v("cy"))mark(f("cy"),"e3");if(!/^\d{5}$/.test(v("zp")))mark(f("zp"),"e3");
+  if(!bad.length)return null;
+  // first bad field in page order (nothing is cleared)
+  bad.sort(function(a,b){return (a.compareDocumentPosition(b)&4)?-1:1});
+  return {k:k,el:bad[0],all:bad}};
+window.fsFocusBad=function(el){
+  var d=document.getElementById("book"),t=(el.id==="tl")?wrap:el;
+  try{t.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){t.scrollIntoView()}
+  t.classList.remove("fs-shake");void t.offsetWidth;t.classList.add("fs-shake");
+  setTimeout(function(){try{el.focus({preventScroll:true})}catch(e){}},300)};
+})();
+</script>
 <script>
 const D={en:{n1:"Rentals",n2:"Videos",n3:"Book",hp:"Tables, chairs and photography that make every event feel special, in Scranton, PA and nearby.",cta:"Check available dates",cta2:"See prices",t1:"Rent for your event",s1:"Birthdays, baby showers, weddings, graduations and family gatherings.",tb:"8 FT tables",tbd:"each · {mt} available",ch:"White folding chairs",chd:"each · {mc} available",best:"Best value",p1:"Party package",p1a:"2 tables (8 FT)",p1b:"12 white chairs",p2:"Celebration package",p2a:"4 tables (8 FT)",p2b:"25 white chairs",note:"Delivery and pickup available for an additional fee ($25 in the Scranton area).",t2:"Our work",ph:"Add photography",phd:"Add a Fortune Studio photographer to your booking.",t3:"Reserve your date",s3:"Pick a free date, choose what you need and send your request. We confirm by phone or email.",av:"Available",bk:"Booked",sl:"Selected",pk:"Package",cu:"Custom (tables + chairs)",phc:"Add photography ($120/hr)",dlc:"Delivery & pickup (+$25)",nm:"Full name",tel:"Phone",ad:"Event address",pm:"Preferred payment method",tt:"Estimated total",rs:"Send reservation request",ar:"and surrounding areas",mk:"Making every event special!",sd:"Send",e1:"Please choose an available date.",e2:"Enter your name, a valid phone (10 digits) and email.",ok:"Request sent for {d}. We will contact you soon to confirm and arrange payment.",cal:"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",dw:"S,M,T,W,T,F,S",hi:"Hi! I am the Fortune Studio assistant. Ask me about prices, delivery, photography or available dates.",bp:"Tables are $12 each, chairs $3 each. Packages: $55 (2 tables + 12 chairs) and $110 (4 tables + 25 chairs).",bd:"We deliver and pick up in Scranton and nearby areas for an additional fee, usually $25.",bph:"Photography is $120 per hour and can be added to any rental.",bs:"We have {mt} tables and {mc} chairs. Use the calendar to see free dates.",bc:"Call or text 570-309-5776 or email fortunestudio14@gmail.com.",bdt:"Next free dates: {d}. Pick one in the calendar to reserve.",bx:"I can help with prices, delivery, photography, stock and dates. For anything else call 570-309-5776."},
 es:{n1:"Alquiler",n2:"Videos",n3:"Reservar",hp:"Mesas, sillas y fotografía para que cada evento sea especial, en Scranton, PA y alrededores.",cta:"Ver fechas disponibles",cta2:"Ver precios",t1:"Alquila para tu evento",s1:"Cumpleaños, baby showers, bodas, graduaciones y reuniones familiares.",tb:"Mesas de 8 pies",tbd:"c/u · {mt} disponibles",ch:"Sillas blancas plegables",chd:"c/u · {mc} disponibles",best:"Mejor valor",p1:"Paquete fiesta",p1a:"2 mesas (8 pies)",p1b:"12 sillas blancas",p2:"Paquete celebración",p2a:"4 mesas (8 pies)",p2b:"25 sillas blancas",note:"Entrega y recogida disponibles con costo adicional ($25 en el área de Scranton).",t2:"Nuestro trabajo",ph:"Agrega fotografía",phd:"Añade un fotógrafo de Fortune Studio a tu reserva.",t3:"Reserva tu fecha",s3:"Elige una fecha libre, lo que necesitas y envía tu solicitud. Confirmamos por teléfono o correo.",av:"Disponible",bk:"Ocupado",sl:"Elegido",pk:"Paquete",cu:"Personalizado (mesas + sillas)",phc:"Añadir fotografía ($120/hr)",dlc:"Entrega y recogida (+$25)",nm:"Nombre completo",tel:"Teléfono",ad:"Dirección del evento",pm:"Método de pago preferido",tt:"Total estimado",rs:"Enviar solicitud de reserva",ar:"y alrededores",mk:"¡Haciendo cada evento especial!",sd:"Enviar",e1:"Elige una fecha disponible.",e2:"Escribe tu nombre, un teléfono válido (10 dígitos) y correo.",ok:"Solicitud enviada para {d}. Te contactaremos pronto para confirmar y coordinar el pago.",cal:"Ene,Feb,Mar,Abr,May,Jun,Jul,Ago,Sep,Oct,Nov,Dic",dw:"D,L,M,M,J,V,S",hi:"¡Hola! Soy el asistente de Fortune Studio. Pregúntame por precios, entrega, fotografía o fechas disponibles.",bp:"Mesas $12 c/u, sillas $3 c/u. Paquetes: $55 (2 mesas + 12 sillas) y $110 (4 mesas + 25 sillas).",bd:"Entregamos y recogemos en Scranton y alrededores con costo adicional, normalmente $25.",bph:"La fotografía cuesta $120 por hora y se puede añadir a cualquier alquiler.",bs:"Tenemos {mt} mesas y {mc} sillas. Usa el calendario para ver fechas libres.",bc:"Llama o escribe al 570-309-5776 o a fortunestudio14@gmail.com.",bdt:"Próximas fechas libres: {d}. Elige una en el calendario.",bx:"Puedo ayudarte con precios, entrega, fotografía, inventario y fechas. Para otra cosa llama al 570-309-5776."},
@@ -534,13 +641,12 @@ $("#qc").addEventListener("change",()=>{customQtyTouched.chairs=true;maybeAdvanc
 const nv=$("#nv"),sc=()=>nv.classList.toggle("sc",scrollY>20);addEventListener("scroll",sc,{passive:true});sc();
 $("#hb").onclick=()=>{const o=nv.classList.toggle("open");$("#hb").setAttribute("aria-expanded",o)};$("#lk").onclick=e=>{if(e.target.closest("a,button"))nv.classList.remove("open")};
 const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll("#lk a").forEach(a=>a.classList.toggle("act",a.getAttribute("href")=="#"+e.target.id))}),{rootMargin:"-45% 0px -50% 0px"});["about","rent","gal","wed","vid","book"].forEach(i=>spy.observe($("#"+i)));
-$("#tl").oninput=e=>{let v=e.target.value.replace(/\D/g,"");if(v.length>10&&v[0]=="1")v=v.slice(1);v=v.slice(0,10);e.target.value=v.length>6?v.slice(0,3)+"-"+v.slice(3,6)+"-"+v.slice(6):v.length>3?v.slice(0,3)+"-"+v.slice(3):v};
 function note(x){const m=$("#mg");m.style.display="block";m.className="msg err";m.textContent=x}
 const nmv=()=>($("#fn").value.trim()+" "+$("#ln").value.trim()).trim(),adv=()=>[$("#ad").value.trim(),$("#ad2").value.trim(),$("#cy").value.trim(),$("#sa").value+" "+$("#zp").value.trim()].filter(Boolean).join(", ");
 $("#zp").oninput=e=>e.target.value=e.target.value.replace(/\D/g,"").slice(0,5);
 async function checkout(d,nm,m,hosted){
 try{
-const body={pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||""};
+const body={pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:fsPhone(),email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||""};
 const method=document.querySelector("[name=paymethod]:checked").value;
 if(method==="paypal"){m.className="msg";m.textContent="";await window.openPayPal(body);return 1}
 const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -552,10 +658,9 @@ if(r.status==409){m.textContent=(j.error=="coupon"&&window.fsCpnErr)?fsCpnErr(j.
 return 0}
 $("#go").onclick=async()=>{const m=$("#mg"),g=$("#go");m.style.display="block";m.className="msg err";
 if(!sel){m.textContent=t("e1");return}
-if(!nmv()||$("#tl").value.replace(/\D/g,"").length!==10||!/^\S+@\S+\.\S+$/.test($("#em").value)){m.textContent=t("e2");return}
-if(!$("#fn").value.trim()||!$("#ln").value.trim()||!$("#ad").value.trim()||!$("#cy").value.trim()||!/^\d{5}$/.test($("#zp").value.trim())){m.textContent=t("e3");return}
+const bad=fsValidate();if(bad){m.textContent=t(bad.k);fsFocusBad(bad.el);return}
 tot();const d=fd(sel),nm=nmv(),ph=pkv()[0]=="p",pp=document.querySelector("[name=pp]:checked").value,dn=$("#due").textContent,dd=dn=="—"?"":", "+dn;
-const det=[["Date",d],["Time",tmf()],["Service",names()],["Duration",durf()],["Tables",ph?0:$("#qt").value],["Chairs",ph?0:$("#qc").value],["Delivery and pickup",$("#dl").checked?"yes":"no"],["Subtotal",$("#sb").textContent],["Tax",$("#tx").textContent],["Total",$("#tv").textContent],["Pay now",pp=="dep"?"Deposit"+(pkv()=="w"?"":" "+Math.round(FSP.dep*100)+"%")+dd:"In full"+dd],["Name",nm],["Phone",$("#tl").value],["Email",$("#em").value],["Address",adv()||"-"],["Payment","Online checkout unavailable - arrange payment"]];
+const det=[["Date",d],["Time",tmf()],["Service",names()],["Duration",durf()],["Tables",ph?0:$("#qt").value],["Chairs",ph?0:$("#qc").value],["Delivery and pickup",$("#dl").checked?"yes":"no"],["Subtotal",$("#sb").textContent],["Tax",$("#tx").textContent],["Total",$("#tv").textContent],["Pay now",pp=="dep"?"Deposit"+(pkv()=="w"?"":" "+Math.round(FSP.dep*100)+"%")+dd:"In full"+dd],["Name",nm],["Phone",fsPhone()],["Email",$("#em").value],["Address",adv()||"-"],["Payment","Online checkout unavailable - arrange payment"]];
 const lines=x=>x.map(y=>y[0]+": "+y[1]).join("\n"),rc=t("rc").replace("{n}",nm)+"\n\n"+lines(det.slice(0,11))+"\n\nFortune Studio LLC\n570-309-5776\nfortunestudio14@gmail.com";
 g.disabled=true;
 try{sessionStorage.setItem("fs_pending_booking",JSON.stringify({name:nm,email:$("#em").value.trim(),date:d,time:tmf(),service:names(),total:$("#tv").textContent,paid:$("#due").textContent,lang:L,paymentMethod:document.querySelector("[name=paymethod]:checked").value}));}catch(e){}
