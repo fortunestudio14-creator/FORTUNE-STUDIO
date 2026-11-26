@@ -3,7 +3,7 @@
 (function () {
   try {
     if (/[?&]cmsedit=1/.test(location.search) || window.top !== window.self) return;
-    if (localStorage.getItem("fs_notrack") === "1") return;
+    if (localStorage.getItem("fs_notrack") === "1") return; if (localStorage.getItem("fs_consent") === "no") return;
   } catch (e) {}
   var sid = "";
   try { sid = sessionStorage.getItem("fs_sid") || ""; } catch (e) {}
