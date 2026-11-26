@@ -361,12 +361,18 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 
 <div class="row"><div><label for="fn" data-i="fn"></label><input id="fn" autocomplete="given-name"></div><div><label for="ln" data-i="ln"></label><input id="ln" autocomplete="family-name"></div></div><div class="row"><div><label for="tl" data-i="tel"></label><input id="tl" type="tel" inputmode="tel" placeholder="570-000-0000" autocomplete="tel"></div><div><label for="em" data-i="eml"></label><input id="em" type="email" autocomplete="email"></div></div><label for="ad" data-i="ad"></label><input id="ad" data-ph="sad" autocomplete="address-line1"><input id="ad2" data-ph="ap" autocomplete="address-line2" style="margin-top:8px"><div class="row" style="margin-top:8px"><div><label for="cy" data-i="cy"></label><input id="cy" autocomplete="address-level2"></div><div><label for="sa" data-i="sa"></label><select id="sa" autocomplete="address-level1"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option selected>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div><label for="zp" data-i="zp"></label><input id="zp" inputmode="numeric" maxlength="5" autocomplete="postal-code" style="max-width:200px"><label data-i="pwhen"></label><div class="pw"><label><input type="radio" name="pp" value="full" checked><span data-i="pfull"></span><small id="pfa"></small></label><label><input type="radio" name="pp" value="dep"><span id="pdl"></span><small id="pda"></small></label></div>
 <div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:16px 0 0;padding:0"><span data-i="sub"></span><span id="sb">$0</span></div><div class="tot" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span id="txl"></span><span id="tx">$0</span></div><div class="tot"><span data-i="tt"></span><b id="tv">$0</b></div><div class="tot" style="font-size:1rem;border:0;margin:6px 0 0;padding:0"><span data-i="due"></span><b id="due">$0</b></div><div class="tot" id="blr" style="font-size:.95rem;color:var(--mu);border:0;margin:6px 0 0;padding:0"><span data-i="bal"></span><b id="bl">$0</b></div>
-<div style="margin-top:18px"><label style="display:block;font-weight:650;margin-bottom:8px">Payment method</label>
-<div class="pw" style="display:grid;gap:9px">
-<label><input type="radio" name="paymethod" value="card" checked><span>Credit or debit card</span><small>Secure payment by card</small></label>
-<label><input type="radio" name="paymethod" value="paypal"><span>PayPal</span><small>Pay with your PayPal account, without leaving this page</small></label>
+<div style="margin-top:20px"><label style="display:block;font-weight:650;margin-bottom:10px">Payment method</label>
+<div class="pw pm">
+<label><input type="radio" name="paymethod" value="card" checked><i class="pm-dot"></i><span class="pm-t"><b>Credit or debit card</b><small>Visa, Mastercard, Amex · Apple Pay · Google Pay</small></span><span class="pm-logos"><svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#fff"/><text x="19" y="17" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-style="italic" font-size="13" fill="#1a1f71">VISA</text></svg><svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#fff"/><circle cx="15" cy="12" r="7" fill="#eb001b"/><circle cx="23" cy="12" r="7" fill="#f79e1b"/><path d="M19 6.8a7 7 0 010 10.4 7 7 0 010-10.4z" fill="#ff5f00"/></svg><svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#2e77bb"/><text x="19" y="15.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="8.5" fill="#fff">AMEX</text></svg></span></label>
+<label><input type="radio" name="paymethod" value="paypal"><i class="pm-dot"></i><span class="pm-t"><b>PayPal</b><small>Pay with your PayPal balance, bank or card</small></span><span class="pm-logos pm-pp"><svg viewBox="0 0 90 24" width="84" height="22" aria-label="PayPal" role="img"><text x="0" y="19" font-family="Verdana,Arial,sans-serif" font-weight="800" font-style="italic" font-size="20" fill="#003087">Pay</text><text x="35" y="19" font-family="Verdana,Arial,sans-serif" font-weight="800" font-style="italic" font-size="20" fill="#009cde">Pal</text></svg></span></label>
 </div></div>
-<div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><div><span data-i="psec"></span><div class="wl"><span title="Card" class="cb"><svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="0.5" y="0.5" width="25" height="17" rx="3.5" fill="#1a1f71"/><rect x="0.5" y="4.5" width="25" height="3.6" fill="#f7b600"/><rect x="3.5" y="12" width="8" height="2.2" rx="1.1" fill="#fff" opacity=".85"/></svg><b style="font:600 13px Arial;color:#111">Card</b></span><span title="Apple Pay"><svg width="14" height="18" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><b style="font:600 16px Arial;color:#000">Pay</b></span><span title="Google Pay"><b style="font:700 17px Arial;color:#4285F4">G</b><b style="font:500 16px Arial;color:#5f6368">Pay</b></span></div></div></div><button class="btn" id="go" style="width:100%;margin-top:14px"></button><div class="msg" id="mg"></div><div class="cr" id="rcb" style="display:none;justify-content:flex-start"><a class="btn o" href="tel:+15703095776"><span data-i="k1"></span></a></div></div></div></dialog>
+<div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><div><span data-i="psec"></span><div class="wl"><span title="Card" class="cb"><svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="0.5" y="0.5" width="25" height="17" rx="3.5" fill="#1a1f71"/><rect x="0.5" y="4.5" width="25" height="3.6" fill="#f7b600"/><rect x="3.5" y="12" width="8" height="2.2" rx="1.1" fill="#fff" opacity=".85"/></svg><b style="font:600 13px Arial;color:#111">Card</b></span><span title="Apple Pay"><svg width="14" height="18" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><b style="font:600 16px Arial;color:#000">Pay</b></span><span title="Google Pay"><b style="font:700 17px Arial;color:#4285F4">G</b><b style="font:500 16px Arial;color:#5f6368">Pay</b></span></div></div></div><button class="btn" id="go" style="width:100%;margin-top:14px"></button><div class="msg" id="mg"></div><div class="cr" id="rcb" style="display:none;justify-content:flex-start"><a class="btn o" href="tel:+15703095776"><span data-i="k1"></span></a></div></div></div>
+<div id="s4" class="pane" hidden>
+<div class="fortune-pay-head"><button type="button" id="stx" class="fp-back" aria-label="Back">&#8592; <span>Back</span></button><div class="fortune-pay-brand"><span class="fortune-pay-mark">F</span><span><strong>Fortune Studio</strong><small>SECURE CHECKOUT</small></span></div></div>
+<div id="stc"></div>
+<div class="fortune-pay-foot"><span>&#128274; Encrypted payment &middot; Stripe &amp; PayPal</span><span>Fortune Studio LLC</span></div>
+</div>
+</dialog>
 
 <section id="space" data-cmsx="space"><h2 data-i="sph"></h2><p style="color:var(--mu);max-width:640px" data-i="spp"></p>
 <div class="sp-ev"><span data-i="spe1"></span><span data-i="spe2"></span><span data-i="spe3"></span><span data-i="spe4"></span><span data-i="spe5"></span></div>
@@ -714,11 +720,7 @@ ad.addEventListener("blur",function(){setTimeout(hide,150)});
 #go:disabled{opacity:.7;cursor:progress}
 #pdn{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:200;max-width:min(520px,calc(100vw - 28px));background:#0f2a18;border:1px solid #7bd88f;color:#eaffef;border-radius:14px;padding:14px 18px;box-shadow:0 14px 40px #000a;font:500 .95rem Outfit,Arial,sans-serif}
 </style>
-<dialog id="stp" class="fortune-pay-dialog" aria-label="Fortune Studio secure payment">
-<div class="fortune-pay-head"><div class="fortune-pay-brand"><span class="fortune-pay-mark">F</span><span><strong>Fortune Studio</strong><small>SECURE CHECKOUT</small></span></div><button type="button" id="stx" aria-label="Close payment" class="fortune-pay-close">&times;</button></div>
-<div id="stc"></div>
-<div class="fortune-pay-foot"><span>🔒 Secure payment · Stripe &amp; PayPal</span><span>Fortune Studio LLC</span></div>
-</dialog>
+
 <style>
 .fortune-pay-dialog{width:min(620px,calc(100vw - 24px));max-width:620px;max-height:min(88vh,900px);padding:0;overflow:auto;background:#151515;color:#f4efe6;border:1px solid #3a302a;border-radius:22px;box-shadow:0 28px 90px #000b}
 .fortune-pay-dialog::backdrop{background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}
@@ -732,6 +734,30 @@ ad.addEventListener("blur",function(){setTimeout(hide,150)});
 #stc{min-height:360px;padding:14px 16px 10px;background:#151515;color:#f4efe6}#stc iframe{border-radius:14px}
 .fortune-pay-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 20px 16px;border-top:1px solid #2a2a2a;color:#a29d94;font:500 11px Outfit,Arial,sans-serif}
 @media(max-width:520px){.fortune-pay-dialog{width:calc(100vw - 14px);max-height:92vh;border-radius:17px}.fortune-pay-head{padding:13px 15px}#stc{padding:12px 12px 8px}.fortune-pay-foot{padding:11px 15px}}
+</style>
+<style>
+/* Inline checkout (no second popup) + modern payment selector */
+.pm{grid-template-columns:1fr;gap:12px}
+.pm label{position:relative;flex-direction:row;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;background:linear-gradient(180deg,#1b1b1b,#141414);border:1px solid #333;transition:border-color .2s,box-shadow .2s,transform .2s}
+.pm label:hover{transform:translateY(-1px);border-color:#5a4a40}
+.pm label:has(input:checked){border-color:var(--ac);box-shadow:0 0 0 1px var(--ac),0 10px 30px #e8b99f1f;background:linear-gradient(180deg,#221d1a,#171413)}
+.pm-dot{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #5b554e;position:relative;transition:.2s}
+.pm label:has(input:checked) .pm-dot{border-color:var(--ac)}
+.pm label:has(input:checked) .pm-dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--ac)}
+.pm-t{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.pm-t b{font-weight:600;font-size:1rem}
+.pm-t small{color:var(--mu);font-size:.8rem;line-height:1.35}
+.pm-logos{display:flex;gap:6px;flex:none;align-items:center}
+.pm-logos svg{border-radius:4px;box-shadow:0 2px 8px #0005}
+.pm-pp{background:#fff;border-radius:10px;padding:7px 11px}.pm-pp svg{box-shadow:none}
+@media(max-width:520px){.pm label{flex-wrap:wrap;padding:14px}.pm-logos{margin-left:34px}}
+#s4 .fortune-pay-head{position:static;padding:4px 0 16px;background:transparent;border-bottom:1px solid #2a2a2a;margin-bottom:16px;gap:12px}
+#s4 .fp-back{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border:1px solid #39332e;border-radius:999px;background:#201e1b;color:#f4efe6;font:500 .9rem Outfit,Arial,sans-serif;cursor:pointer;transition:.2s}
+#s4 .fp-back:hover{background:#e8b99f;color:#17110e}
+#s4 #stc{min-height:340px;padding:0;background:transparent;border-radius:18px;overflow:hidden}
+#s4 #stc iframe{border-radius:16px}
+#s4 .fortune-pay-foot{padding:14px 2px 0;margin-top:16px}
+#s4.pay-leaving{opacity:0;transform:translateY(14px);transition:opacity .28s,transform .28s}
 </style>
 <style>
 /* Premium payment-success experience */
@@ -792,7 +818,8 @@ var SUCCESS={
  es:{tag:"PAGO CONFIRMADO",title:"¡Gracias por reservar con nosotros!",sub:"Recibimos tu pago y tu fecha está reservada.",date:"FECHA",time:"HORA",service:"SERVICIO",paid:"PAGADO AHORA",note:"Enviaremos un correo de confirmación a la dirección que proporcionaste. Gracias por elegir Fortune Studio LLC.",close:"Volver a Fortune Studio"},
  fr:{tag:"PAIEMENT CONFIRMÉ",title:"Merci d’avoir réservé avec nous !",sub:"Votre paiement a été reçu et votre date est réservée.",date:"DATE",time:"HEURE",service:"SERVICE",paid:"PAYÉ MAINTENANT",note:"Un email de confirmation sera envoyé à l’adresse que vous avez indiquée. Merci d’avoir choisi Fortune Studio LLC.",close:"Retour à Fortune Studio"}
 };
-function finishPaymentDialog(){return new Promise(function(resolve){var dlg=document.getElementById("stp");if(!dlg||!dlg.open){resolve();return}dlg.classList.add("pay-leaving");setTimeout(function(){close();dlg.classList.remove("pay-leaving");resolve()},300)})}
+function showPay(){var a=document.getElementById("s3"),b=document.getElementById("s4"),bk=document.getElementById("book");if(a)a.hidden=true;b.hidden=false;try{bk.scrollTo({top:0,behavior:"smooth"})}catch(e){}}
+function finishPaymentDialog(){return new Promise(function(resolve){var p=document.getElementById("s4");if(!p||p.hidden){resolve();return}p.classList.add("pay-leaving");setTimeout(function(){close();p.classList.remove("pay-leaving");resolve()},300)})}
 window.fsPaid=function(){
 var panel=document.getElementById("fs-success"),copy=SUCCESS[lang()]||SUCCESS.en,info={};
 if(panel.classList.contains("show"))return;
@@ -813,14 +840,11 @@ return loading;
 }
 function close(){
 try{if(ck){ck.destroy();ck=null}}catch(e){}
-var d=document.getElementById("stp");if(d.open)d.close();
-document.getElementById("stc").innerHTML="";
+document.getElementById("stc").innerHTML="";var p4=document.getElementById("s4"),p3=document.getElementById("s3");if(p4)p4.hidden=true;if(p3)p3.hidden=false;var g=document.getElementById("go");if(g)g.disabled=false;
 }
 document.getElementById("stx").onclick=close;
-document.getElementById("stp").addEventListener("cancel",function(){try{if(ck){ck.destroy();ck=null}}catch(e){}});
-// whenever the payment window closes (X, Esc, or finished) clean it up and let the customer press Pay again
-document.getElementById("stp").addEventListener("close",function(){try{if(ck){ck.destroy();ck=null}}catch(e){}document.getElementById("stc").innerHTML="";var g=document.getElementById("go");if(g)g.disabled=false});
-// ---- PayPal button INSIDE the site (PayPal opens a small secure popup over the page, nobody leaves) ----
+document.getElementById("book").addEventListener("close",function(){close()});
+// ---- PayPal button INSIDE the page (PayPal only opens its own small secure login window) ----
 var ppLoading=null;
 function paypalJs(id){
 if(window.paypal&&window.paypal.Buttons)return Promise.resolve();
@@ -837,9 +861,9 @@ window.openPayPal=async function(body){
 var r=await fetch("/api/paypal-create");var cfg=await r.json().catch(function(){return{}});
 if(!r.ok||!cfg.clientId)throw new Error("paypal config");
 await paypalJs(cfg.clientId);
-var dlg=document.getElementById("stp"),box=document.getElementById("stc");
-box.innerHTML='<div style="max-width:420px;margin:26px auto 14px"><p style="text-align:center;margin:0 0 6px;font:600 1.02rem Outfit,Arial,sans-serif">'+'Pay with PayPal</p><p style="text-align:center;margin:0 0 20px;color:#a29d94;font-size:.85rem">A secure PayPal window opens on top of this page.</p><div id="ppb"></div><p id="ppe" role="alert" style="display:none;margin:14px 0 0;color:#ffb4a8;text-align:center;font-size:.9rem"></p></div>';
-if(!dlg.open)dlg.showModal();
+var box=document.getElementById("stc");
+box.innerHTML='<div style="max-width:420px;margin:26px auto 14px"><p style="text-align:center;margin:0 0 6px;font:600 1.02rem Outfit,Arial,sans-serif">'+'Pay with PayPal</p><p style="text-align:center;margin:0 0 20px;color:#a29d94;font-size:.85rem">Press the button below. PayPal will ask you to log in securely.</p><div id="ppb" style="background:#fff;border-radius:18px;padding:18px"></div><p id="ppe" role="alert" style="display:none;margin:14px 0 0;color:#ffb4a8;text-align:center;font-size:.9rem"></p></div>';
+showPay();
 var err=function(x){var e=document.getElementById("ppe");if(e){e.textContent=x;e.style.display="block"}};
 window.paypal.Buttons({
 style:{layout:"vertical",color:"gold",shape:"pill",label:"pay",height:50},
@@ -862,9 +886,8 @@ window.openPay=async function(j){
 if(!j.publishableKey)throw new Error("pk");
 await stripeJs();
 var st=window.Stripe(j.publishableKey);
-var dlg=document.getElementById("stp");
 document.getElementById("stc").innerHTML="";
-if(!dlg.open)dlg.showModal();
+showPay();
 try{
 ck=await st.initEmbeddedCheckout({clientSecret:j.clientSecret,onComplete:function(){
 finishPaymentDialog().then(function(){var b=document.getElementById("book");if(b&&b.open)b.close();window.fsPaid()});
