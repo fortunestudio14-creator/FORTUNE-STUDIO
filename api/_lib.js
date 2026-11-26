@@ -139,6 +139,24 @@ async function availability() {
     }
     if (++n >= 500) break;
   }
+  // Include successful PayPal captures in the same date-availability source as Stripe.
+  try {
+    const url = process.env.FORTUNE_SUPABASE_URL, key = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY;
+    if (url && key) {
+      const r = await fetch(url.replace(/\/$/, "") + "/rest/v1/paypal_bookings?status=eq.paid&select=order_id,booking,created_at", { headers: { apikey: key, Authorization: "Bearer " + key } });
+      if (r.ok) {
+        const rows = await r.json();
+        for (const row of rows) {
+          const m = row.booking || {};
+          if (m.app !== "fortune" || !m.date || m.date < today) continue;
+          if (av.freed.includes(row.order_id)) continue;
+          list.push({ id: row.order_id, date: m.date, label: m.date_label, time: m.time, service: m.service, name: m.name, phone: m.phone, paid: m.paid_now, coupon: m.coupon || "", payment_method: "PayPal" });
+          if (av.win[row.order_id]) (part[m.date] = part[m.date] || []).push(av.win[row.order_id]);
+          else blocked.add(m.date);
+        }
+      } else console.error("PayPal booking lookup failed", r.status);
+    }
+  } catch (e) { console.error("PayPal availability lookup failed", e.message); }
   Object.keys(part).forEach((d) => { if (blocked.has(d)) delete part[d]; }); // a new full booking on that date closes it again
   list.sort((a, b) => (a.date < b.date ? -1 : 1));
   return { blocked: [...blocked], windows: part, list };
