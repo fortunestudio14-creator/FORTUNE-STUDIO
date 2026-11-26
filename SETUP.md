@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/35444940/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35442360/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35432963/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35069034/SETUP.md)
@@ -86,8 +87,21 @@ New files: `track.js`, `retain.js`, `api/track.js`, `supabase-analytics.sql`. Ch
 ## Update (Nov 25 2026): payments never blocked, one message per payment, new Payments page, better chat, tidy phone layout
 Changed: `api/checkout.js`, `api/webhook.js`, `api/chat.js`, `api/manage.js`, `index.html`, `admin.html`, `visitors.html`, `vercel.json`, `robots.txt`. New: `api/health.js`, `payments.html`. No new SQL.
 
-- **Payment never blocked**: if the payment form inside the site cannot open for any reason (missing `STRIPE_PUBLISHABLE_KEY`, Stripe.js blocked, a Stripe setting), the customer is sent to Stripe's own secure payment page automatically. If something is wrong on the server, the browser console (F12) and the Vercel logs now show the real reason (`stage` and `detail`).
+- **Payment never blocked**: customers are sent directly to Stripe's own secure hosted Checkout page. If something is wrong on the server, the browser console (F12) and Vercel logs show the real reason (`stage` and `detail`).
 - **One message per payment**: the customer confirmation and the owner alert are each sent ONCE. Before sending, a flag is written on the Stripe payment, so when Stripe retries an event nothing is sent twice. If the customer email cannot be sent (for example the Resend domain is not verified), the owner email says so and nothing is retried in a loop. The site no longer asks Stripe to send its own receipt on top of ours. To also stop Stripe's automatic receipt: Stripe > Settings > Customer emails > turn off "Successful payments".
 - **/payments** (owner only, same sign in as /admin): money received, paid bookings, balance still due, every customer's details, checkouts that were started but not paid, download as spreadsheet. The top of the page runs a **system check** for Stripe keys, the webhook address, Resend email, the AI chat and the database, with the exact fix for each problem. **/visitors** shows who visits the site.
 - **Chat assistant**: now reads the live prices, Black Friday sale, delivery and booked dates, answers in plain text, supports Haitian Creole, has quick-question buttons, falls back to built-in answers if the AI is unreachable, and is protected against abuse. Optional Vercel variables: `OPENAI_MODEL`, `OPENAI_BACKUP_MODEL` (default gpt-4.1-mini).
 - **Phone layout**: Back to top, Book and Chat sit in one tidy row at the bottom, the Black Friday countdown sits just above it, and everything floating hides while the chat is open.
+
+
+## PayPal checkout (added; payment-only change)
+1. In PayPal Developer, create/select a REST app. Copy its **Client ID** and **Secret**. Start with Sandbox credentials.
+2. In Supabase SQL Editor, run `supabase-paypal.sql` once.
+3. In Vercel > Settings > Environment Variables, add:
+   - `PAYPAL_CLIENT_ID` (Sandbox or Live client ID)
+   - `PAYPAL_CLIENT_SECRET` (keep private; never put this in browser code)
+   - `PAYPAL_ENV` = `sandbox` for testing, then `live` for real payments
+   - `FORTUNE_SUPABASE_SERVICE_ROLE_KEY` = Supabase service-role key (server-only; never expose it in browser code)
+   - Keep the existing `FORTUNE_SUPABASE_URL`, `RESEND_API_KEY`, `MAIL_FROM`, and `OWNER_EMAIL`.
+4. Redeploy. Test with PayPal Sandbox buyer and seller accounts first. For real payments, change `PAYPAL_ENV` to `live` and use the Live app credentials.
+5. Stripe now always redirects to Stripe's hosted Checkout page. PayPal redirects to PayPal approval and the server captures the order after the customer returns. Only a server-confirmed completed capture is marked as paid.
