@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/35445377/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35444940/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35442360/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35432963/SETUP.md)
@@ -104,4 +105,6 @@ Changed: `api/checkout.js`, `api/webhook.js`, `api/chat.js`, `api/manage.js`, `i
    - `FORTUNE_SUPABASE_SERVICE_ROLE_KEY` = Supabase service-role key (server-only; never expose it in browser code)
    - Keep the existing `FORTUNE_SUPABASE_URL`, `RESEND_API_KEY`, `MAIL_FROM`, and `OWNER_EMAIL`.
 4. Redeploy. Test with PayPal Sandbox buyer and seller accounts first. For real payments, change `PAYPAL_ENV` to `live` and use the Live app credentials.
-5. Stripe now always redirects to Stripe's hosted Checkout page. PayPal redirects to PayPal approval and the server captures the order after the customer returns. Only a server-confirmed completed capture is marked as paid.
+5. **Everything now happens inside the website.** Stripe uses *Embedded Checkout* (card, Apple Pay, Google Pay and Link are drawn in a window on top of your page) and PayPal uses the PayPal button (a small secure PayPal popup opens over the page). Nobody is sent to checkout.stripe.com or paypal.com in a new page. Card numbers go straight from the customer's browser to Stripe/PayPal and never touch your server. Only a server-confirmed payment is marked as paid.
+6. **Required for Apple Pay**: Stripe Dashboard > Settings > Payment method domains > add your site domain (and www) and verify it.
+7. `STRIPE_PUBLISHABLE_KEY` (pk_live_...) and `PAYPAL_CLIENT_ID` must be set in Vercel. If either is missing the payment window shows the "could not be started" message.
