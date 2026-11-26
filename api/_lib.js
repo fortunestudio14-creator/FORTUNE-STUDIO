@@ -42,7 +42,7 @@ const money = (n) => "$" + n.toFixed(2);
 const num = (v, d, lo, hi) => (Number.isFinite(+v) && v !== "" && v !== null && +v >= lo && +v <= hi ? +v : d);
 
 // Prices come from the admin editor (Supabase site_settings.content.prices). Falls back to the defaults.
-const CP_DEF = { stack: false }, AV_DEF = { freed: [], win: {} };
+const CP_DEF = { stack: false }, AV_DEF = { freed: [], win: {}, off: [] };
 function cpConfig(c) { return { stack: !!(c && c.stack) }; }
 function avConfig(c) { // dates the owner re-opened in /admin: freed = booking ids whose date is open again, win = booking ids whose date is open only for some start hours
   c = c || {};
@@ -52,7 +52,8 @@ function avConfig(c) { // dates the owner re-opened in /admin: freed = booking i
     const w = c.win[id], a = Array.isArray(w) ? +w[0] : NaN, z = Array.isArray(w) ? +w[1] : NaN;
     if (Number.isFinite(a) && Number.isFinite(z) && a >= 0 && z <= 24 && a <= z) win[id] = [a, z];
   });
-  return { freed, win };
+  const off = Array.isArray(c.off) ? c.off.filter((x) => typeof x === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(0, 800) : []; // days the owner closed by hand
+  return { freed, win, off };
 }
 let cache = { at: 0, p: DEF, bf: bfConfig(), cp: CP_DEF, av: AV_DEF };
 async function load() {
@@ -157,6 +158,7 @@ async function availability() {
       } else console.error("PayPal booking lookup failed", r.status);
     }
   } catch (e) { console.error("PayPal availability lookup failed", e.message); }
+  (av.off || []).forEach((d) => { if (d >= today) blocked.add(d); }); // days off set by the owner in /admin
   Object.keys(part).forEach((d) => { if (blocked.has(d)) delete part[d]; }); // a new full booking on that date closes it again
   list.sort((a, b) => (a.date < b.date ? -1 : 1));
   return { blocked: [...blocked], windows: part, list };
