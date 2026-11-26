@@ -2,6 +2,8 @@ const { quote, availability, couponFor, claimCode, money, limited, badOrigin } =
 const { paypal, saveBooking } = require("./_paypal");
 const cut=(v,n=200)=>String(v??"").slice(0,n);
 module.exports=async(req,res)=>{
+ // GET = public PayPal Client ID (safe to expose, it is meant for the browser) so the PayPal button can load inside the site.
+ if(req.method==="GET"){const id=process.env.PAYPAL_CLIENT_ID;if(!id)return res.status(503).json({error:"not_configured"});res.setHeader("Cache-Control","no-store");return res.status(200).json({clientId:id,env:process.env.PAYPAL_ENV==="live"?"live":"sandbox"});}
  if(req.method!=="POST")return res.status(405).end();
  if(badOrigin(req))return res.status(403).json({error:"forbidden"});
  if(limited(req,"paypal-create",25,10*60*1000))return res.status(429).json({error:"too_many_requests"});
@@ -28,11 +30,14 @@ module.exports=async(req,res)=>{
    delivery:b.delivery?"yes":"no",name:cut(b.name,100),phone:cut(b.phone,20),email:cut(b.email,200),address:cut(b.address,300),lang:cut(b.lang,2),
    amount:Number(q.due).toFixed(2),currency:"USD"
   };
+  // inline = the PayPal button on our own page (popup over the site, nobody leaves). No redirect links needed.
+  const inline=b.inline===true;
   const order=await paypal("/v2/checkout/orders",{method:"POST",body:JSON.stringify({
    intent:"CAPTURE",
    purchase_units:[{description:"Fortune Studio · "+q.label+" · "+label,custom_id:"fortune",amount:{currency_code:"USD",value:booking.amount}}],
-   payment_source:{paypal:{experience_context:{brand_name:"Fortune Studio LLC",user_action:"PAY_NOW",return_url:origin+"/?paypal=success",cancel_url:origin+"/?paypal=cancel"}}}
+   ...(inline?{}:{payment_source:{paypal:{experience_context:{brand_name:"Fortune Studio LLC",user_action:"PAY_NOW",return_url:origin+"/?paypal=success",cancel_url:origin+"/?paypal=cancel"}}}})
   })});
+  if(inline){await saveBooking(order.id,booking,"pending",null);return res.status(200).json({orderId:order.id});}
   const approve=(order.links||[]).find(x=>x.rel==="payer-action"||x.rel==="approve");
   if(!approve||!approve.href)throw new Error("PayPal did not return an approval link");
   await saveBooking(order.id,booking,"pending",null);
