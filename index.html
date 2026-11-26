@@ -364,7 +364,7 @@ body:has(#cw.open) #bfpill,body:has(#cw.open) #fsbook,body:has(#cw.open) #fsnudg
 <div style="margin-top:18px"><label style="display:block;font-weight:650;margin-bottom:8px">Payment method</label>
 <div class="pw" style="display:grid;gap:9px">
 <label><input type="radio" name="paymethod" value="card" checked><span>Credit or debit card</span><small>Secure payment by card</small></label>
-<label><input type="radio" name="paymethod" value="paypal"><span>PayPal</span><small>Pay securely with your PayPal account</small></label>
+<label><input type="radio" name="paymethod" value="paypal"><span>PayPal</span><small>Pay with your PayPal account, without leaving this page</small></label>
 </div></div>
 <div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><div><span data-i="psec"></span><div class="wl"><span title="Card" class="cb"><svg width="26" height="18" viewBox="0 0 26 18" fill="none"><rect x="0.5" y="0.5" width="25" height="17" rx="3.5" fill="#1a1f71"/><rect x="0.5" y="4.5" width="25" height="3.6" fill="#f7b600"/><rect x="3.5" y="12" width="8" height="2.2" rx="1.1" fill="#fff" opacity=".85"/></svg><b style="font:600 13px Arial;color:#111">Card</b></span><span title="Apple Pay"><svg width="14" height="18" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><b style="font:600 16px Arial;color:#000">Pay</b></span><span title="Google Pay"><b style="font:700 17px Arial;color:#4285F4">G</b><b style="font:500 16px Arial;color:#5f6368">Pay</b></span></div></div></div><button class="btn" id="go" style="width:100%;margin-top:14px"></button><div class="msg" id="mg"></div><div class="cr" id="rcb" style="display:none;justify-content:flex-start"><a class="btn o" href="tel:+15703095776"><span data-i="k1"></span></a></div></div></div></dialog>
 
@@ -535,12 +535,11 @@ async function checkout(d,nm,m,hosted){
 try{
 const body={pk:pkv(),qt:+$("#qt").value,qc:+$("#qc").value,hr:+$("#hr").value,pp:document.querySelector("[name=pp]:checked").value,date:sel,time:tmf(),delivery:$("#dl").checked,name:nm,phone:$("#tl").value,email:$("#em").value.trim(),address:adv(),lang:L,tv:+$("#st").value,coupon:(window.FS_CPN&&FS_CPN.code)||""};
 const method=document.querySelector("[name=paymethod]:checked").value;
-const endpoint=method==="paypal"?"/api/paypal-create":"/api/checkout";
-const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+if(method==="paypal"){m.className="msg";m.textContent="";await window.openPayPal(body);return 1}
+const r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
 const j=await r.json().catch(()=>({}));
 if(!r.ok)console.error("Checkout API:",r.status,j.stage||"",j.detail||j.error||"");
-if(r.ok&&j.approvalUrl){m.className="msg";m.textContent="Redirecting you securely to PayPal…";location.href=j.approvalUrl;return 1}
-if(r.ok&&j.url){m.className="msg";m.textContent=t("pwait");location.href=j.url;return 1}
+if(r.ok&&j.clientSecret){m.style.display="none";await window.openPay(j);return 1}
 if(r.status==409){m.textContent=(j.error=="coupon"&&window.fsCpnErr)?fsCpnErr(j.reason):(j.error=="time"&&window.fsTimeErr)?fsTimeErr():t("ptk");if(j.error=="coupon"&&window.fsCpnReset)fsCpnReset();window.FS_ERR2=(j.error=="coupon"||j.error=="time")?1:0;loadBooked();return 2}
 }catch(e){console.error("Payment checkout failed",e)}
 return 0}
@@ -718,7 +717,7 @@ ad.addEventListener("blur",function(){setTimeout(hide,150)});
 <dialog id="stp" class="fortune-pay-dialog" aria-label="Fortune Studio secure payment">
 <div class="fortune-pay-head"><div class="fortune-pay-brand"><span class="fortune-pay-mark">F</span><span><strong>Fortune Studio</strong><small>SECURE CHECKOUT</small></span></div><button type="button" id="stx" aria-label="Close payment" class="fortune-pay-close">&times;</button></div>
 <div id="stc"></div>
-<div class="fortune-pay-foot"><span>🔒 Secure payment powered by Stripe</span><span>Fortune Studio LLC</span></div>
+<div class="fortune-pay-foot"><span>🔒 Secure payment · Stripe &amp; PayPal</span><span>Fortune Studio LLC</span></div>
 </dialog>
 <style>
 .fortune-pay-dialog{width:min(620px,calc(100vw - 24px));max-width:620px;max-height:min(88vh,900px);padding:0;overflow:auto;background:#151515;color:#f4efe6;border:1px solid #3a302a;border-radius:22px;box-shadow:0 28px 90px #000b}
@@ -819,6 +818,46 @@ document.getElementById("stc").innerHTML="";
 }
 document.getElementById("stx").onclick=close;
 document.getElementById("stp").addEventListener("cancel",function(){try{if(ck){ck.destroy();ck=null}}catch(e){}});
+// whenever the payment window closes (X, Esc, or finished) clean it up and let the customer press Pay again
+document.getElementById("stp").addEventListener("close",function(){try{if(ck){ck.destroy();ck=null}}catch(e){}document.getElementById("stc").innerHTML="";var g=document.getElementById("go");if(g)g.disabled=false});
+// ---- PayPal button INSIDE the site (PayPal opens a small secure popup over the page, nobody leaves) ----
+var ppLoading=null;
+function paypalJs(id){
+if(window.paypal&&window.paypal.Buttons)return Promise.resolve();
+if(ppLoading)return ppLoading;
+ppLoading=new Promise(function(ok,no){var x=document.createElement("script");x.src="https://www.paypal.com/sdk/js?client-id="+encodeURIComponent(id)+"&currency=USD&intent=capture&components=buttons&disable-funding=card,credit,paylater,venmo";x.onload=ok;x.onerror=function(){ppLoading=null;no(new Error("paypal.js"))};document.head.appendChild(x)});
+return ppLoading;
+}
+function payErr(status,j){
+j=j||{};
+if(status==409){if(j.error==="coupon"&&window.fsCpnErr)return fsCpnErr(j.reason);if(j.error==="time"&&window.fsTimeErr)return fsTimeErr();return t("ptk")}
+return t("pErr");
+}
+window.openPayPal=async function(body){
+var r=await fetch("/api/paypal-create");var cfg=await r.json().catch(function(){return{}});
+if(!r.ok||!cfg.clientId)throw new Error("paypal config");
+await paypalJs(cfg.clientId);
+var dlg=document.getElementById("stp"),box=document.getElementById("stc");
+box.innerHTML='<div style="max-width:420px;margin:26px auto 14px"><p style="text-align:center;margin:0 0 6px;font:600 1.02rem Outfit,Arial,sans-serif">'+'Pay with PayPal</p><p style="text-align:center;margin:0 0 20px;color:#a29d94;font-size:.85rem">A secure PayPal window opens on top of this page.</p><div id="ppb"></div><p id="ppe" role="alert" style="display:none;margin:14px 0 0;color:#ffb4a8;text-align:center;font-size:.9rem"></p></div>';
+if(!dlg.open)dlg.showModal();
+var err=function(x){var e=document.getElementById("ppe");if(e){e.textContent=x;e.style.display="block"}};
+window.paypal.Buttons({
+style:{layout:"vertical",color:"gold",shape:"pill",label:"pay",height:50},
+createOrder:async function(){
+var rr=await fetch("/api/paypal-create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({},body,{inline:true}))});
+var jj=await rr.json().catch(function(){return{}});
+if(!rr.ok||!jj.orderId){console.error("PayPal create:",rr.status,jj.detail||jj.error||"");err(payErr(rr.status,jj));throw new Error("create")}
+return jj.orderId;
+},
+onApprove:async function(d){
+var rr=await fetch("/api/paypal-capture",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:d.orderID})});
+var jj=await rr.json().catch(function(){return{}});
+if(!rr.ok){console.error("PayPal capture:",rr.status,jj.error||"");err("We could not confirm your PayPal payment automatically. Please contact Fortune Studio LLC at 570-309-5776 before paying again.");return}
+finishPaymentDialog().then(function(){var b=document.getElementById("book");if(b&&b.open)b.close();window.fsPaid()});
+},
+onError:function(e){console.error("PayPal error",e);err(t("pErr"))}
+}).render("#ppb");
+};
 window.openPay=async function(j){
 if(!j.publishableKey)throw new Error("pk");
 await stripeJs();
