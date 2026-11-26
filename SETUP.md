@@ -1,3 +1,4 @@
+[SETUP.md](https://github.com/user-attachments/files/35442360/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35432963/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/35069034/SETUP.md)
 [SETUP.md](https://github.com/user-attachments/files/34992208/SETUP.md)
@@ -80,3 +81,13 @@ New files: `track.js`, `retain.js`, `api/track.js`, `supabase-analytics.sql`. Ch
    - Bots and the admin editor preview are not counted. "Delete all visitor data" is in the same panel.
    - If you collect visitor data, mention it in your privacy policy.
 4. `/admin` > **Keep visitors on the site**: progress bar (on), floating Book now button (on), friendly help message after 45 s with a chat button (on), "Before you go" message when a computer visitor leaves (off). Change texts, seconds, then **Save and publish**.
+
+
+## Update (Nov 25 2026): payments never blocked, one message per payment, new Payments page, better chat, tidy phone layout
+Changed: `api/checkout.js`, `api/webhook.js`, `api/chat.js`, `api/manage.js`, `index.html`, `admin.html`, `visitors.html`, `vercel.json`, `robots.txt`. New: `api/health.js`, `payments.html`. No new SQL.
+
+- **Payment never blocked**: if the payment form inside the site cannot open for any reason (missing `STRIPE_PUBLISHABLE_KEY`, Stripe.js blocked, a Stripe setting), the customer is sent to Stripe's own secure payment page automatically. If something is wrong on the server, the browser console (F12) and the Vercel logs now show the real reason (`stage` and `detail`).
+- **One message per payment**: the customer confirmation and the owner alert are each sent ONCE. Before sending, a flag is written on the Stripe payment, so when Stripe retries an event nothing is sent twice. If the customer email cannot be sent (for example the Resend domain is not verified), the owner email says so and nothing is retried in a loop. The site no longer asks Stripe to send its own receipt on top of ours. To also stop Stripe's automatic receipt: Stripe > Settings > Customer emails > turn off "Successful payments".
+- **/payments** (owner only, same sign in as /admin): money received, paid bookings, balance still due, every customer's details, checkouts that were started but not paid, download as spreadsheet. The top of the page runs a **system check** for Stripe keys, the webhook address, Resend email, the AI chat and the database, with the exact fix for each problem. **/visitors** shows who visits the site.
+- **Chat assistant**: now reads the live prices, Black Friday sale, delivery and booked dates, answers in plain text, supports Haitian Creole, has quick-question buttons, falls back to built-in answers if the AI is unreachable, and is protected against abuse. Optional Vercel variables: `OPENAI_MODEL`, `OPENAI_BACKUP_MODEL` (default gpt-4.1-mini).
+- **Phone layout**: Back to top, Book and Chat sit in one tidy row at the bottom, the Black Friday countdown sits just above it, and everything floating hides while the chat is open.
