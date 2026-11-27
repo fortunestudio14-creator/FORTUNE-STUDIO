@@ -44,17 +44,31 @@ module.exports = async (req, res) => {
       else add("whe", "Stripe webhook address", "ok", "https://" + host + "/api/webhook is active.");
     } catch (e) { add("whe", "Stripe webhook address", "warn", "Could not read your webhooks (the key may be restricted).", "Open Stripe > Developers > Webhooks and confirm the URL is https://" + host + "/api/webhook."); }
   }
-  // ---- Email (confirmation to customer + alert to owner)
+  // ---- Resend API key and verified MAIL_FROM sender domain
   const rk = process.env.RESEND_API_KEY || "", from = process.env.MAIL_FROM || "";
-  if (!rk) add("mail", "Email sending (Resend)", "fail", "RESEND_API_KEY is missing: no confirmation or alert emails are sent.", "resend.com > API Keys > create key, add it in Vercel as RESEND_API_KEY and redeploy.");
-  else {
-    let domains = null;
-    try { const r = await T(8000, fetch("https://api.resend.com/domains", { headers: { Authorization: "Bearer " + rk } })); if (r.status === 401) add("mail", "Email sending (Resend)", "fail", "Resend refused the API key.", "Create a new key in Resend and update RESEND_API_KEY in Vercel."); else if (r.ok) domains = (await r.json()).data || []; } catch (e) {}
-    if (!out.some((x) => x.id === "mail")) {
-      const fd = (from.match(/<([^>]+)>/) || [, from])[1] || "", dom = fd.split("@")[1] || "";
-      if (!from || /@resend\.dev$/i.test(fd)) add("mail", "Email sending (Resend)", "warn", "The sender is Resend's test address, which can only email YOU. Customers will not receive their confirmation.", "In Resend > Domains add your domain (for example fortunestudiollc.com), then set MAIL_FROM in Vercel to Fortune Studio <bookings@fortunestudiollc.com> and redeploy.");
-      else if (domains && !domains.some((d) => d.name === dom && d.status === "verified")) add("mail", "Email sending (Resend)", "fail", "The domain " + dom + " is not verified in Resend, so emails are rejected.", "Resend > Domains > " + dom + " > add the DNS records it shows and wait until it says Verified.");
-      else add("mail", "Email sending (Resend)", "ok", "Sender " + fd + " is ready.");
+  if (!rk) {
+    add("mail", "Email sending (Resend)", "fail", "RESEND_API_KEY is missing: customer replies and email alerts cannot be sent.", "Resend > API Keys > create an API key, add it in Vercel as RESEND_API_KEY, then redeploy.");
+  } else {
+    let domains = null, domainCheck = "unavailable";
+    try {
+      const response = await T(8000, fetch("https://api.resend.com/domains", { headers: { Authorization: "Bearer " + rk } }));
+      if (response.status === 401) domainCheck = "unauthorized";
+      else if (!response.ok) domainCheck = "error:" + response.status;
+      else { domains = (await response.json()).data || []; domainCheck = "ok"; }
+    } catch (e) { domainCheck = "unavailable"; }
+    if (domainCheck === "unauthorized") {
+      add("mail", "Email sending (Resend)", "fail", "Resend rejected the API key.", "Create a new API key in Resend, update RESEND_API_KEY in Vercel and redeploy.");
+    } else if (domainCheck.startsWith("error:")) {
+      add("mail", "Email sending (Resend)", "warn", "Resend accepted the key setting but the domains endpoint returned " + domainCheck.slice(6) + ". The email test below can check actual sending.", "Check the API key permissions in Resend and send a real test email from Admin > System tests.");
+    } else if (domainCheck === "unavailable") {
+      add("mail", "Email sending (Resend)", "warn", "Could not verify the sender domain with Resend. Use the real email test below to check sending.", "Check Resend service status and send a real test email from Admin > System tests.");
+    } else {
+      const sender = ((from.match(/<([^>]+)>/) || [, from])[1] || "").trim().toLowerCase();
+      const domain = sender.split("@")[1] || "";
+      if (!sender) add("mail", "Email sender (MAIL_FROM)", "fail", "MAIL_FROM is not configured.", "Verify your sending domain in Resend, then set MAIL_FROM to Fortune Studio <support@fortunestudiollc.com> (use an address on the domain Resend verifies) and redeploy.");
+      else if (/@resend\.dev$/i.test(sender)) add("mail", "Email sender (MAIL_FROM)", "warn", "The sender is Resend's testing address. It is limited to the verified Resend account owner and cannot deliver normal customer replies.", "Verify fortunestudiollc.com in Resend and set MAIL_FROM to an address on that verified domain, then redeploy.");
+      else if (!domains.some((d) => d.name === domain && d.status === "verified")) add("mail", "Email sender (MAIL_FROM)", "fail", "The sender domain " + domain + " is not shown as verified in Resend.", "Resend > Domains > add/verify " + domain + ", then redeploy after MAIL_FROM uses that domain.");
+      else add("mail", "Email sending (Resend)", "ok", "Resend API key is valid and sender domain " + domain + " is verified. Run a real test email to confirm delivery to an inbox.");
     }
   }
   add("owner", "Owner email", "ok", "Alerts go to " + (process.env.OWNER_EMAIL || "fortunestudio14@gmail.com") + ".");
@@ -79,16 +93,22 @@ module.exports = async (req, res) => {
       add("db", "Database (Supabase)", r.ok ? "ok" : "warn", r.ok ? "Connected." : "Supabase answered with status " + r.status + ".");
     } catch (e) { add("db", "Database (Supabase)", "warn", "Could not reach Supabase."); }
   }
-  // ---- Customer support inbox (the private message tables are accessed server-side only)
+  // ---- Customer support inbox (check all required private tables)
   const supportKey = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY || "";
   if (!su) add("support", "Customer message inbox", "fail", "FORTUNE_SUPABASE_URL is missing.", "Add FORTUNE_SUPABASE_URL in Vercel and redeploy.");
   else if (!supportKey) add("support", "Customer message inbox", "fail", "FORTUNE_SUPABASE_SERVICE_ROLE_KEY is missing.", "Supabase > Project Settings > API > copy the service_role key. Add it in Vercel as FORTUNE_SUPABASE_SERVICE_ROLE_KEY and redeploy. Keep this key private.");
   else {
     try {
-      const r = await T(8000, fetch(su.replace(/\/$/, "") + "/rest/v1/support_conversations?select=id&limit=1", { headers: { apikey: supportKey, Authorization: "Bearer " + supportKey } }));
-      if (r.ok) add("support", "Customer message inbox", "ok", "Support tables are reachable.");
-      else add("support", "Customer message inbox", "fail", r.status === 404 ? "The support tables do not exist yet." : "Supabase answered with status " + r.status + ".", "Supabase > SQL Editor > run supabase-support.sql from the Fortune Studio project.");
-    } catch (e) { add("support", "Customer message inbox", "warn", "Could not reach the support tables."); }
+      const headers = { apikey: supportKey, Authorization: "Bearer " + supportKey };
+      const checks = await Promise.all(["support_conversations", "support_messages", "support_settings"].map(async (table) => {
+        const fields = table === "support_messages" ? "id,delivery_status,delivery_error,email_id" : "id";
+        const response = await T(8000, fetch(su.replace(/\/$/, "") + "/rest/v1/" + table + "?select=" + fields + "&limit=1", { headers }));
+        return { table, status: response.status, ok: response.ok };
+      }));
+      const failed = checks.filter((x) => !x.ok);
+      if (!failed.length) add("support", "Customer message inbox", "ok", "All three live inbox tables are reachable: conversations, messages and agent settings.");
+      else add("support", "Customer message inbox", "fail", "Could not read: " + failed.map((x) => x.table + " (HTTP " + x.status + ")").join(", ") + ".", "Run the updated supabase-support.sql from this project in Supabase > SQL Editor. It adds the email delivery status columns as well.");
+    } catch (e) { add("support", "Customer message inbox", "warn", "Could not reach all inbox tables: " + String(e.message || "connection failed").slice(0, 100)); }
   }
   // ---- PayPal (keys, live/sandbox match, and the Supabase table that stores PayPal orders)
   {
