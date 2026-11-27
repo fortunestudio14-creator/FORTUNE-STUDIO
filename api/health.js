@@ -79,6 +79,17 @@ module.exports = async (req, res) => {
       add("db", "Database (Supabase)", r.ok ? "ok" : "warn", r.ok ? "Connected." : "Supabase answered with status " + r.status + ".");
     } catch (e) { add("db", "Database (Supabase)", "warn", "Could not reach Supabase."); }
   }
+  // ---- Customer support inbox (the private message tables are accessed server-side only)
+  const supportKey = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY || "";
+  if (!su) add("support", "Customer message inbox", "fail", "FORTUNE_SUPABASE_URL is missing.", "Add FORTUNE_SUPABASE_URL in Vercel and redeploy.");
+  else if (!supportKey) add("support", "Customer message inbox", "fail", "FORTUNE_SUPABASE_SERVICE_ROLE_KEY is missing.", "Supabase > Project Settings > API > copy the service_role key. Add it in Vercel as FORTUNE_SUPABASE_SERVICE_ROLE_KEY and redeploy. Keep this key private.");
+  else {
+    try {
+      const r = await T(8000, fetch(su.replace(/\/$/, "") + "/rest/v1/support_conversations?select=id&limit=1", { headers: { apikey: supportKey, Authorization: "Bearer " + supportKey } }));
+      if (r.ok) add("support", "Customer message inbox", "ok", "Support tables are reachable.");
+      else add("support", "Customer message inbox", "fail", r.status === 404 ? "The support tables do not exist yet." : "Supabase answered with status " + r.status + ".", "Supabase > SQL Editor > run supabase-support.sql from the Fortune Studio project.");
+    } catch (e) { add("support", "Customer message inbox", "warn", "Could not reach the support tables."); }
+  }
   // ---- PayPal (keys, live/sandbox match, and the Supabase table that stores PayPal orders)
   {
     const pid = process.env.PAYPAL_CLIENT_ID || "", psec = process.env.PAYPAL_CLIENT_SECRET || "";
