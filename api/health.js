@@ -72,18 +72,6 @@ module.exports = async (req, res) => {
     }
   }
   add("owner", "Owner email", "ok", "Alerts go to " + (process.env.OWNER_EMAIL || "fortunestudio14@gmail.com") + ".");
-  // ---- AI chat
-  const ok = process.env.OPENAI_API_KEY || "", model = process.env.OPENAI_MODEL || "gpt-6-luna";
-  if (!ok) add("ai", "AI chat assistant", "fail", "OPENAI_API_KEY is missing: the chat falls back to simple built-in answers.", "platform.openai.com > API keys, add it in Vercel as OPENAI_API_KEY and redeploy.");
-  else {
-    try {
-      const r = await T(8000, fetch("https://api.openai.com/v1/models/" + encodeURIComponent(model), { headers: { Authorization: "Bearer " + ok } }));
-      if (r.ok) add("ai", "AI chat assistant", "ok", "Model " + model + " is available.");
-      else if (r.status === 401) add("ai", "AI chat assistant", "fail", "OpenAI refused the API key.", "Create a new key and update OPENAI_API_KEY in Vercel.");
-      else if (r.status === 404) add("ai", "AI chat assistant", "warn", "The model name " + model + " was not found for this key. The chat will use a backup model.", "Set OPENAI_MODEL in Vercel to a model your account can use (for example gpt-4.1-mini).");
-      else add("ai", "AI chat assistant", "warn", "OpenAI answered with status " + r.status + ".");
-    } catch (e) { add("ai", "AI chat assistant", "warn", "Could not reach OpenAI to test the key."); }
-  }
   // ---- Admin / visitors database
   const su = process.env.FORTUNE_SUPABASE_URL, skey = process.env.FORTUNE_SUPABASE_KEY;
   if (!su || !skey) add("db", "Database (Supabase)", "fail", "FORTUNE_SUPABASE_URL or FORTUNE_SUPABASE_KEY is missing.", "Add both in Vercel and redeploy.");
