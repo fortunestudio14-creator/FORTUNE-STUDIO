@@ -13,6 +13,7 @@ button{background:#b88963;border:0;color:#111;font-weight:700;cursor:pointer}but
 details{background:#1b1d22;border:1px solid #343840;border-radius:12px;padding:10px 12px;margin-bottom:10px}summary{cursor:pointer;font-weight:700}
 .row{display:flex;gap:8px;align-items:center;margin:6px 0}.row>*{margin:0}.row button{width:auto;padding:8px 12px}.row label{flex:1}
 .thumb{width:46px;height:46px;object-fit:cover;border-radius:6px;background:#000;flex:none}
+.support-msg{padding:10px 12px;border:1px solid #343840;border-radius:10px;background:#111318;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere}.support-msg.admin{border-color:#8d6c54;background:#211b17}.support-msg small{display:block;color:#a9a9b1;font-size:11px;margin-bottom:5px}.support-choice{width:100%;text-align:left;background:#20232a;color:#fff;border:1px solid #454a55;padding:10px;border-radius:10px}.support-choice.active{border-color:#e8b99f;background:#30251f}
 input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6px;font-size:12px}
 @media(max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:auto 45vh 1fr}#top{grid-column:1}#side{border-right:0;order:3}}
 </style></head><body>
@@ -39,6 +40,8 @@ input[type=color]{padding:2px;height:34px;width:60px}input[type=file]{padding:6p
 <details><summary>Coupon codes (choose % or $ off, one use each)</summary><div id="cpp"></div></details>
 <details id="avd"><summary>Available dates and hours (re-open a booked date)</summary><div id="avp"></div></details>
 <a id="vsLink" href="/visitors" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#e8b99f,#b88963);color:#111;font-weight:700;padding:14px;border-radius:12px;margin-bottom:10px">📊 Visitors: countries and time on the site →</a><a id="payLink" href="/payments" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#e8b99f,#b88963);color:#111;font-weight:700;padding:14px;border-radius:12px;margin-bottom:10px">💵 Payments: who paid, how much, what is still due</a>
+<details id="supportPanel"><summary>💬 Customer messages & real agent <span id="supportBadge" style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:99px;background:#30343b;color:#e8b99f;font-size:12px">0 new</span></summary><div class="hint">Messages customers leave on the website appear here. Reply from this panel; the customer receives your answer by email and, when they still have the chat open, in the website chat too.</div><div id="supportTools"></div><div id="supportInbox" class="hint">Loading customer messages...</div></details>
+<details id="systemTestPanel"><summary>🧪 System tests (payments, email, chat and database)</summary><div class="hint">Check the connections without charging a customer. You can also send a test email to the admin address and create a clearly marked test message in the inbox.</div><div id="systemTestTools"></div><div id="systemTestResults"></div></details>
 <details><summary>Keep visitors on the site (button, bar, help message)</summary><div id="rtp"></div></details>
 <details><summary>Black Friday sale (automatic)</summary><div id="bfp"></div></details>
 <details><summary>All texts (search and edit)</summary>
@@ -182,7 +185,7 @@ function drawBF(){const b=$('bfp');b.textContent='';C.bf=C.bf||{};
    el('button',{className:'s',textContent:'Reset Black Friday to default',onclick:()=>{delete C.bf;refresh();drawBF()}}))}
 let dirty=false;function refresh(){dirty=true;win.FS_CMS.content=C;win.FS_CMS.applyAll()}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-function drawAll(){drawRetain();drawFx();drawRent();drawPrices();drawBF();drawCoupons();drawAvail();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers()}
+function drawAll(){drawRetain();drawFx();drawRent();drawPrices();drawBF();drawCoupons();drawAvail();drawTexts();drawColors();drawMedia();drawSections();drawAdded();drawEdits();drawVers();drawSupportPanel();drawSystemPanel()}
 function pick(t){
   if(sel)sel.classList.remove('cms-sel');
   const tx=t.closest('[data-cms]'),ln=t.closest('[data-cmsa]'),md=t.closest('[data-cmsm]'),bl=t.closest('[data-cmsx]');
@@ -373,6 +376,52 @@ async function srv(body){const s=(await sb.auth.getSession()).data.session;if(!s
   const r=await fetch('/api/manage',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||('Server error '+r.status));return j}
 const copy=async(t,msg)=>{try{await navigator.clipboard.writeText(t);say('status',msg||'Copied.')}catch(e){prompt('Copy this:',t)}};
+
+/* ===== Customer inbox, real-agent availability and system tests ===== */
+let SUPPORT_ROWS=[],SUPPORT_SELECTED='',SUPPORT_TIMER=null;
+async function supportApi(body){const s=(await sb.auth.getSession()).data.session;if(!s)throw Error('Please sign in again.');const r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||('Server error '+r.status));return j}
+function drawSupportPanel(){
+  const b=$('supportTools');if(!b)return;b.textContent='';
+  const top=el('div',{className:'row'}),online=el('input',{type:'checkbox',style:'width:auto;margin:0'}),off=el('textarea',{rows:2,placeholder:'Leave a message and our team will reply by email.'});
+  const save=el('button',{className:'s',textContent:'Save agent settings'}),refresh=el('button',{className:'s',textContent:'↻ Refresh inbox'});
+  top.append(el('label',{style:'display:flex;align-items:center;gap:8px;flex:1'},online,el('span',{textContent:'A real agent is available now'})),refresh);
+  b.append(top,el('label',{textContent:'Message customers see when the agent is offline'}),off,save);
+  supportApi({action:'status'}).then(x=>{online.checked=!!x.agent_online;off.value=x.offline_message||''}).catch(e=>{const n=el('div',{className:'hint',textContent:'Could not load agent status: '+e.message});b.append(n)});
+  save.onclick=async()=>{save.disabled=true;try{await supportApi({action:'agent_settings',agent_online:online.checked,offline_message:off.value});say('status',online.checked?'Real agent status is ON.':'Real agent status is OFF. Customers can still leave messages.')}catch(e){say('status','Could not save agent settings: '+e.message)}save.disabled=false};
+  refresh.onclick=()=>loadSupport(true);
+  if(!SUPPORT_TIMER)SUPPORT_TIMER=setInterval(()=>{if($('app').style.display!=='none')loadSupport(false)},30000);
+  loadSupport(false);
+}
+async function loadSupport(showError){
+  const box=$('supportInbox');if(!box)return;
+  try{const j=await supportApi({action:'list'});SUPPORT_ROWS=j.conversations||[];const fresh=SUPPORT_ROWS.filter(x=>x.status==='new'&&!x.is_test).length;$('supportBadge').textContent=fresh+' new';renderSupportInbox()}
+  catch(e){if(showError){box.textContent='Could not load messages: '+e.message;say('status','Inbox error: '+e.message)}}
+}
+function renderSupportInbox(){
+  const box=$('supportInbox');if(!box)return;box.textContent='';
+  if(!SUPPORT_ROWS.length){box.append(el('div',{className:'hint',textContent:'No customer messages yet. Use “Create test customer message” under System tests to verify the inbox.'}));return}
+  let selected=SUPPORT_ROWS.find(x=>x.id===SUPPORT_SELECTED);if(!selected)selected=SUPPORT_ROWS.find(x=>x.status!=='closed')||SUPPORT_ROWS[0];SUPPORT_SELECTED=selected.id;
+  const list=el('div',{style:'display:grid;gap:6px;margin:10px 0'});
+  SUPPORT_ROWS.forEach(c=>{const last=(c.messages||[]).slice(-1)[0],title=(c.is_test?'[TEST] ':'')+c.name+' · '+c.status;const btn=el('button',{className:'support-choice'+(c.id===SUPPORT_SELECTED?' active':''),textContent:title+'\n'+(last?last.body.slice(0,95):c.email)+'\n'+new Date(c.last_message_at||c.created_at).toLocaleString()});btn.onclick=async()=>{SUPPORT_SELECTED=c.id;if(c.status==='new'){try{await supportApi({action:'set_status',conversation_id:c.id,status:'open'});await loadSupport(false)}catch(e){renderSupportInbox()}}else renderSupportInbox()};list.append(btn)});
+  const thread=el('div',{});thread.append(el('div',{className:'row'},el('b',{textContent:selected.name+(selected.is_test?' · TEST MESSAGE':'')}),el('a',{href:'mailto:'+selected.email,textContent:selected.email,style:'color:#e8b99f;overflow-wrap:anywhere'})));
+  (selected.messages||[]).forEach(m=>{const d=el('div',{className:'support-msg'+(m.sender==='admin'?' admin':'')});d.append(el('small',{textContent:(m.sender==='admin'?'You':m.sender==='customer'?'Customer':'System')+' · '+new Date(m.created_at).toLocaleString()}),el('div',{textContent:m.body}));thread.append(d)});
+  const reply=el('textarea',{rows:3,placeholder:'Write your reply to this customer...'}),send=el('button',{textContent:'Send reply by email'}),actions=el('div',{className:'row'}),status=el('select',{});
+  [['new','New'],['open','Open'],['replied','Replied'],['closed','Closed']].forEach(([v,l])=>status.append(el('option',{value:v,textContent:l})));
+  status.value=selected.status;status.onchange=async()=>{try{await supportApi({action:'set_status',conversation_id:selected.id,status:status.value});await loadSupport(false)}catch(e){say('status','Could not update message: '+e.message)}};
+  send.onclick=async()=>{send.disabled=true;try{if(!reply.value.trim())throw Error('Write a reply first.');const j=await supportApi({action:'admin_reply',conversation_id:selected.id,message:reply.value.trim()});reply.value='';await loadSupport(false);say('status',j.email_sent?'Reply sent to '+selected.email+'.':'Reply saved, but email was not sent: '+(j.email_error||'check Resend settings.'))}catch(e){say('status','Could not send reply: '+e.message)}send.disabled=false};
+  actions.append(status,send);thread.append(el('label',{textContent:'Your reply'}),reply,actions);
+  box.append(el('div',{className:'hint',textContent:SUPPORT_ROWS.length+' conversation(s) · New messages are checked automatically about every 30 seconds.'}),list,thread);
+}
+function drawSystemPanel(){
+  const tools=$('systemTestTools'),out=$('systemTestResults');if(!tools||tools.dataset.ready)return;tools.dataset.ready='1';
+  const run=el('button',{textContent:'▶ Run system check'}),mail=el('button',{className:'s',textContent:'✉ Send test email to admin'}),msg=el('button',{className:'s',textContent:'💬 Create test customer message'});
+  tools.append(el('div',{className:'row'},run,mail),msg);
+  const ownerPost=async(path,body)=>{const s=(await sb.auth.getSession()).data.session;if(!s)throw Error('Please sign in again.');const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||('Server error '+r.status));return j};
+  run.onclick=async()=>{run.disabled=true;out.textContent='Checking payment keys, payment webhook, email provider, AI and database...';try{const h=await ownerPost('/api/health',{});out.textContent='';const list=el('div',{style:'margin-top:10px'});h.checks.forEach(c=>{const x=el('div',{className:'support-msg'});x.append(el('b',{textContent:(c.status==='ok'?'✓ ':c.status==='warn'?'! ':'✕ ')+c.label}),el('div',{textContent:c.detail}));if(c.fix&&c.status!=='ok')x.append(el('small',{textContent:'How to fix: '+c.fix}));list.append(x)});out.append(el('div',{className:'hint',textContent:'Environment: '+(h.mode||'Stripe mode not detected')+' · '+h.host}),list)}catch(e){out.textContent='System check failed: '+e.message}run.disabled=false};
+  mail.onclick=async()=>{mail.disabled=true;out.textContent='Sending a test email to the admin email address...';try{await supportApi({action:'test_email'});out.textContent='Test email sent. Check the admin inbox (and spam folder).'}catch(e){out.textContent='Test email failed: '+e.message}mail.disabled=false};
+  msg.onclick=async()=>{msg.disabled=true;out.textContent='Creating a test message...';try{const j=await supportApi({action:'test_message'});await loadSupport(false);out.textContent=j.email_sent?'Test message added to the inbox and email notification sent.':'Test message added to the inbox. Email alert could not be sent: '+(j.email_error||'check Resend settings.')}catch(e){out.textContent='Test message failed: '+e.message}msg.disabled=false};
+}
+
 
 /* ===== Coupon codes ===== */
 let CODES=null,NEWC=[];
