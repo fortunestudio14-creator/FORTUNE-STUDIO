@@ -1,6 +1,6 @@
--- Fortune Studio customer inbox and real-agent availability.
--- Run this once in Supabase > SQL Editor > New query.
--- The website server accesses these tables with FORTUNE_SUPABASE_SERVICE_ROLE_KEY.
+-- Fortune Studio private customer inbox and real-agent availability.
+-- Safe to run again: it creates missing tables and adds delivery tracking columns.
+-- Run once in Supabase > SQL Editor > New query > Run.
 
 create extension if not exists pgcrypto;
 
@@ -27,6 +27,11 @@ create table if not exists public.support_messages (
   created_at timestamptz not null default now()
 );
 
+-- Track whether an admin reply was actually accepted by Resend, and allow retries after failures.
+alter table public.support_messages add column if not exists delivery_status text not null default 'unknown';
+alter table public.support_messages add column if not exists delivery_error text not null default '';
+alter table public.support_messages add column if not exists email_id text;
+
 create index if not exists support_messages_conversation_idx
   on public.support_messages (conversation_id, created_at);
 
@@ -45,11 +50,11 @@ alter table public.support_conversations enable row level security;
 alter table public.support_messages enable row level security;
 alter table public.support_settings enable row level security;
 
--- Do not expose inbox records or customer details directly to anonymous visitors.
--- All reads/writes go through api/messages.js after validation; the service-role key stays on the server.
-revoke all on public.support_conversations from anon, authenticated;
-revoke all on public.support_messages from anon, authenticated;
-revoke all on public.support_settings from anon, authenticated;
+-- Never expose private inbox messages or customer contact details to website visitors.
+-- All access is server-side through api/messages.js with the service-role key.
+revoke all on public.support_conversations from public, anon, authenticated;
+revoke all on public.support_messages from public, anon, authenticated;
+revoke all on public.support_settings from public, anon, authenticated;
 
 grant all on public.support_conversations, public.support_messages, public.support_settings to service_role;
 grant usage, select on sequence public.support_messages_id_seq to service_role;

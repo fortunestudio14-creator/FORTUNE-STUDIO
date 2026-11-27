@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Customer Inbox — Fortune Studio Admin</title>
+<style>
+:root{color-scheme:dark;--bg:#101216;--panel:#191d23;--panel2:#20252d;--line:#303742;--muted:#a5adb8;--text:#f7f5f1;--gold:#d4a77e;--gold2:#f0c9a6;--green:#75d6a2;--red:#ff8d87;--blue:#91b9ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 420px at 10% -15%,#3a2b20 0,transparent 65%),var(--bg);color:var(--text);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.shell{max-width:1600px;margin:auto;padding:24px clamp(14px,3vw,38px) 34px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}.brand{display:flex;gap:13px;align-items:center}.mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#f0c9a6,#a87650);color:#1a1714;display:grid;place-items:center;font-weight:900;font-family:Georgia,serif;font-size:19px;box-shadow:0 8px 25px #0005}.brand h1{font:600 22px/1.1 Georgia,serif;margin:0}.brand p{margin:5px 0 0;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.nav a,.nav button{border:1px solid var(--line);border-radius:11px;background:#1b2027;color:#eee;padding:9px 13px;font-size:13px;font-weight:650}.nav a.active{background:#3b2b21;border-color:#8d6d51;color:#f4cba7}.nav button:hover,.nav a:hover{border-color:#987455}
+.page-title{display:flex;justify-content:space-between;align-items:end;gap:14px;margin:0 0 18px;flex-wrap:wrap}.page-title h2{font:500 clamp(25px,3vw,34px)/1.1 Georgia,serif;margin:0}.page-title p{color:var(--muted);margin:6px 0 0;font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);padding:10px 14px;font-weight:650;font-size:13px}.btn.primary{background:linear-gradient(135deg,#e8bd98,#bf8b60);color:#21170f;border:0}.btn:disabled{opacity:.55;cursor:wait}.btn:hover{filter:brightness(1.08)}
+.overview{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,390px);gap:14px;margin-bottom:15px}.card{background:linear-gradient(145deg,#1b2027,#171b20);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 30px #0002}.agent-card{display:flex;justify-content:space-between;align-items:center;gap:16px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:750}.card h3{font-size:15px;margin:5px 0 3px}.muted{color:var(--muted);font-size:13px}.toggle{display:flex;align-items:center;gap:10px;white-space:nowrap}.toggle input{appearance:none;width:44px;height:25px;border-radius:99px;background:#414852;position:relative;cursor:pointer;transition:.2s;margin:0}.toggle input:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}.toggle input:checked{background:#398f69}.toggle input:checked:before{left:22px}.offline-row{display:flex;gap:8px;margin-top:12px}.field{width:100%;border:1px solid #3a424d;background:#11151a;color:#fff;padding:11px 12px;border-radius:10px;outline:none}.field:focus{border-color:#c69a74;box-shadow:0 0 0 3px #c69a7425}.offline-row .field{min-width:0}.online-indicator{display:inline-flex;align-items:center;gap:7px;font-weight:750;font-size:12px;color:var(--green)}.online-indicator:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px #75d6a21c}.online-indicator.off{color:#e4ad76}.online-indicator.off:before{background:currentColor;box-shadow:0 0 0 4px #e4ad761c}
+.workspace{display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px;min-height:650px}.list-panel,.thread-panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}.panel-head{padding:16px;border-bottom:1px solid var(--line)}.panel-head h3{margin:0 0 4px;font-size:16px}.filters{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px}.filter{background:#242a32;border:1px solid #37404a;border-radius:99px;color:#c9cdd3;padding:6px 10px;font-size:11px;font-weight:750}.filter.active{background:#4a3527;border-color:#a57c58;color:#ffcfaa}.search{margin-top:10px}.conversation-list{padding:8px;max-height:590px;overflow:auto}.conversation{width:100%;display:block;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;border-radius:12px;padding:12px;margin:2px 0}.conversation:hover{background:#232932}.conversation.active{background:#2c2926;border-color:#8e6c4d}.con-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.con-name{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.con-date{font-size:10px;color:var(--muted);white-space:nowrap}.con-preview{font-size:12px;color:#b7bec8;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:5px}.con-email{font-size:11px;color:#8f99a5;margin-top:4px;overflow:hidden;text-overflow:ellipsis}.pills{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:7px}.pill{font-size:10px;font-weight:800;border-radius:99px;padding:3px 7px;background:#313945;color:#cbd4df;text-transform:uppercase;letter-spacing:.03em}.pill.new{background:#543523;color:#ffd1ad}.pill.replied{background:#1d4537;color:#9be0ba}.pill.closed{background:#34383e;color:#c1c4ca}.pill.test{background:#3d3157;color:#d5c1ff}.count{font-size:12px;color:var(--muted)}
+.thread-panel{display:flex;flex-direction:column}.thread-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.thread-head h3{font-size:18px;margin:0 0 4px}.thread-head a{color:var(--gold2);font-size:13px;overflow-wrap:anywhere}.thread-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.thread-controls select{min-width:130px}.messages{padding:18px 20px;flex:1;overflow:auto;min-height:250px;max-height:470px;background:linear-gradient(180deg,#161a20,#181c22)}.bubble{max-width:min(78%,700px);padding:12px 14px;border:1px solid #333b46;background:#202630;border-radius:14px;margin:0 0 13px;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.admin{margin-left:auto;background:#36291f;border-color:#775b43}.bubble small{display:flex;gap:8px;align-items:center;justify-content:space-between;color:#aab3be;font-size:10px;margin-bottom:7px}.bubble.admin small{color:#d1b397}.delivery{display:inline-flex;gap:4px;align-items:center;font-weight:750}.delivery.sent{color:var(--green)}.delivery.failed{color:var(--red)}.delivery.pending{color:#e4bd84}.retry{font-size:11px;border:0;background:transparent;color:#ffc99c;text-decoration:underline;padding:0;margin-left:6px}.composer{padding:16px 18px;border-top:1px solid var(--line);background:#191e25}.composer label{display:flex;justify-content:space-between;color:#c6cdd6;font-size:12px;font-weight:700;margin-bottom:7px}.composer textarea{width:100%;min-height:112px;resize:vertical;line-height:1.5}.compose-foot{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:9px;flex-wrap:wrap}.compose-foot .muted{font-size:11px}.empty{height:100%;min-height:450px;display:grid;place-items:center;text-align:center;padding:35px;color:var(--muted)}.empty-icon{width:58px;height:58px;margin:0 auto 12px;border-radius:18px;background:#29241f;display:grid;place-items:center;color:var(--gold2);font-size:25px}.notice{margin:12px 18px 0;padding:10px 12px;border-radius:10px;font-size:12px;display:none}.notice.show{display:block}.notice.ok{background:#173326;border:1px solid #2d6b4a;color:#a5e2bd}.notice.warn{background:#38271e;border:1px solid #81563b;color:#f0c39c}.notice.err{background:#3d2021;border:1px solid #824343;color:#ffb3aa}.foot{margin-top:14px;color:#77818d;font-size:11px;text-align:center}
+@media(max-width:980px){.workspace{grid-template-columns:310px minmax(0,1fr)}.overview{grid-template-columns:1fr}.messages{max-height:420px}}
+@media(max-width:720px){.shell{padding:16px 10px 26px}.brand h1{font-size:19px}.workspace{grid-template-columns:1fr;min-height:0}.list-panel{max-height:340px}.conversation-list{max-height:230px}.thread-panel{min-height:610px}.bubble{max-width:94%}.messages{max-height:none}.thread-head{padding:14px}.agent-card{align-items:flex-start;flex-direction:column}.offline-row{flex-direction:column}.thread-controls{width:100%}.thread-controls select{flex:1}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="brand"><div class="mark">FS</div><div><h1>Fortune Studio</h1><p>Admin workspace · Customer care</p></div></div>
+    <nav class="nav"><a href="/admin">← Main admin</a><a class="active" href="/admin-inbox">Customer inbox</a><a href="/admin-tests">System tests</a><button id="signOut" type="button">Sign out</button></nav>
+  </header>
+  <section class="page-title"><div><h2>Customer messages</h2><p>Read every customer message, reply by email, and manage your live-agent status.</p></div><div class="actions"><button class="btn" id="refresh">↻ Refresh inbox</button><span class="count" id="updatedAt">Waiting for secure connection…</span></div></section>
+  <section class="overview">
+    <div class="card">
+      <div class="agent-card"><div><div class="eyebrow">Live agent</div><h3 id="agentTitle">Checking availability…</h3><div class="muted" id="agentDescription">Customers can always leave a message, even when you are offline.</div></div><label class="toggle"><span id="agentToggleText">Offline</span><input type="checkbox" id="agentOnline" aria-label="Set the real agent online"></label></div>
+      <div class="offline-row"><input class="field" id="offlineMessage" maxlength="240" value="Leave a message and our team will reply by email." aria-label="Message shown while the agent is offline"><button class="btn primary" id="saveAgent">Save availability</button></div>
+    </div>
+    <div class="card"><div class="eyebrow">Inbox overview</div><div style="display:flex;gap:18px;align-items:end;margin-top:9px"><div><div id="totalCount" style="font:500 31px Georgia,serif">—</div><div class="muted">Conversations</div></div><div><div id="newCount" style="font:500 31px Georgia,serif;color:var(--gold2)">—</div><div class="muted">Waiting for reply</div></div></div><div class="muted" style="margin-top:12px">New messages refresh automatically every 25 seconds while this page is open.</div></div>
+  </section>
+  <main class="workspace">
+    <aside class="list-panel"><div class="panel-head"><h3>Inbox</h3><div class="count" id="listSummary">Loading conversations…</div><input class="field search" id="search" placeholder="Search by name, email or message…" aria-label="Search inbox"><div class="filters" id="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="new">New</button><button class="filter" data-filter="replied">Replied</button><button class="filter" data-filter="closed">Closed</button><button class="filter" data-filter="tests">Tests</button></div></div><div class="conversation-list" id="conversationList"><div class="empty" style="min-height:160px">Loading inbox…</div></div></aside>
+    <section class="thread-panel" id="threadPanel"><div class="empty"><div><div class="empty-icon">✉</div><h3 style="color:#eee;margin:0 0 5px">Choose a conversation</h3><p class="muted">Select a customer from the inbox to read the conversation and send a reply.</p></div></div></section>
+  </main>
+  <div class="foot">Private admin page · Customer data is accessed through the secured server API.</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin-tools-common.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const state = { rows: [], selected: "", filter: "all", search: "", loading: false, drafts: {}, timer: null };
+  const escText = s => String(s == null ? "" : s);
+  const dateText = value => { const d = new Date(value); return Number.isNaN(d.getTime()) ? "" : d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); };
+  const lastMessage = c => (c.messages || []).slice(-1)[0];
+  const selectedConversation = () => state.rows.find(c => c.id === state.selected) || null;
+  function statusLabel(s){ return ({new:"New",open:"Open",replied:"Replied",closed:"Closed"})[s] || s; }
+  function updateCounters(){
+    const real = state.rows.filter(c => !c.is_test);
+    $("totalCount").textContent = state.rows.length;
+    $("newCount").textContent = real.filter(c => c.status === "new").length;
+    $("listSummary").textContent = state.rows.length + " conversation" + (state.rows.length === 1 ? "" : "s");
+  }
+  function filteredRows(){
+    const q = state.search.toLowerCase();
+    return state.rows.filter(c => {
+      if(state.filter === "tests" && !c.is_test) return false;
+      if(["new","replied","closed"].includes(state.filter) && c.status !== state.filter) return false;
+      if(q){ const all = [c.name,c.email,...(c.messages||[]).map(m=>m.body)].join(" ").toLowerCase(); if(!all.includes(q)) return false; }
+      return true;
+    });
+  }
+  function renderList(){
+    const list = $("conversationList"); list.replaceChildren();
+    const rows = filteredRows();
+    if(!rows.length){ const e=document.createElement("div");e.className="empty";e.style.minHeight="180px";e.textContent=state.rows.length?"No conversations match this filter.":"No customer messages yet. Your website chat messages will appear here.";list.append(e);return; }
+    rows.forEach(c=>{
+      const last=lastMessage(c),button=document.createElement("button");button.type="button";button.className="conversation"+(c.id===state.selected?" active":"");
+      const top=document.createElement("div");top.className="con-top";
+      const name=document.createElement("span");name.className="con-name";name.textContent=c.name||"Customer";
+      const time=document.createElement("span");time.className="con-date";time.textContent=dateText(c.last_message_at||c.created_at);top.append(name,time);
+      const preview=document.createElement("div");preview.className="con-preview";preview.textContent=last?last.body:c.email;
+      const email=document.createElement("div");email.className="con-email";email.textContent=c.email||"";
+      const pills=document.createElement("div");pills.className="pills";
+      const st=document.createElement("span");st.className="pill "+(c.status||"new");st.textContent=statusLabel(c.status);pills.append(st);
+      if(c.is_test){const t=document.createElement("span");t.className="pill test";t.textContent="Test";pills.append(t);}
+      const failed=(c.messages||[]).filter(m=>m.sender==="admin"&&m.delivery_status==="failed").length;
+      if(failed){const f=document.createElement("span");f.className="pill";f.style.color="var(--red)";f.textContent=failed+" email failed";pills.append(f);}
+      button.append(top,preview,email,pills);button.addEventListener("click",()=>selectConversation(c.id));list.append(button);
+    });
+  }
+  function notice(text,type){ const n=document.createElement("div");n.className="notice show "+type;n.textContent=text;return n; }
+  function setAgentDisplay(){const online=$("agentOnline").checked;$("agentTitle").textContent=online?"A real team member is available":"Customers can leave a message";$("agentToggleText").textContent=online?"Online":"Offline";$("agentToggleText").className=online?"online-indicator":"online-indicator off";$("agentDescription").textContent=online?"The website chat will show that a real person is available.":"The website chat will invite visitors to leave a message for an email reply.";}
+  async function loadAgent(){try{const j=await FSAdmin.post("/api/messages",{action:"status"});$("agentOnline").checked=!!j.agent_online;$("offlineMessage").value=j.offline_message||"Leave a message and our team will reply by email.";setAgentDisplay();}catch(e){$("agentTitle").textContent="Could not load agent status";$("agentDescription").textContent=e.message;}}
+  async function loadInbox(showError=true){if(state.loading)return;state.loading=true;$("refresh").disabled=true;try{const j=await FSAdmin.post("/api/messages",{action:"list"});state.rows=j.conversations||[];if(!state.rows.some(c=>c.id===state.selected))state.selected=(state.rows.find(c=>c.status!=="closed")||state.rows[0]||{}).id||"";updateCounters();renderList();if(state.selected)renderThread();$("updatedAt").textContent="Updated "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});}catch(e){if(showError){$("updatedAt").textContent="Could not refresh";$("threadPanel").replaceChildren(notice(e.message,"err"));}}finally{state.loading=false;$("refresh").disabled=false;}}
+  function selectConversation(id){if($("replyText"))state.drafts[state.selected]=$("replyText").value;state.selected=id;const c=selectedConversation();if(c&&c.status==="new")FSAdmin.post("/api/messages",{action:"set_status",conversation_id:c.id,status:"open"}).then(loadInbox).catch(()=>{renderList();renderThread();});else{renderList();renderThread();}}
+  function renderThread(){
+    const c=selectedConversation(),panel=$("threadPanel");panel.replaceChildren();if(!c){const e=document.createElement("div");e.className="empty";e.innerHTML='<div><div class="empty-icon">✉</div><h3 style="color:#eee;margin:0 0 5px">Choose a conversation</h3><p class="muted">Select a customer from the inbox to read the conversation and send a reply.</p></div>';panel.append(e);return;}
+    const head=document.createElement("div");head.className="thread-head";
+    const identity=document.createElement("div"),title=document.createElement("h3"),email=document.createElement("a");title.textContent=c.name+(c.is_test?" · TEST":"");email.href="mailto:"+c.email;email.textContent=c.email;identity.append(title,email);
+    const controls=document.createElement("div");controls.className="thread-controls";
+    const status=document.createElement("select");status.className="field";status.style.width="auto";[["new","New"],["open","Open"],["replied","Replied"],["closed","Closed"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;status.append(o)});status.value=c.status;status.addEventListener("change",async()=>{try{await FSAdmin.post("/api/messages",{action:"set_status",conversation_id:c.id,status:status.value});await loadInbox(false);}catch(e){status.value=c.status;alert(e.message);}});
+    const mailto=document.createElement("a");mailto.className="btn";mailto.href="mailto:"+c.email;mailto.textContent="Open email";controls.append(status,mailto);head.append(identity,controls);panel.append(head);
+    const banner=document.createElement("div");banner.className="notice";banner.id="threadNotice";panel.append(banner);
+    const messages=document.createElement("div");messages.className="messages";messages.id="messagesView";
+    (c.messages||[]).forEach(m=>{
+      const bubble=document.createElement("div");bubble.className="bubble"+(m.sender==="admin"?" admin":"");
+      const meta=document.createElement("small"),who=document.createElement("span"),when=document.createElement("span");who.textContent=m.sender==="admin"?"You · Fortune Studio":m.sender==="customer"?"Customer":"System";when.textContent=dateText(m.created_at);meta.append(who,when);bubble.append(meta);
+      const body=document.createElement("div");body.textContent=m.body;bubble.append(body);
+      if(m.sender==="admin"){
+        const delivery=document.createElement("div");delivery.style.marginTop="8px";
+        const ds=document.createElement("span");ds.className="delivery "+(m.delivery_status==="sent"?"sent":m.delivery_status==="failed"?"failed":"pending");ds.textContent=m.delivery_status==="sent"?"✓ Accepted by email provider":m.delivery_status==="failed"?"✕ Email not sent":m.delivery_status==="pending"?"◷ Email pending":"Delivery status unavailable";delivery.append(ds);
+        if(m.delivery_status==="failed"||m.delivery_status==="pending"){
+          if(m.delivery_error){const error=document.createElement("div");error.className="muted";error.style.marginTop="4px";error.textContent=m.delivery_error;delivery.append(error);}
+          const retry=document.createElement("button");retry.type="button";retry.className="retry";retry.textContent="Retry email";retry.addEventListener("click",()=>retryEmail(c.id,m.id,retry));delivery.append(retry);
+        }
+        bubble.append(delivery);
+      }
+      messages.append(bubble);
+    });panel.append(messages);
+    const composer=document.createElement("div");composer.className="composer";
+    const label=document.createElement("label"),labelText=document.createElement("span"),chars=document.createElement("span");labelText.textContent="Your reply";chars.textContent="";label.append(labelText,chars);
+    const reply=document.createElement("textarea");reply.id="replyText";reply.className="field";reply.maxLength=4000;reply.placeholder="Write a clear, friendly reply to your customer…";reply.value=state.drafts[c.id]||"";reply.disabled=c.status==="closed";
+    reply.addEventListener("input",()=>{state.drafts[c.id]=reply.value;chars.textContent=reply.value.length+" / 4000";});chars.textContent=reply.value.length+" / 4000";
+    const foot=document.createElement("div");foot.className="compose-foot";const hint=document.createElement("span");hint.className="muted";hint.textContent=c.status==="closed"?"This conversation is closed. Reopen it to send a reply.":"Your reply will be emailed to "+c.email+".";
+    const send=document.createElement("button");send.className="btn primary";send.type="button";send.textContent="Send reply by email ↗";send.disabled=c.status==="closed"||!c.email;
+    send.addEventListener("click",async()=>{const message=reply.value.trim();if(message.length<2){showNotice("Write a reply before sending.","warn");reply.focus();return;}send.disabled=true;send.textContent="Sending…";try{const j=await FSAdmin.post("/api/messages",{action:"admin_reply",conversation_id:c.id,message});delete state.drafts[c.id];await loadInbox(false);if(j.email_sent)showNotice("Resend accepted the reply for "+c.email+". Check the Resend delivery log if you need final delivery confirmation.","ok");else showNotice("The reply is saved in the conversation, but the email was not sent: "+(j.email_error||"Check the email settings."),"err");}catch(e){showNotice("Could not send the reply: "+e.message,"err");}finally{send.disabled=false;send.textContent="Send reply by email ↗";}});
+    foot.append(hint,send);composer.append(label,reply,foot);panel.append(composer);
+    requestAnimationFrame(()=>{messages.scrollTop=messages.scrollHeight;});
+  }
+  function showNotice(message,type){const old=$("threadNotice");if(old){old.textContent=message;old.className="notice show "+type;}}
+  async function retryEmail(conversationId,messageId,button){button.disabled=true;button.textContent="Retrying…";try{const j=await FSAdmin.post("/api/messages",{action:"retry_email",conversation_id:conversationId,message_id:String(messageId)});await loadInbox(false);showNotice(j.email_sent?"Email accepted by Resend for delivery.":"Email still failed: "+(j.email_error||"Unknown error"),j.email_sent?"ok":"err");}catch(e){button.disabled=false;button.textContent="Retry email";showNotice(e.message,"err");}}
+  function bind(){
+    $("refresh").addEventListener("click",()=>loadInbox(true));$("signOut").addEventListener("click",()=>FSAdmin.signOut());
+    $("agentOnline").addEventListener("change",setAgentDisplay);
+    $("saveAgent").addEventListener("click",async()=>{const button=$("saveAgent");button.disabled=true;button.textContent="Saving…";try{await FSAdmin.post("/api/messages",{action:"agent_settings",agent_online:$("agentOnline").checked,offline_message:$("offlineMessage").value});setAgentDisplay();button.textContent="Saved ✓";setTimeout(()=>button.textContent="Save availability",1600);}catch(e){alert("Could not save agent settings: "+e.message);button.textContent="Save availability";}finally{button.disabled=false;}});
+    $("search").addEventListener("input",e=>{state.search=e.target.value;renderList();});
+    $("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;state.filter=b.dataset.filter;$("filters").querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));renderList();});
+  }
+  async function boot(){try{await FSAdmin.init();bind();await Promise.all([loadAgent(),loadInbox()]);state.timer=setInterval(()=>{if(!document.hidden)loadInbox(false);},25000);}catch(e){$("updatedAt").textContent=e.message;}}
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadInbox(false)});boot();
+})();
+</script>
+</body></html>
