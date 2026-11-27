@@ -134,6 +134,9 @@ module.exports = async (req, res) => {
       if (clean(body.website, 200)) return res.status(200).json({ ok: true, email_sent: false });
       const name = clean(body.name, 100), email = clean(body.email, 254).toLowerCase(), message = clean(body.message, 4000);
       if (!name || !EMAIL.test(email) || message.length < 2) return res.status(400).json({ error: "Please enter your name, a valid email address and a message." });
+      // Visitors can only start a real-agent conversation while the owner is marked online.
+      const availability = await db("support_settings?id=eq.1&select=agent_online");
+      if (!(availability && availability[0] && availability[0].agent_online)) return res.status(409).json({ error: "No agent is available right now. The virtual assistant can keep helping you." });
       const visitorToken = crypto.randomBytes(32).toString("base64url");
       const now = new Date().toISOString();
       const rows = await db("support_conversations", "POST", { name, email, status: "new", visitor_token_hash: tokenHash(visitorToken), is_test: false, created_at: now, last_message_at: now });
