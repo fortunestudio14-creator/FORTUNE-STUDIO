@@ -46,6 +46,11 @@ insert into public.support_settings (id, agent_online)
 values (1, false)
 on conflict (id) do nothing;
 
+-- Live chat: AI on/off switch and "is typing" signals.
+alter table public.support_settings add column if not exists ai_enabled boolean not null default true;
+alter table public.support_conversations add column if not exists visitor_typing_at timestamptz;
+alter table public.support_conversations add column if not exists admin_typing_at timestamptz;
+
 alter table public.support_conversations enable row level security;
 alter table public.support_messages enable row level security;
 alter table public.support_settings enable row level security;
