@@ -18,6 +18,57 @@ Rules:
 - If the visitor wants a real person, follow the "Live agent status" line at the end of these instructions.
 - Never ask for card numbers or passwords. Do not discuss topics unrelated to Fortune Studio; politely steer back.`;
 
+
+// Built-in answers used only when OpenAI is unavailable (bad key, no credit, outage), so visitors never hit a dead end.
+function guessLang(text, hint) {
+  const t = " " + String(text || "").toLowerCase() + " ";
+  if (/\b(bonjou|bonswa|komn|kijan|mwen|ou ye|sak pase|souple|mèsi|mesi|pri|ki jan|nap|wi|non)\b/.test(t)) return "ht";
+  if (/[¿¡ñ]|\b(hola|precio|precios|cuánto|cuanto|reservar|gracias|buenos|buenas|quiero|alquiler)\b/.test(t)) return "es";
+  if (/\b(bonjour|salut|prix|tarif|tarifs|réserver|reserver|merci|combien|séance|seance|je veux|location)\b/.test(t)) return "fr";
+  if (/\b(hello|hi|hey|price|prices|book|how much|thanks|thank you|session|rental)\b/.test(t)) return "en";
+  return ["en", "es", "fr", "ht"].includes(hint) ? hint : "en";
+}
+const FB = {
+  en: {
+    hi: "Hi! I’m the Fortune Studio assistant. I can help with portrait sessions, event coverage, rentals and booking. What would you like to know?",
+    price: "Portrait sessions start from $99 (30 to 120 minutes, edited digital photos included). Wedding and event coverage is $150 per hour with a 4 hour minimum plus tax. Tables and chairs, party packages and studio space are also available. Book at https://fortunestudiollc.com/#book",
+    book: "You can book online (date, time and payment by card, Apple Pay or Google Pay) at https://fortunestudiollc.com/#book. For a custom request call 570-309-5776 or email fortunestudio14@gmail.com.",
+    rent: "We rent tables and chairs, party and celebration packages, and studio space by the hour. Delivery and pickup are available for an additional fee. Call 570-309-5776 for a custom quote.",
+    other: "Thanks for your message! I can’t answer that one right now. Please call 570-309-5776 or email fortunestudio14@gmail.com, or book online at https://fortunestudiollc.com/#book."
+  },
+  es: {
+    hi: "¡Hola! Soy el asistente de Fortune Studio. Puedo ayudarte con sesiones de retrato, cobertura de eventos, alquileres y reservas. ¿Qué te gustaría saber?",
+    price: "Las sesiones de retrato empiezan desde $99 (30 a 120 minutos, fotos digitales editadas incluidas). La cobertura de bodas y eventos cuesta $150 por hora con mínimo de 4 horas más impuestos. También alquilamos mesas, sillas, paquetes de fiesta y estudio. Reserva en https://fortunestudiollc.com/#book",
+    book: "Puedes reservar en línea (fecha, hora y pago con tarjeta, Apple Pay o Google Pay) en https://fortunestudiollc.com/#book. Para algo personalizado llama al 570-309-5776 o escribe a fortunestudio14@gmail.com.",
+    rent: "Alquilamos mesas, sillas, paquetes de fiesta y espacio de estudio por hora. Entrega y recogida disponibles con costo adicional. Llama al 570-309-5776 para una cotización.",
+    other: "¡Gracias por tu mensaje! Ahora mismo no puedo responder eso. Llama al 570-309-5776, escribe a fortunestudio14@gmail.com o reserva en https://fortunestudiollc.com/#book."
+  },
+  fr: {
+    hi: "Bonjour ! Je suis l’assistant de Fortune Studio. Je peux vous aider pour les séances portrait, les événements, les locations et les réservations. Que souhaitez-vous savoir ?",
+    price: "Les séances portrait commencent à 99 $ (30 à 120 minutes, photos numériques retouchées incluses). La couverture de mariages et d’événements coûte 150 $ de l’heure, minimum 4 heures, taxes en sus. Nous louons aussi tables, chaises, forfaits fête et studio. Réservez sur https://fortunestudiollc.com/#book",
+    book: "Vous pouvez réserver en ligne (date, heure et paiement par carte, Apple Pay ou Google Pay) sur https://fortunestudiollc.com/#book. Pour une demande spéciale, appelez le 570-309-5776 ou écrivez à fortunestudio14@gmail.com.",
+    rent: "Nous louons des tables, des chaises, des forfaits fête et le studio à l’heure. Livraison et récupération possibles moyennant un supplément. Appelez le 570-309-5776 pour un devis.",
+    other: "Merci pour votre message ! Je ne peux pas répondre à cela pour le moment. Appelez le 570-309-5776, écrivez à fortunestudio14@gmail.com ou réservez sur https://fortunestudiollc.com/#book."
+  },
+  ht: {
+    hi: "Bonjou! Mwen se asistan Fortune Studio. Mwen ka ede w ak sesyon foto, evènman, lokasyon ak rezèvasyon. Kisa w ta renmen konnen?",
+    price: "Sesyon foto pòtrè kòmanse a $99 (30 a 120 minit, foto dijital edite enkli). Kouvèti maryaj ak evènman se $150 chak èdtan, minimòm 4 èdtan plis taks. Nou louwe tab, chèz, pake fèt ak espas estidyo tou. Rezève sou https://fortunestudiollc.com/#book",
+    book: "Ou ka rezève sou entènèt (dat, lè ak peman ak kat, Apple Pay oswa Google Pay) sou https://fortunestudiollc.com/#book. Pou yon demann espesyal rele 570-309-5776 oswa ekri fortunestudio14@gmail.com.",
+    rent: "Nou louwe tab, chèz, pake fèt ak espas estidyo pa èdtan. Livrezon ak ranmase disponib pou yon frè anplis. Rele 570-309-5776 pou yon pri.",
+    other: "Mèsi pou mesaj ou! Mwen pa ka reponn sa kounye a. Rele 570-309-5776, ekri fortunestudio14@gmail.com oswa rezève sou https://fortunestudiollc.com/#book."
+  }
+};
+function fallbackReply(messages, hint) {
+  const last = (messages[messages.length - 1] || {}).content || "";
+  const lang = guessLang(last, hint), F = FB[lang];
+  const t = last.toLowerCase();
+  if (/(price|cost|how much|rate|precio|cu[aá]nto|prix|tarif|combien|pri\b|konbyen|kobyen|\$)/.test(t)) return F.price;
+  if (/(book|reserv|appointment|date|cita|r[eé]server|rendez|randevou|rezèv)/.test(t)) return F.book;
+  if (/(rent|table|chair|mesa|silla|alquil|louer|location|chèz|chez|tab\b|louwe|lokasyon)/.test(t)) return F.rent;
+  if (/^(hi|hello|hey|hola|buenas|buenos|bonjour|salut|bonjou|bonswa|komn|kijan|sak pase|nap|wi\b)/.test(t.trim()) || t.length < 14 && /(ou ye|sak pase|how are|que tal|ça va|ca va)/.test(t)) return F.hi;
+  return F.other;
+}
+
 const clean = (v, n) => String(v == null ? "" : v).replace(/\u0000/g, "").trim().slice(0, n);
 
 module.exports = async function chat(req, res) {
@@ -37,7 +88,7 @@ module.exports = async function chat(req, res) {
   if (!messages.length || messages[messages.length - 1].role !== "user") return res.status(400).json({ error: "Write a message first." });
 
   const apiKey = process.env.OPENAI_API_KEY || "";
-  if (!apiKey) return res.status(503).json({ error: "The assistant is not connected. Add OPENAI_API_KEY in Vercel and redeploy." });
+  if (!apiKey) return res.status(200).json({ reply: fallbackReply(messages, body.lang), agent_online: false, fallback: true, code: "no_key" });
 
   // Tell the assistant whether a real agent is online right now (best effort: never blocks the answer).
   let agentOnline = false;
@@ -83,5 +134,7 @@ module.exports = async function chat(req, res) {
       console.error("AI chat error:", model, error.message);
     }
   }
-  return res.status(502).json({ error: "The assistant could not answer right now.", code: lastCode || String(lastStatus || "network") });
+  const code = lastCode || String(lastStatus || "network");
+  console.error("AI chat fallback used. OpenAI code:", code);
+  return res.status(200).json({ reply: fallbackReply(messages, body.lang), agent_online: agentOnline, fallback: true, code });
 };
