@@ -137,3 +137,10 @@ New/updated files: `admin-inbox.html`, `admin-tests.html`, `admin-tools-common.j
 - The server also refuses new agent chats while you are offline.
 - **Needed in Vercel:** `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`), then redeploy. No new SQL.
 - Changed files: `api/chat.js`, `api/messages.js`, `index.html` (chat part only), `admin-inbox.html`, `SETUP.md`.
+
+## Update (Nov 27 2026): AI chat fixed, modern chat design, live-agent notices
+- **Why the AI said "Sorry, I can't answer right now":** `api/chat.js` sent `max_tokens` and `temperature`, which newer OpenAI models reject. It now uses `max_completion_tokens`, no custom temperature, and falls back to `OPENAI_BACKUP_MODEL` then `gpt-4o-mini` if your `OPENAI_MODEL` fails. Errors are logged in Vercel > Logs (search "AI chat error"). **After adding or changing env vars you must Redeploy** in Vercel.
+- If it still fails, the log line tells you why: `invalid_api_key` (wrong key), `insufficient_quota` (add billing/credit at platform.openai.com), `model_not_found` (fix `OPENAI_MODEL`).
+- **Modern chat window:** glass design, animated typing dots, quick-question chips, round send button, green dot on the chat bubble when an agent is online.
+- **Agent availability:** the "Talk to an agent" button is always visible. If nobody is online, the assistant says "No agent is available yet" and promises to notify the visitor. The visitor's chat checks every 10 s; the moment you switch to Online in `/admin-inbox`, the assistant says "an agent is available now, how can we help you?" (or the chat bubble pings if the chat is closed). Typing "I want an agent" (also in Spanish, French, Creole) gets the same answer without using AI.
+- Changed: `api/chat.js`, `index.html` (chat part only). No new SQL or env vars.
