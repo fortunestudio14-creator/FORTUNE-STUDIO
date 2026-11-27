@@ -90,16 +90,19 @@ module.exports = async function chat(req, res) {
   const apiKey = process.env.OPENAI_API_KEY || "";
   if (!apiKey) return res.status(200).json({ reply: fallbackReply(messages, body.lang), agent_online: false, fallback: true, code: "no_key" });
 
-  // Tell the assistant whether a real agent is online right now (best effort: never blocks the answer).
-  let agentOnline = false;
+  // Tell the assistant whether a real agent is online / whether the owner switched the AI off (best effort).
+  let agentOnline = false, aiEnabled = true;
   try {
     const url = String(process.env.FORTUNE_SUPABASE_URL || "").replace(/\/$/, ""), key = process.env.FORTUNE_SUPABASE_SERVICE_ROLE_KEY || "";
     if (url && key) {
-      const r = await fetch(url + "/rest/v1/support_settings?id=eq.1&select=agent_online", { headers: { apikey: key, Authorization: "Bearer " + key } });
-      const rows = await r.json().catch(() => null);
+      const h = { headers: { apikey: key, Authorization: "Bearer " + key } };
+      let rows = await (await fetch(url + "/rest/v1/support_settings?id=eq.1&select=agent_online,ai_enabled", h)).json().catch(() => null);
+      if (!Array.isArray(rows)) rows = await (await fetch(url + "/rest/v1/support_settings?id=eq.1&select=agent_online", h)).json().catch(() => null);
       agentOnline = !!(Array.isArray(rows) && rows[0] && rows[0].agent_online);
+      aiEnabled = !(Array.isArray(rows) && rows[0] && rows[0].ai_enabled === false);
     }
   } catch (_) {}
+  if (!aiEnabled) return res.status(200).json({ reply: "", ai_disabled: true, agent_online: agentOnline });
   const system = SYSTEM + "\n\nLive agent status right now: " + (agentOnline
     ? "A real agent IS available. If the visitor wants a person, tell them to tap the \"Talk to an agent\" button under the chat."
     : "NO agent is available yet. If the visitor asks for a person, say clearly that no agent is available yet, that you will notify them in this chat as soon as one comes online, and meanwhile you can help or they can call or email.");

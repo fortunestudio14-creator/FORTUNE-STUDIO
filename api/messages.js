@@ -99,6 +99,11 @@ async function mail(to, subject, title, name, body, footer, replyTo, isTest = fa
   }
 }
 
+async function getSettings() {
+  try { const r = await db("support_settings?id=eq.1&select=agent_online,offline_message,ai_enabled"); return (r && r[0]) || {}; }
+  catch (_) { const r = await db("support_settings?id=eq.1&select=agent_online,offline_message"); return (r && r[0]) || {}; } // ai_enabled column not created yet
+}
+const recent = (v, ms) => { const t = v ? Date.parse(v) : 0; return !!t && Date.now() - t < ms; };
 async function addMessage(conversationId, sender, body, extra = {}) {
   const rows = await db("support_messages", "POST", { conversation_id: conversationId, sender, body, ...extra });
   return Array.isArray(rows) ? rows[0] : rows;
@@ -123,10 +128,9 @@ module.exports = async (req, res) => {
 
   try {
     if (action === "status") {
-      if (limited(req, "support-status", 120, 10 * 60 * 1000)) return res.status(429).json({ error: "Please wait a moment." });
-      const rows = await db("support_settings?id=eq.1&select=agent_online,offline_message");
-      const setting = rows && rows[0] || {};
-      return res.status(200).json({ agent_online: !!setting.agent_online, offline_message: clean(setting.offline_message, 240) || "Leave a message and our team will reply by email." });
+      if (limited(req, "support-status", 600, 10 * 60 * 1000)) return res.status(429).json({ error: "Please wait a moment." });
+      const setting = await getSettings();
+      return res.status(200).json({ agent_online: !!setting.agent_online, ai_enabled: setting.ai_enabled !== false, offline_message: clean(setting.offline_message, 240) || "Leave a message and our team will reply by email." });
     }
 
     if (action === "create") {
@@ -135,8 +139,8 @@ module.exports = async (req, res) => {
       const name = clean(body.name, 100), email = clean(body.email, 254).toLowerCase(), message = clean(body.message, 4000);
       if (!name || !EMAIL.test(email) || message.length < 2) return res.status(400).json({ error: "Please enter your name, a valid email address and a message." });
       // Visitors can only start a real-agent conversation while the owner is marked online.
-      const availability = await db("support_settings?id=eq.1&select=agent_online");
-      if (!(availability && availability[0] && availability[0].agent_online)) return res.status(409).json({ error: "No agent is available right now. The virtual assistant can keep helping you." });
+      const availability = await getSettings();
+      if (!availability.agent_online && availability.ai_enabled !== false) return res.status(409).json({ error: "No agent is available right now. The virtual assistant can keep helping you." });
       const visitorToken = crypto.randomBytes(32).toString("base64url");
       const now = new Date().toISOString();
       const rows = await db("support_conversations", "POST", { name, email, status: "new", visitor_token_hash: tokenHash(visitorToken), is_test: false, created_at: now, last_message_at: now });
@@ -148,42 +152,59 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, conversation_id: conversation.id, visitor_token: visitorToken, email_sent: notification.sent, email_error: notification.sent ? "" : notification.reason });
     }
 
-    if (action === "thread" || action === "customer_reply") {
-      if (limited(req, action === "thread" ? "support-thread" : "support-reply", action === "thread" ? 90 : 12, 10 * 60 * 1000)) return res.status(429).json({ error: "Please wait a moment before trying again." });
+    if (action === "thread" || action === "customer_reply" || action === "typing") {
+      if (limited(req, action === "customer_reply" ? "support-reply" : "support-" + action, action === "customer_reply" ? 30 : 900, 10 * 60 * 1000)) return res.status(429).json({ error: "Please wait a moment before trying again." });
       const id = clean(body.conversation_id, 50), visitorToken = clean(body.visitor_token, 100);
       if (!UUID.test(id) || !TOKEN.test(visitorToken)) return res.status(400).json({ error: "Invalid conversation." });
-      const rows = await db("support_conversations?id=eq." + id + "&select=id,name,email,status,visitor_token_hash");
+      let rows;
+      try { rows = await db("support_conversations?id=eq." + id + "&select=id,name,email,status,visitor_token_hash,admin_typing_at"); }
+      catch (_) { rows = await db("support_conversations?id=eq." + id + "&select=id,name,email,status,visitor_token_hash"); }
       const conversation = rows && rows[0];
       if (!conversation || !crypto.timingSafeEqual(Buffer.from(conversation.visitor_token_hash), Buffer.from(tokenHash(visitorToken)))) return res.status(403).json({ error: "This conversation link is not valid on this device." });
+      if (action === "typing") {
+        try { await db("support_conversations?id=eq." + id, "PATCH", { visitor_typing_at: new Date().toISOString() }); } catch (_) {}
+        return res.status(200).json({ ok: true });
+      }
       if (action === "thread") {
         const messages = await db("support_messages?conversation_id=eq." + id + "&select=id,sender,body,created_at&order=created_at.asc&limit=100");
-        const settings = await db("support_settings?id=eq.1&select=agent_online");
-        return res.status(200).json({ status: conversation.status, messages: messages || [], agent_online: !!(settings && settings[0] && settings[0].agent_online) });
+        const settings = await getSettings();
+        return res.status(200).json({ status: conversation.status, messages: messages || [], agent_online: !!settings.agent_online, ai_enabled: settings.ai_enabled !== false, agent_typing: recent(conversation.admin_typing_at, 5000) });
       }
       const message = clean(body.message, 4000);
       if (message.length < 2) return res.status(400).json({ error: "Write a message first." });
       if (conversation.status === "closed") return res.status(409).json({ error: "This conversation is closed. Please start a new message." });
       const saved = await addMessage(id, "customer", message);
       await db("support_conversations?id=eq." + id, "PATCH", { status: "new", last_message_at: new Date().toISOString() });
-      const notification = await notifyOwner(conversation, message);
+      // While you are online and watching the inbox, skip the email alert for every chat line.
+      let watching = false; try { watching = !!(await getSettings()).agent_online; } catch (_) {}
+      const notification = watching ? { sent: true } : await notifyOwner(conversation, message);
       return res.status(200).json({ ok: true, message: saved, email_sent: notification.sent, email_error: notification.sent ? "" : notification.reason });
     }
 
     if (!(await isOwner(req))) return res.status(401).json({ error: "Not signed in as the owner. Sign in again." });
-    if (limited(req, "support-admin", 120, 10 * 60 * 1000)) return res.status(429).json({ error: "Too many admin requests. Please wait a minute." });
+    if (limited(req, "support-admin", 1500, 10 * 60 * 1000)) return res.status(429).json({ error: "Too many admin requests. Please wait a minute." });
 
     if (action === "admin_info") {
       return res.status(200).json({ owner_email: OWNER, mail_from: process.env.MAIL_FROM || "Fortune Studio <onboarding@resend.dev>" });
     }
 
     if (action === "list") {
-      const conversations = await db("support_conversations?select=id,name,email,status,is_test,created_at,last_message_at,last_replied_at&order=last_message_at.desc&limit=150");
+      let conversations;
+      try { conversations = await db("support_conversations?select=id,name,email,status,is_test,created_at,last_message_at,last_replied_at,visitor_typing_at&order=last_message_at.desc&limit=150"); }
+      catch (_) { conversations = await db("support_conversations?select=id,name,email,status,is_test,created_at,last_message_at,last_replied_at&order=last_message_at.desc&limit=150"); }
       if (!conversations || !conversations.length) return res.status(200).json({ conversations: [] });
       const ids = conversations.map((item) => item.id).filter((id) => UUID.test(id));
       const messages = ids.length ? await db("support_messages?conversation_id=in.(" + ids.join(",") + ")&select=id,conversation_id,sender,body,created_at,delivery_status,delivery_error,email_id&order=created_at.asc&limit=1500") : [];
       const byConversation = new Map();
       (messages || []).forEach((message) => { const current = byConversation.get(message.conversation_id) || []; current.push(message); byConversation.set(message.conversation_id, current); });
-      return res.status(200).json({ conversations: conversations.map((item) => ({ ...item, messages: byConversation.get(item.id) || [] })) });
+      return res.status(200).json({ conversations: conversations.map((item) => { const { visitor_typing_at, ...rest } = item; return { ...rest, customer_typing: recent(visitor_typing_at, 5000), messages: byConversation.get(item.id) || [] }; }) });
+    }
+
+    if (action === "admin_typing") {
+      const id = clean(body.conversation_id, 50);
+      if (!UUID.test(id)) return res.status(400).json({ error: "Invalid conversation." });
+      try { await db("support_conversations?id=eq." + id, "PATCH", { admin_typing_at: new Date().toISOString() }); } catch (_) {}
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "admin_reply") {
@@ -195,6 +216,12 @@ module.exports = async (req, res) => {
       if (conversation.status === "closed") return res.status(409).json({ error: "Reopen this conversation before replying." });
       const saved = await addMessage(id, "admin", message, { delivery_status: "pending", delivery_error: "" });
       if (!saved || !saved.id) throw new Error("Your reply could not be saved.");
+      if (body.send_email === false) { // live chat reply: the visitor sees it in the website chat, no email
+        await updateMessage(saved.id, { delivery_status: "chat", delivery_error: "" });
+        await db("support_conversations?id=eq." + id, "PATCH", { status: "replied", last_message_at: new Date().toISOString(), last_replied_at: new Date().toISOString() });
+        try { await db("support_conversations?id=eq." + id, "PATCH", { admin_typing_at: null }); } catch (_) {}
+        return res.status(200).json({ ok: true, message_id: saved.id, email_sent: false, chat_only: true, email_error: "" });
+      }
       const sent = await mail(conversation.email, "Fortune Studio LLC replied to your message", "Fortune Studio has replied to your message", conversation.name, message,
         "You can reply directly to this email if you have another question.", OWNER, !!conversation.is_test);
       await updateMessage(saved.id, { delivery_status: sent.sent ? "sent" : "failed", delivery_error: sent.sent ? "" : sent.reason, email_id: sent.id || null });
@@ -228,9 +255,17 @@ module.exports = async (req, res) => {
     if (action === "agent_settings") {
       const agentOnline = !!body.agent_online;
       const offlineMessage = clean(body.offline_message, 240) || "Leave a message and our team will reply by email.";
-      const rows = await db("support_settings?id=eq.1", "PATCH", { agent_online: agentOnline, offline_message: offlineMessage, updated_at: new Date().toISOString() });
+      const patch = { agent_online: agentOnline, offline_message: offlineMessage, updated_at: new Date().toISOString() };
+      if (typeof body.ai_enabled === "boolean") patch.ai_enabled = body.ai_enabled;
+      let rows, warning = "";
+      try { rows = await db("support_settings?id=eq.1", "PATCH", patch); }
+      catch (e) {
+        if (patch.ai_enabled === undefined || !/ai_enabled|column|schema/i.test(e.message)) throw e;
+        delete patch.ai_enabled; warning = "Your online status was saved, but the AI switch needs a one-time database update: run supabase-support.sql again in Supabase > SQL Editor.";
+        rows = await db("support_settings?id=eq.1", "PATCH", patch);
+      }
       if (!rows || !rows.length) throw new Error("The agent availability setting could not be saved. Run supabase-support.sql again in Supabase SQL Editor.");
-      return res.status(200).json({ ok: true, agent_online: agentOnline, offline_message: offlineMessage });
+      return res.status(200).json({ ok: true, agent_online: agentOnline, ai_enabled: patch.ai_enabled !== false, offline_message: offlineMessage, warning });
     }
 
     if (action === "test_email") {
