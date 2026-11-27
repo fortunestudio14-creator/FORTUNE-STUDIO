@@ -129,3 +129,11 @@ New/updated files: `admin-inbox.html`, `admin-tests.html`, `admin-tools-common.j
 - New messages and customer follow-ups are saved in the Supabase support inbox and trigger an email alert to `OWNER_EMAIL`. Open `/admin-inbox` to read and reply. Your reply appears in the customer's chat when they reopen the site and is also emailed through Resend.
 - The old `/api/chat` AI endpoint now returns HTTP 410 and is no longer used. The OpenAI health check has been removed from `/admin-tests`; OpenAI is not needed for the customer contact chat. You may remove `OPENAI_API_KEY`, `OPENAI_MODEL` and `OPENAI_BACKUP_MODEL` from Vercel if nothing else in the project uses them.
 - Changed files in this update: `index.html`, `admin-tests.html`, `api/health.js`, `api/chat.js`, `privacy.html`, and `SETUP.md`. No new SQL or environment variables are required; the support tables and Resend/Supabase settings from the previous inbox update remain required.
+
+## Update: AI assistant + real agent when online
+- The website chat now opens with the **AI assistant** (`api/chat.js`). It answers normally about services, prices and booking.
+- The **"Talk to an agent"** button appears only while you switch **Online** in `/admin-inbox`. When you are offline the visitor only sees the AI.
+- When a visitor starts an agent chat, the thread is saved in the inbox as before. When you finish, click **Close chat** (or set the status to Closed) in `/admin-inbox`. The visitor's chat then returns to the AI automatically.
+- The server also refuses new agent chats while you are offline.
+- **Needed in Vercel:** `OPENAI_API_KEY` (optional `OPENAI_MODEL`, default `gpt-4o-mini`), then redeploy. No new SQL.
+- Changed files: `api/chat.js`, `api/messages.js`, `index.html` (chat part only), `admin-inbox.html`, `SETUP.md`.
